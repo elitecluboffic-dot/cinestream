@@ -78,8 +78,19 @@
   .modal { background:var(--surface); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); transform:scale(0.9); transition:transform 0.25s; }
   .modal-overlay.open .modal { transform:scale(1); }
   .modal-video { aspect-ratio:16/9; background:#000; border-radius:16px 16px 0 0; overflow:hidden; position:relative; }
-  .modal-video iframe { width:100%; height:100%; border:none; }
+  .modal-video iframe { width:100%; height:100%; border:none; display:block; }
   .modal-video .video-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1rem; color:var(--muted); font-size:0.9rem; }
+  /* Error state untuk player */
+  .player-error { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
+  .player-error .err-icon { font-size:2.5rem; }
+  .player-error .err-title { font-size:0.95rem; font-weight:600; color:var(--text); }
+  .player-error .err-msg { font-size:0.8rem; text-align:center; max-width:300px; line-height:1.5; }
+  .player-error .err-btn { margin-top:0.5rem; background:var(--accent); color:#fff; border:none; padding:0.55rem 1.25rem; border-radius:6px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .player-error .err-btn:hover { background:#c1121f; }
+  /* Loading state */
+  .player-loading { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
   .modal-body { padding:1.5rem; }
   .modal-title { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.5rem; }
   .modal-meta { display:flex; gap:1rem; color:var(--muted); font-size:0.82rem; margin-bottom:1rem; flex-wrap:wrap; }
@@ -172,7 +183,7 @@
   <div class="modal">
     <div class="modal-video" id="modalVideo">
       <button class="modal-close" onclick="closeModal()">✕</button>
-      <div class="video-placeholder" id="videoPlaceholder"></div>
+      <div id="videoPlaceholder" class="video-placeholder"></div>
     </div>
     <div class="modal-body">
       <h2 class="modal-title" id="modalTitle"></h2>
@@ -225,17 +236,19 @@ let currentUser = JSON.parse(localStorage.getItem('cs_user')) || null;
 let isRegister = false;
 let userRatings = JSON.parse(localStorage.getItem('cs_ratings')) || {};
 let allComments = JSON.parse(localStorage.getItem('cs_comments')) || {};
+let iframeLoadTimer = null;
 
 // ===== LOAD FILM DARI WORKER API =====
 async function loadFilms() {
   showSkeletons();
   try {
     const res = await fetch(WORKER_URL + '/api/films');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     movies = Array.isArray(data) ? data : [];
   } catch(e) {
     movies = [];
-    showToast('Gagal memuat film.', 'error');
+    showToast('Gagal memuat film. Cek koneksi kamu.', 'error');
   }
   renderHero();
   renderMovies(movies);
@@ -268,12 +281,12 @@ function renderHero() {
     <div class="hero-gradient"></div>
     <div class="hero-content fade-up">
       <span class="hero-badge">🔥 TERBARU</span>
-      <h1>${m.title}</h1>
-      <p>${m.desc||'Klik untuk menonton film ini.'}</p>
+      <h1>${escHtml(m.title)}</h1>
+      <p>${escHtml(m.desc||'Klik untuk menonton film ini.')}</p>
       <div class="hero-meta">
         ${m.rating?`<span class="rating">★ ${m.rating}</span>`:''}
-        <span>${m.year}</span><span>${m.genre}</span>
-        ${m.duration?`<span>${m.duration}</span>`:''}
+        <span>${m.year}</span><span>${escHtml(m.genre)}</span>
+        ${m.duration?`<span>${escHtml(m.duration)}</span>`:''}
       </div>
       <div class="hero-btns">
         <button class="btn-play">▶ Tonton Sekarang</button>
@@ -283,19 +296,24 @@ function renderHero() {
   </div>`;
 }
 
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function movieCard(m) {
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
   return `
   <div class="movie-card fade-up" onclick="openModal(${data})">
     <div class="movie-thumb">
       <div class="placeholder-icon">${m.thumb||'🎬'}</div>
-      <div class="movie-quality">${m.quality}</div>
+      <div class="movie-quality">${escHtml(m.quality)}</div>
       <div class="movie-overlay"><div class="play-icon">▶</div></div>
     </div>
     <div class="movie-info">
-      <div class="movie-title">${m.title}</div>
+      <div class="movie-title">${escHtml(m.title)}</div>
       <div class="movie-meta">
-        <span>${m.year} · ${m.genre}</span>
+        <span>${m.year} · ${escHtml(m.genre)}</span>
         ${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}
       </div>
     </div>
@@ -328,74 +346,149 @@ function handleSearch(q) {
   renderMovies(lower ? movies.filter(m=>m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower)) : [...movies]);
 }
 
+// ===== PLAYER — dengan error handling lengkap =====
+function showPlayerLoading(mv) {
+  // Hapus elemen lama
+  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  const vp = document.getElementById('videoPlaceholder');
+  vp.style.display = 'none';
+
+  const loading = document.createElement('div');
+  loading.className = 'player-loading';
+  loading.innerHTML = `<div class="spinner"></div><div style="font-size:0.82rem">Memuat player...</div>`;
+  mv.appendChild(loading);
+  return loading;
+}
+
+function showPlayerError(mv, embedUrl) {
+  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  const vp = document.getElementById('videoPlaceholder');
+  vp.style.display = 'none';
+
+  const err = document.createElement('div');
+  err.className = 'player-error';
+  err.innerHTML = `
+    <div class="err-icon">⚠️</div>
+    <div class="err-title">Player gagal dimuat</div>
+    <div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed di domain ini.</div>
+    <button class="err-btn" onclick="window.open('${escHtml(embedUrl)}','_blank')">Buka di Tab Baru</button>
+  `;
+  mv.appendChild(err);
+}
+
+function loadIframe(mv, embedUrl) {
+  const loadingEl = showPlayerLoading(mv);
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:100%;height:100%;border:none;display:none;';
+  iframe.setAttribute('allowfullscreen', 'true');
+  iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
+  iframe.setAttribute('referrerpolicy', 'no-referrer');
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox');
+  mv.appendChild(iframe);
+
+  // Timeout: kalau 10 detik tidak load → tampilkan error
+  iframeLoadTimer = setTimeout(() => {
+    iframe.remove();
+    loadingEl.remove();
+    showPlayerError(mv, embedUrl);
+  }, 10000);
+
+  iframe.onload = () => {
+    clearTimeout(iframeLoadTimer);
+    loadingEl.remove();
+    iframe.style.display = 'block';
+  };
+
+  iframe.onerror = () => {
+    clearTimeout(iframeLoadTimer);
+    iframe.remove();
+    loadingEl.remove();
+    showPlayerError(mv, embedUrl);
+  };
+
+  // Set src setelah event listener terpasang
+  iframe.src = embedUrl;
+}
+
 function openModal(m) {
   currentMovie = m;
   document.getElementById('modalTitle').textContent = m.title;
   document.getElementById('modalDesc').textContent = m.desc || '-';
   document.getElementById('modalMeta').innerHTML = `
-    <span>📅 ${m.year}</span><span>🎭 ${m.genre}</span>
-    ${m.duration?`<span>⏱ ${m.duration}</span>`:''}
+    <span>📅 ${m.year}</span><span>🎭 ${escHtml(m.genre)}</span>
+    ${m.duration?`<span>⏱ ${escHtml(m.duration)}</span>`:''}
     ${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}
-    <span>🎞 ${m.quality}</span>`;
+    <span>🎞 ${escHtml(m.quality)}</span>`;
+
   const mv = document.getElementById('modalVideo');
   const vp = document.getElementById('videoPlaceholder');
-  const old = mv.querySelector('iframe');
-  if (old) old.remove();
-  if (m.embed) {
-    const iframe = document.createElement('iframe');
-    iframe.src = m.embed; iframe.allowFullscreen = true; iframe.allow = "autoplay; fullscreen";
-    mv.appendChild(iframe); vp.style.display='none';
+
+  // Bersihkan konten lama
+  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  clearTimeout(iframeLoadTimer);
+
+  if (m.embed && m.embed.trim()) {
+    loadIframe(mv, m.embed.trim());
   } else {
-    vp.style.display='flex';
-    vp.innerHTML=`<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:0.85rem">Link video belum ditambahkan admin</div>`;
+    vp.style.display = 'flex';
+    vp.innerHTML = `<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:0.85rem">Link video belum ditambahkan admin</div>`;
   }
+
   updateStars(userRatings[m.id]||0);
   renderComments(m.id);
   document.getElementById('movieModal').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
+  clearTimeout(iframeLoadTimer);
   document.getElementById('movieModal').classList.remove('open');
-  document.body.style.overflow='';
-  const iframe = document.getElementById('modalVideo').querySelector('iframe');
-  if (iframe) iframe.remove();
+  document.body.style.overflow = '';
+  const mv = document.getElementById('modalVideo');
+  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  const vp = document.getElementById('videoPlaceholder');
+  vp.style.display = 'none';
+  vp.innerHTML = '';
 }
 
 function closeModalOutside(e) { if(e.target.id==='movieModal') closeModal(); }
 
+// ===== RATING =====
 function setRating(val) {
   if (!currentUser) { showToast('Login dulu untuk memberi rating!','error'); return; }
-  userRatings[currentMovie.id]=val;
-  localStorage.setItem('cs_ratings',JSON.stringify(userRatings));
+  userRatings[currentMovie.id] = val;
+  localStorage.setItem('cs_ratings', JSON.stringify(userRatings));
   updateStars(val);
-  showToast(`Rating ${val}★ tersimpan!`,'success');
+  showToast(`Rating ${val}★ tersimpan!`, 'success');
 }
 
 function updateStars(val) {
-  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<val));
+  document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < val));
 }
 
+// ===== KOMENTAR =====
 function submitComment() {
   if (!currentUser) { showToast('Login dulu untuk berkomentar!','error'); return; }
   const input = document.getElementById('commentInput');
   const text = input.value.trim();
   if (!text) return;
-  if (!allComments[currentMovie.id]) allComments[currentMovie.id]=[];
-  allComments[currentMovie.id].unshift({user:currentUser.username,text,time:new Date().toLocaleDateString('id')});
-  localStorage.setItem('cs_comments',JSON.stringify(allComments));
-  input.value='';
+  if (!allComments[currentMovie.id]) allComments[currentMovie.id] = [];
+  allComments[currentMovie.id].unshift({user:currentUser.username, text, time:new Date().toLocaleDateString('id')});
+  localStorage.setItem('cs_comments', JSON.stringify(allComments));
+  input.value = '';
   renderComments(currentMovie.id);
-  showToast('Komentar terkirim!','success');
+  showToast('Komentar terkirim!', 'success');
 }
 
 function renderComments(id) {
-  const list = allComments[id]||[];
+  const list = allComments[id] || [];
   document.getElementById('commentsList').innerHTML = list.length
-    ? list.map(c=>`<div class="comment-card"><div class="comment-user">👤 ${c.user} <span style="color:var(--muted);font-weight:400;font-size:0.75rem">· ${c.time}</span></div><div class="comment-text">${c.text}</div></div>`).join('')
+    ? list.map(c=>`<div class="comment-card"><div class="comment-user">👤 ${escHtml(c.user)} <span style="color:var(--muted);font-weight:400;font-size:0.75rem">· ${c.time}</span></div><div class="comment-text">${escHtml(c.text)}</div></div>`).join('')
     : '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem">Belum ada komentar. Jadilah yang pertama!</div>';
 }
 
+// ===== AUTH =====
 function openLogin() { isRegister=false; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
 function openRegister() { isRegister=true; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeLoginOutside(e) { if(e.target.id==='loginModal'){document.getElementById('loginModal').classList.remove('open');document.body.style.overflow='';} }
@@ -418,36 +511,44 @@ function handleAuth() {
   if (isRegister) {
     const users = JSON.parse(localStorage.getItem('cs_users')||'{}');
     if (users[username]) { showToast('Username sudah dipakai!','error'); return; }
-    users[username]={password};
-    localStorage.setItem('cs_users',JSON.stringify(users));
-    currentUser={username}; localStorage.setItem('cs_user',JSON.stringify(currentUser));
-    showToast(`Selamat datang, ${username}! 🎉`,'success');
+    users[username] = {password};
+    localStorage.setItem('cs_users', JSON.stringify(users));
+    currentUser = {username};
+    localStorage.setItem('cs_user', JSON.stringify(currentUser));
+    showToast(`Selamat datang, ${username}! 🎉`, 'success');
   } else {
     const users = JSON.parse(localStorage.getItem('cs_users')||'{}');
     if (!users[username]||users[username].password!==password) { showToast('Username atau password salah!','error'); return; }
-    currentUser={username}; localStorage.setItem('cs_user',JSON.stringify(currentUser));
-    showToast(`Halo, ${username}! 👋`,'success');
+    currentUser = {username};
+    localStorage.setItem('cs_user', JSON.stringify(currentUser));
+    showToast(`Halo, ${username}! 👋`, 'success');
   }
   document.getElementById('loginModal').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
   updateNavbar();
 }
 
 function updateNavbar() {
   document.getElementById('navRight').innerHTML = currentUser ? `
-    <div class="user-avatar" title="${currentUser.username}">${currentUser.username[0].toUpperCase()}</div>
+    <div class="user-avatar" title="${escHtml(currentUser.username)}">${currentUser.username[0].toUpperCase()}</div>
     <button class="btn btn-outline" onclick="logout()">Keluar</button>
   ` : `
     <button class="btn btn-outline" onclick="openLogin()">Masuk</button>
     <button class="btn btn-primary" onclick="openRegister()">Daftar</button>`;
 }
 
-function logout() { currentUser=null; localStorage.removeItem('cs_user'); updateNavbar(); showToast('Berhasil keluar!','success'); }
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('cs_user');
+  updateNavbar();
+  showToast('Berhasil keluar!', 'success');
+}
 
 function showToast(msg, type='success') {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=`toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'),3000);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ===== INIT =====
