@@ -1,0 +1,9 @@
+name = "cinestream"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# Ganti YOUR_KV_ID dengan ID yang didapat setelah jalankan:
+# npx wrangler kv namespace create CS_KV
+[[kv_namespaces]]
+binding = "CS_KV"
+id      = "9393895340bf42ef87edd670a782360d"
