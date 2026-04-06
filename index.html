@@ -8,56 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --card: #1a1a26;
-    --border: #2a2a3a;
-    --accent: #e63946;
-    --accent2: #f4a261;
-    --text: #f0f0f5;
-    --muted: #7a7a9a;
-    --radius: 10px;
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --border: #2a2a3a;
+    --accent: #e63946; --accent2: #f4a261; --text: #f0f0f5; --muted: #7a7a9a; --radius: 10px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
-
-  body::before {
-    content:'';
-    position:fixed;
-    inset:0;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events:none;
-    z-index:0;
-    opacity:0.4;
-  }
-
-  nav {
-    position:sticky; top:0; z-index:100;
-    background:rgba(10,10,15,0.85);
-    backdrop-filter:blur(20px);
-    border-bottom:1px solid var(--border);
-    padding:0 5vw;
-    display:flex; align-items:center; justify-content:space-between;
-    height:64px;
-  }
+  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
+  nav { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 5vw; display:flex; align-items:center; justify-content:space-between; height:64px; }
   .logo { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:2px; color:var(--text); text-decoration:none; }
   .logo span { color:var(--accent); }
   .nav-links { display:flex; gap:2rem; list-style:none; }
   .nav-links a { color:var(--muted); text-decoration:none; font-size:0.9rem; font-weight:500; transition:color 0.2s; }
   .nav-links a:hover { color:var(--text); }
   .nav-right { display:flex; gap:0.75rem; align-items:center; }
-
   .btn { padding:0.5rem 1.25rem; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; }
   .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
   .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
   .btn-primary { background:var(--accent); color:#fff; }
   .btn-primary:hover { background:#c1121f; }
-
   .search-wrap { padding:1.5rem 5vw 0; display:flex; gap:0.75rem; align-items:center; }
   .search-input { flex:1; max-width:480px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.65rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; }
   .search-input:focus { border-color:var(--accent); }
   .search-input::placeholder { color:var(--muted); }
-
   .hero { position:relative; height:520px; margin:1.5rem 5vw; border-radius:16px; overflow:hidden; cursor:pointer; }
   .hero-bg { position:absolute; inset:0; background:linear-gradient(135deg,#1a0a0f 0%,#0d0d2b 50%,#0a1a0a 100%); }
   .hero-gradient { position:absolute; inset:0; background:linear-gradient(to right,rgba(10,10,15,0.95) 40%,transparent 100%),linear-gradient(to top,rgba(10,10,15,0.8) 0%,transparent 60%); }
@@ -72,18 +44,14 @@
   .btn-play:hover { background:#c1121f; }
   .btn-info { background:rgba(255,255,255,0.1); color:#fff; padding:0.75rem 1.5rem; border-radius:8px; font-size:0.95rem; font-weight:600; border:1px solid rgba(255,255,255,0.2); cursor:pointer; backdrop-filter:blur(10px); transition:background 0.2s; }
   .btn-info:hover { background:rgba(255,255,255,0.18); }
-
   section { padding:2rem 5vw; }
   .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
   .section-title { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:1px; }
   .section-title span { color:var(--accent); }
-
   .filter-tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
   .tab { padding:0.4rem 1rem; border-radius:100px; font-size:0.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted); transition:all 0.2s; font-family:'DM Sans',sans-serif; }
   .tab:hover,.tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-
   .movie-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; }
-
   .movie-card { background:var(--card); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:transform 0.25s,box-shadow 0.25s; border:1px solid var(--border); }
   .movie-card:hover { transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,0,0,0.5); border-color:var(--accent); }
   .movie-thumb { aspect-ratio:2/3; background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
@@ -96,10 +64,15 @@
   .movie-title { font-size:0.85rem; font-weight:600; margin-bottom:0.3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .movie-meta { display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--muted); }
   .movie-rating { color:var(--accent2); font-weight:600; }
-
   .scroll-row { display:flex; gap:1rem; overflow-x:auto; padding-bottom:0.5rem; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
   .scroll-row .movie-card { min-width:160px; flex-shrink:0; }
-
+  .skeleton { background:linear-gradient(90deg,var(--card) 25%,var(--border) 50%,var(--card) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius); }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skeleton-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+  .skeleton-thumb { aspect-ratio:2/3; }
+  .skeleton-info { padding:0.75rem; display:flex; flex-direction:column; gap:0.4rem; }
+  .skeleton-line { height:10px; border-radius:4px; }
+  .skeleton-line.short { width:60%; }
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(10px); }
   .modal-overlay.open { opacity:1; pointer-events:all; }
   .modal { background:var(--surface); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); transform:scale(0.9); transition:transform 0.25s; }
@@ -112,7 +85,6 @@
   .modal-meta { display:flex; gap:1rem; color:var(--muted); font-size:0.82rem; margin-bottom:1rem; flex-wrap:wrap; }
   .modal-desc { font-size:0.9rem; line-height:1.7; color:rgba(240,240,245,0.8); margin-bottom:1.5rem; }
   .modal-close { position:absolute; top:1rem; right:1rem; background:rgba(0,0,0,0.7); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; z-index:10; }
-
   .comments-section { margin-top:1.5rem; }
   .comments-title { font-weight:700; margin-bottom:1rem; font-size:1rem; }
   .comment-input-wrap { display:flex; gap:0.75rem; margin-bottom:1rem; }
@@ -124,7 +96,6 @@
   .star-rating { display:flex; gap:0.25rem; margin-bottom:1rem; }
   .star { font-size:1.4rem; cursor:pointer; color:var(--border); transition:color 0.15s; }
   .star.active { color:var(--accent2); }
-
   .login-modal { background:var(--surface); border-radius:16px; max-width:420px; width:100%; border:1px solid var(--border); padding:2.5rem; transform:scale(0.9); transition:transform 0.25s; }
   .modal-overlay.open .login-modal { transform:scale(1); }
   .login-modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.25rem; }
@@ -135,21 +106,13 @@
   .form-input:focus { border-color:var(--accent); }
   .form-switch { text-align:center; margin-top:1rem; font-size:0.82rem; color:var(--muted); }
   .form-switch a { color:var(--accent); cursor:pointer; text-decoration:none; }
-
   footer { border-top:1px solid var(--border); padding:2rem 5vw; text-align:center; color:var(--muted); font-size:0.8rem; margin-top:2rem; }
   .toast { position:fixed; bottom:2rem; right:2rem; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1.25rem; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; max-width:300px; }
   .toast.show { transform:translateY(0); opacity:1; }
   .toast.success { border-color:#2d9e6b; }
   .toast.error { border-color:var(--accent); }
   .user-avatar { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer; }
-
-  @media(max-width:640px) {
-    .nav-links { display:none; }
-    .hero { height:380px; margin:1rem 4vw; }
-    .hero-content { padding:1.5rem; }
-    .movie-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); }
-    .scroll-row .movie-card { min-width:130px; }
-  }
+  @media(max-width:640px) { .nav-links{display:none;} .hero{height:380px;margin:1rem 4vw;} .hero-content{padding:1.5rem;} .movie-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .scroll-row .movie-card{min-width:130px;} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   .fade-up { animation:fadeUp 0.4s ease forwards; }
 </style>
@@ -173,7 +136,7 @@
 <div id="heroSection"></div>
 
 <section>
-  <div class="filter-tabs" id="filterTabs">
+  <div class="filter-tabs">
     <button class="tab active" onclick="filterMovies('Semua',this)">Semua</button>
     <button class="tab" onclick="filterMovies('Action',this)">Action</button>
     <button class="tab" onclick="filterMovies('Drama',this)">Drama</button>
@@ -192,7 +155,7 @@
   </div>
 </section>
 
-<section id="trendingSection">
+<section id="trendingSection" style="display:none">
   <div class="section-header">
     <h2 class="section-title">TRENDING <span>MINGGU INI</span></h2>
   </div>
@@ -200,7 +163,7 @@
 </section>
 
 <footer>
-  <span class="logo" style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;display:block;margin-bottom:0.5rem">CINE<span style="color:var(--accent)">STREAM</span></span>
+  <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;display:block;margin-bottom:0.5rem">CINE<span style="color:var(--accent)">STREAM</span></span>
   <p>© 2024 CineStream. Semua konten berlisensi dan telah mendapat izin.</p>
 </footer>
 
@@ -253,6 +216,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ===== URL WORKER — jangan diubah =====
+const WORKER_URL = 'https://stream.internetdnsofficial.workers.dev';
+
 let movies = [];
 let currentMovie = null;
 let currentUser = JSON.parse(localStorage.getItem('cs_user')) || null;
@@ -260,21 +226,38 @@ let isRegister = false;
 let userRatings = JSON.parse(localStorage.getItem('cs_ratings')) || {};
 let allComments = JSON.parse(localStorage.getItem('cs_comments')) || {};
 
-// ===== LOAD FILM DARI ADMIN =====
-function loadFilms() {
-  const saved = localStorage.getItem('cs_admin_films');
-  if (saved) { try { return JSON.parse(saved); } catch(e){} }
-  return [
-    { id:1, title:"Laskar Pelangi", year:2008, genre:"Drama", rating:8.9, quality:"HD", duration:"2j 5m", desc:"Kisah inspiratif 10 anak dari Belitung yang berjuang meraih mimpi di tengah keterbatasan.", embed:"", thumb:"🎬" },
-    { id:2, title:"Pengabdi Setan", year:2017, genre:"Horror", rating:7.8, quality:"HD", duration:"1j 47m", desc:"Keluarga ini mulai diganggu sosok misterius setelah ibu mereka meninggal.", embed:"", thumb:"👻" },
-  ];
+// ===== LOAD FILM DARI WORKER API =====
+async function loadFilms() {
+  showSkeletons();
+  try {
+    const res = await fetch(WORKER_URL + '/api/films');
+    const data = await res.json();
+    movies = Array.isArray(data) ? data : [];
+  } catch(e) {
+    movies = [];
+    showToast('Gagal memuat film.', 'error');
+  }
+  renderHero();
+  renderMovies(movies);
+  renderTrending();
+}
+
+function showSkeletons() {
+  document.getElementById('movieGrid').innerHTML = Array(8).fill(0).map(() => `
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-thumb"></div>
+      <div class="skeleton-info">
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line short"></div>
+      </div>
+    </div>`).join('');
 }
 
 // ===== HERO =====
 function renderHero() {
   const el = document.getElementById('heroSection');
   if (!movies.length) {
-    el.innerHTML = `<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:0.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film. Tambahkan lewat <a href="admin.html" style="color:var(--accent)">Admin Panel</a></p></div>`;
+    el.innerHTML = `<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:0.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film. Tambahkan lewat Admin Panel.</p></div>`;
     return;
   }
   const m = movies[0];
@@ -300,7 +283,6 @@ function renderHero() {
   </div>`;
 }
 
-// ===== CARDS =====
 function movieCard(m) {
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
   return `
@@ -335,7 +317,6 @@ function renderTrending() {
   document.getElementById('trendingSection').style.display = movies.length ? 'block' : 'none';
 }
 
-// ===== FILTER =====
 function filterMovies(genre, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
@@ -347,7 +328,6 @@ function handleSearch(q) {
   renderMovies(lower ? movies.filter(m=>m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower)) : [...movies]);
 }
 
-// ===== MODAL FILM =====
 function openModal(m) {
   currentMovie = m;
   document.getElementById('modalTitle').textContent = m.title;
@@ -356,19 +336,15 @@ function openModal(m) {
     <span>📅 ${m.year}</span><span>🎭 ${m.genre}</span>
     ${m.duration?`<span>⏱ ${m.duration}</span>`:''}
     ${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}
-    <span>🎞 ${m.quality}</span>
-  `;
+    <span>🎞 ${m.quality}</span>`;
   const mv = document.getElementById('modalVideo');
   const vp = document.getElementById('videoPlaceholder');
   const old = mv.querySelector('iframe');
   if (old) old.remove();
   if (m.embed) {
     const iframe = document.createElement('iframe');
-    iframe.src = m.embed;
-    iframe.allowFullscreen = true;
-    iframe.allow = "autoplay; fullscreen";
-    mv.appendChild(iframe);
-    vp.style.display='none';
+    iframe.src = m.embed; iframe.allowFullscreen = true; iframe.allow = "autoplay; fullscreen";
+    mv.appendChild(iframe); vp.style.display='none';
   } else {
     vp.style.display='flex';
     vp.innerHTML=`<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:0.85rem">Link video belum ditambahkan admin</div>`;
@@ -382,14 +358,12 @@ function openModal(m) {
 function closeModal() {
   document.getElementById('movieModal').classList.remove('open');
   document.body.style.overflow='';
-  const mv = document.getElementById('modalVideo');
-  const iframe = mv.querySelector('iframe');
+  const iframe = document.getElementById('modalVideo').querySelector('iframe');
   if (iframe) iframe.remove();
 }
 
 function closeModalOutside(e) { if(e.target.id==='movieModal') closeModal(); }
 
-// ===== RATING =====
 function setRating(val) {
   if (!currentUser) { showToast('Login dulu untuk memberi rating!','error'); return; }
   userRatings[currentMovie.id]=val;
@@ -402,7 +376,6 @@ function updateStars(val) {
   document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<val));
 }
 
-// ===== KOMENTAR =====
 function submitComment() {
   if (!currentUser) { showToast('Login dulu untuk berkomentar!','error'); return; }
   const input = document.getElementById('commentInput');
@@ -423,7 +396,6 @@ function renderComments(id) {
     : '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem">Belum ada komentar. Jadilah yang pertama!</div>';
 }
 
-// ===== AUTH =====
 function openLogin() { isRegister=false; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
 function openRegister() { isRegister=true; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeLoginOutside(e) { if(e.target.id==='loginModal'){document.getElementById('loginModal').classList.remove('open');document.body.style.overflow='';} }
@@ -448,14 +420,12 @@ function handleAuth() {
     if (users[username]) { showToast('Username sudah dipakai!','error'); return; }
     users[username]={password};
     localStorage.setItem('cs_users',JSON.stringify(users));
-    currentUser={username};
-    localStorage.setItem('cs_user',JSON.stringify(currentUser));
+    currentUser={username}; localStorage.setItem('cs_user',JSON.stringify(currentUser));
     showToast(`Selamat datang, ${username}! 🎉`,'success');
   } else {
     const users = JSON.parse(localStorage.getItem('cs_users')||'{}');
     if (!users[username]||users[username].password!==password) { showToast('Username atau password salah!','error'); return; }
-    currentUser={username};
-    localStorage.setItem('cs_user',JSON.stringify(currentUser));
+    currentUser={username}; localStorage.setItem('cs_user',JSON.stringify(currentUser));
     showToast(`Halo, ${username}! 👋`,'success');
   }
   document.getElementById('loginModal').classList.remove('open');
@@ -469,8 +439,7 @@ function updateNavbar() {
     <button class="btn btn-outline" onclick="logout()">Keluar</button>
   ` : `
     <button class="btn btn-outline" onclick="openLogin()">Masuk</button>
-    <button class="btn btn-primary" onclick="openRegister()">Daftar</button>
-  `;
+    <button class="btn btn-primary" onclick="openRegister()">Daftar</button>`;
 }
 
 function logout() { currentUser=null; localStorage.removeItem('cs_user'); updateNavbar(); showToast('Berhasil keluar!','success'); }
@@ -482,12 +451,9 @@ function showToast(msg, type='success') {
 }
 
 // ===== INIT =====
-movies = loadFilms();
-renderHero();
-renderMovies(movies);
-renderTrending();
 updateNavbar();
 setAuthMode();
+loadFilms();
 </script>
 </body>
 </html>
