@@ -26,6 +26,7 @@
   .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
   .btn-primary { background:var(--accent); color:#fff; }
   .btn-primary:hover { background:#c1121f; }
+  .btn-loading { opacity:0.6; pointer-events:none; }
   .search-wrap { padding:1.5rem 5vw 0; display:flex; gap:0.75rem; align-items:center; }
   .search-input { flex:1; max-width:480px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.65rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; }
   .search-input:focus { border-color:var(--accent); }
@@ -73,6 +74,7 @@
   .skeleton-info { padding:0.75rem; display:flex; flex-direction:column; gap:0.4rem; }
   .skeleton-line { height:10px; border-radius:4px; }
   .skeleton-line.short { width:60%; }
+  /* MODAL */
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(10px); }
   .modal-overlay.open { opacity:1; pointer-events:all; }
   .modal { background:var(--surface); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); transform:scale(0.9); transition:transform 0.25s; }
@@ -80,14 +82,11 @@
   .modal-video { aspect-ratio:16/9; background:#000; border-radius:16px 16px 0 0; overflow:hidden; position:relative; }
   .modal-video iframe { width:100%; height:100%; border:none; display:block; }
   .modal-video .video-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1rem; color:var(--muted); font-size:0.9rem; }
-  /* Error state untuk player */
   .player-error { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
   .player-error .err-icon { font-size:2.5rem; }
   .player-error .err-title { font-size:0.95rem; font-weight:600; color:var(--text); }
   .player-error .err-msg { font-size:0.8rem; text-align:center; max-width:300px; line-height:1.5; }
   .player-error .err-btn { margin-top:0.5rem; background:var(--accent); color:#fff; border:none; padding:0.55rem 1.25rem; border-radius:6px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
-  .player-error .err-btn:hover { background:#c1121f; }
-  /* Loading state */
   .player-loading { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
   .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
@@ -107,22 +106,35 @@
   .star-rating { display:flex; gap:0.25rem; margin-bottom:1rem; }
   .star { font-size:1.4rem; cursor:pointer; color:var(--border); transition:color 0.15s; }
   .star.active { color:var(--accent2); }
-  .login-modal { background:var(--surface); border-radius:16px; max-width:420px; width:100%; border:1px solid var(--border); padding:2.5rem; transform:scale(0.9); transition:transform 0.25s; }
-  .modal-overlay.open .login-modal { transform:scale(1); }
-  .login-modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.25rem; }
-  .login-modal p { color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem; }
+  /* AUTH MODAL */
+  .auth-modal { background:var(--surface); border-radius:16px; max-width:420px; width:100%; border:1px solid var(--border); padding:2.5rem; transform:scale(0.9); transition:transform 0.25s; }
+  .modal-overlay.open .auth-modal { transform:scale(1); }
+  .auth-modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.25rem; }
+  .auth-modal p { color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem; }
   .form-group { margin-bottom:1rem; }
-  .form-label { font-size:0.8rem; font-weight:600; margin-bottom:0.4rem; display:block; color:var(--muted); }
+  .form-label { font-size:0.8rem; font-weight:600; margin-bottom:0.4rem; display:block; color:var(--muted); letter-spacing:0.5px; }
   .form-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:0.7rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
   .form-input:focus { border-color:var(--accent); }
+  .form-input.error { border-color:var(--accent); }
+  .form-err { color:var(--accent); font-size:0.78rem; margin-top:0.4rem; display:none; }
+  .form-err.show { display:block; }
   .form-switch { text-align:center; margin-top:1rem; font-size:0.82rem; color:var(--muted); }
   .form-switch a { color:var(--accent); cursor:pointer; text-decoration:none; }
+  /* OTP input */
+  .otp-wrap { display:flex; gap:0.5rem; justify-content:center; margin:1rem 0; }
+  .otp-box { width:48px; height:56px; background:var(--card); border:2px solid var(--border); border-radius:8px; text-align:center; font-size:1.5rem; font-weight:700; color:var(--text); outline:none; font-family:'Bebas Neue',sans-serif; transition:border-color 0.2s; }
+  .otp-box:focus { border-color:var(--accent); }
+  .otp-timer { text-align:center; font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; }
+  .otp-timer span { color:var(--accent2); font-weight:600; }
+  /* User dropdown */
+  .user-btn { display:flex; align-items:center; gap:0.5rem; cursor:pointer; position:relative; }
+  .user-avatar { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; }
+  .user-name { font-size:0.85rem; font-weight:600; }
   footer { border-top:1px solid var(--border); padding:2rem 5vw; text-align:center; color:var(--muted); font-size:0.8rem; margin-top:2rem; }
-  .toast { position:fixed; bottom:2rem; right:2rem; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1.25rem; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; max-width:300px; }
+  .toast { position:fixed; bottom:2rem; right:2rem; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1.25rem; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; max-width:320px; }
   .toast.show { transform:translateY(0); opacity:1; }
   .toast.success { border-color:#2d9e6b; }
   .toast.error { border-color:var(--accent); }
-  .user-avatar { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer; }
   @media(max-width:640px) { .nav-links{display:none;} .hero{height:380px;margin:1rem 4vw;} .hero-content{padding:1.5rem;} .movie-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .scroll-row .movie-card{min-width:130px;} }
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
   .fade-up { animation:fadeUp 0.4s ease forwards; }
@@ -211,122 +223,90 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL -->
-<div class="modal-overlay" id="loginModal" onclick="closeLoginOutside(event)">
-  <div class="login-modal">
-    <h2 id="authTitle">MASUK</h2>
-    <p id="authSubtitle"></p>
-    <div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="authUsername" type="text" placeholder="Username kamu"/></div>
-    <div class="form-group" id="emailGroup" style="display:none"><label class="form-label">EMAIL</label><input class="form-input" id="authEmail" type="email" placeholder="email@example.com"/></div>
-    <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="authPassword" type="password" placeholder="••••••••"/></div>
-    <button class="btn btn-primary" style="width:100%;padding:0.85rem;margin-top:0.5rem" onclick="handleAuth()"><span id="authBtnText">Masuk</span></button>
-    <div class="form-switch" id="authSwitch"></div>
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeAuthOutside(event)">
+  <div class="auth-modal" id="authBox">
+    <!-- konten diisi JS -->
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== URL WORKER — jangan diubah =====
 const WORKER_URL = 'https://stream.internetdnsofficial.workers.dev';
 
 let movies = [];
 let currentMovie = null;
-let currentUser = JSON.parse(localStorage.getItem('cs_user')) || null;
-let isRegister = false;
+let currentUser = null;
+let userToken = localStorage.getItem('cs_token') || null;
 let userRatings = JSON.parse(localStorage.getItem('cs_ratings')) || {};
 let allComments = JSON.parse(localStorage.getItem('cs_comments')) || {};
 let iframeLoadTimer = null;
+let otpTimer = null;
+let authMode = 'login'; // login | register | otp | forgot | reset
+let pendingEmail = '';
 
-// ===== LOAD FILM DARI WORKER API =====
+// ===== INIT =====
+async function init() {
+  updateNavbar();
+  loadFilms();
+  if (userToken) {
+    try {
+      const res = await fetch(WORKER_URL + '/api/me', {
+        headers: { 'Authorization': 'Bearer ' + userToken }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok) { currentUser = { username: data.username, email: data.email }; updateNavbar(); }
+        else { userToken = null; localStorage.removeItem('cs_token'); }
+      }
+    } catch(e) { /* offline, biarkan */ }
+  }
+}
+
+// ===== LOAD FILM =====
 async function loadFilms() {
   showSkeletons();
   try {
     const res = await fetch(WORKER_URL + '/api/films');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) throw new Error();
     const data = await res.json();
     movies = Array.isArray(data) ? data : [];
   } catch(e) {
     movies = [];
-    showToast('Gagal memuat film. Cek koneksi kamu.', 'error');
+    showToast('Gagal memuat film.', 'error');
   }
-  renderHero();
-  renderMovies(movies);
-  renderTrending();
+  renderHero(); renderMovies(movies); renderTrending();
 }
 
 function showSkeletons() {
   document.getElementById('movieGrid').innerHTML = Array(8).fill(0).map(() => `
-    <div class="skeleton-card">
-      <div class="skeleton skeleton-thumb"></div>
-      <div class="skeleton-info">
-        <div class="skeleton skeleton-line"></div>
-        <div class="skeleton skeleton-line short"></div>
-      </div>
-    </div>`).join('');
+    <div class="skeleton-card"><div class="skeleton skeleton-thumb"></div>
+    <div class="skeleton-info"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div></div>`).join('');
 }
 
-// ===== HERO =====
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderHero() {
   const el = document.getElementById('heroSection');
-  if (!movies.length) {
-    el.innerHTML = `<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:0.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film. Tambahkan lewat Admin Panel.</p></div>`;
-    return;
-  }
+  if (!movies.length) { el.innerHTML=`<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film.</p></div>`; return; }
   const m = movies[0];
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  el.innerHTML = `
-  <div class="hero" onclick="openModal(${data})">
-    <div class="hero-bg"></div>
-    <div class="hero-gradient"></div>
-    <div class="hero-content fade-up">
-      <span class="hero-badge">🔥 TERBARU</span>
-      <h1>${escHtml(m.title)}</h1>
-      <p>${escHtml(m.desc||'Klik untuk menonton film ini.')}</p>
-      <div class="hero-meta">
-        ${m.rating?`<span class="rating">★ ${m.rating}</span>`:''}
-        <span>${m.year}</span><span>${escHtml(m.genre)}</span>
-        ${m.duration?`<span>${escHtml(m.duration)}</span>`:''}
-      </div>
-      <div class="hero-btns">
-        <button class="btn-play">▶ Tonton Sekarang</button>
-        <button class="btn-info" onclick="event.stopPropagation()">ℹ Info</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  el.innerHTML = `<div class="hero" onclick="openModal(${data})"><div class="hero-bg"></div><div class="hero-gradient"></div><div class="hero-content fade-up"><span class="hero-badge">🔥 TERBARU</span><h1>${escHtml(m.title)}</h1><p>${escHtml(m.desc||'Klik untuk menonton.')}</p><div class="hero-meta">${m.rating?`<span class="rating">★ ${m.rating}</span>`:''}<span>${m.year}</span><span>${escHtml(m.genre)}</span>${m.duration?`<span>${escHtml(m.duration)}</span>`:''}</div><div class="hero-btns"><button class="btn-play">▶ Tonton Sekarang</button><button class="btn-info" onclick="event.stopPropagation()">ℹ Info</button></div></div></div>`;
 }
 
 function movieCard(m) {
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  return `
-  <div class="movie-card fade-up" onclick="openModal(${data})">
-    <div class="movie-thumb">
-      <div class="placeholder-icon">${m.thumb||'🎬'}</div>
-      <div class="movie-quality">${escHtml(m.quality)}</div>
-      <div class="movie-overlay"><div class="play-icon">▶</div></div>
-    </div>
-    <div class="movie-info">
-      <div class="movie-title">${escHtml(m.title)}</div>
-      <div class="movie-meta">
-        <span>${m.year} · ${escHtml(m.genre)}</span>
-        ${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}
-      </div>
-    </div>
-  </div>`;
+  return `<div class="movie-card fade-up" onclick="openModal(${data})"><div class="movie-thumb"><div class="placeholder-icon">${m.thumb||'🎬'}</div><div class="movie-quality">${escHtml(m.quality)}</div><div class="movie-overlay"><div class="play-icon">▶</div></div></div><div class="movie-info"><div class="movie-title">${escHtml(m.title)}</div><div class="movie-meta"><span>${m.year} · ${escHtml(m.genre)}</span>${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}</div></div></div>`;
 }
 
 function renderMovies(list) {
-  const grid = document.getElementById('movieGrid');
-  const empty = document.getElementById('emptyGrid');
+  const grid = document.getElementById('movieGrid'), empty = document.getElementById('emptyGrid');
   document.getElementById('filmCount').textContent = list.length + ' film';
   if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  grid.innerHTML = list.map(movieCard).join('');
+  empty.style.display='none'; grid.innerHTML = list.map(movieCard).join('');
 }
 
 function renderTrending() {
@@ -346,215 +326,365 @@ function handleSearch(q) {
   renderMovies(lower ? movies.filter(m=>m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower)) : [...movies]);
 }
 
-// ===== PLAYER — dengan error handling lengkap =====
-function showPlayerLoading(mv) {
-  // Hapus elemen lama
-  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
-  const vp = document.getElementById('videoPlaceholder');
-  vp.style.display = 'none';
+// ===== PLAYER =====
+function loadIframe(mv, embedUrl) {
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  document.getElementById('videoPlaceholder').style.display = 'none';
 
   const loading = document.createElement('div');
   loading.className = 'player-loading';
-  loading.innerHTML = `<div class="spinner"></div><div style="font-size:0.82rem">Memuat player...</div>`;
+  loading.innerHTML = `<div class="spinner"></div><div style="font-size:.82rem">Memuat player...</div>`;
   mv.appendChild(loading);
-  return loading;
-}
-
-function showPlayerError(mv, embedUrl) {
-  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
-  const vp = document.getElementById('videoPlaceholder');
-  vp.style.display = 'none';
-
-  const err = document.createElement('div');
-  err.className = 'player-error';
-  err.innerHTML = `
-    <div class="err-icon">⚠️</div>
-    <div class="err-title">Player gagal dimuat</div>
-    <div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed di domain ini.</div>
-    <button class="err-btn" onclick="window.open('${escHtml(embedUrl)}','_blank')">Buka di Tab Baru</button>
-  `;
-  mv.appendChild(err);
-}
-
-function loadIframe(mv, embedUrl) {
-  const loadingEl = showPlayerLoading(mv);
 
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'width:100%;height:100%;border:none;display:none;';
-  iframe.setAttribute('allowfullscreen', 'true');
-  iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-  iframe.setAttribute('referrerpolicy', 'no-referrer');
-  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox');
+  iframe.setAttribute('allowfullscreen','true');
+  iframe.setAttribute('allow','autoplay; fullscreen; encrypted-media; picture-in-picture');
+  iframe.setAttribute('referrerpolicy','no-referrer');
+  iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox');
   mv.appendChild(iframe);
 
-  // Timeout: kalau 10 detik tidak load → tampilkan error
   iframeLoadTimer = setTimeout(() => {
-    iframe.remove();
-    loadingEl.remove();
+    iframe.remove(); loading.remove();
     showPlayerError(mv, embedUrl);
   }, 10000);
 
-  iframe.onload = () => {
-    clearTimeout(iframeLoadTimer);
-    loadingEl.remove();
-    iframe.style.display = 'block';
-  };
-
-  iframe.onerror = () => {
-    clearTimeout(iframeLoadTimer);
-    iframe.remove();
-    loadingEl.remove();
-    showPlayerError(mv, embedUrl);
-  };
-
-  // Set src setelah event listener terpasang
+  iframe.onload = () => { clearTimeout(iframeLoadTimer); loading.remove(); iframe.style.display='block'; };
+  iframe.onerror = () => { clearTimeout(iframeLoadTimer); iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); };
   iframe.src = embedUrl;
+}
+
+function showPlayerError(mv, url) {
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  const err = document.createElement('div');
+  err.className = 'player-error';
+  err.innerHTML = `<div class="err-icon">⚠️</div><div class="err-title">Player gagal dimuat</div><div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed.</div><button class="err-btn" onclick="window.open('${escHtml(url)}','_blank')">Buka di Tab Baru</button>`;
+  mv.appendChild(err);
 }
 
 function openModal(m) {
   currentMovie = m;
   document.getElementById('modalTitle').textContent = m.title;
   document.getElementById('modalDesc').textContent = m.desc || '-';
-  document.getElementById('modalMeta').innerHTML = `
-    <span>📅 ${m.year}</span><span>🎭 ${escHtml(m.genre)}</span>
-    ${m.duration?`<span>⏱ ${escHtml(m.duration)}</span>`:''}
-    ${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}
-    <span>🎞 ${escHtml(m.quality)}</span>`;
-
+  document.getElementById('modalMeta').innerHTML = `<span>📅 ${m.year}</span><span>🎭 ${escHtml(m.genre)}</span>${m.duration?`<span>⏱ ${escHtml(m.duration)}</span>`:''}${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}<span>🎞 ${escHtml(m.quality)}</span>`;
   const mv = document.getElementById('modalVideo');
-  const vp = document.getElementById('videoPlaceholder');
-
-  // Bersihkan konten lama
-  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
   clearTimeout(iframeLoadTimer);
-
   if (m.embed && m.embed.trim()) {
     loadIframe(mv, m.embed.trim());
   } else {
-    vp.style.display = 'flex';
-    vp.innerHTML = `<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:0.85rem">Link video belum ditambahkan admin</div>`;
+    const vp = document.getElementById('videoPlaceholder');
+    vp.style.display='flex';
+    vp.innerHTML=`<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:.85rem">Link video belum tersedia</div>`;
   }
-
   updateStars(userRatings[m.id]||0);
   renderComments(m.id);
   document.getElementById('movieModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
 
 function closeModal() {
   clearTimeout(iframeLoadTimer);
   document.getElementById('movieModal').classList.remove('open');
-  document.body.style.overflow = '';
+  document.body.style.overflow='';
   const mv = document.getElementById('modalVideo');
-  mv.querySelectorAll('iframe, .player-error, .player-loading').forEach(el => el.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
   const vp = document.getElementById('videoPlaceholder');
-  vp.style.display = 'none';
-  vp.innerHTML = '';
+  vp.style.display='none'; vp.innerHTML='';
 }
 
 function closeModalOutside(e) { if(e.target.id==='movieModal') closeModal(); }
 
-// ===== RATING =====
+// ===== RATING & KOMENTAR =====
 function setRating(val) {
   if (!currentUser) { showToast('Login dulu untuk memberi rating!','error'); return; }
-  userRatings[currentMovie.id] = val;
-  localStorage.setItem('cs_ratings', JSON.stringify(userRatings));
-  updateStars(val);
-  showToast(`Rating ${val}★ tersimpan!`, 'success');
+  userRatings[currentMovie.id]=val;
+  localStorage.setItem('cs_ratings',JSON.stringify(userRatings));
+  updateStars(val); showToast(`Rating ${val}★ tersimpan!`,'success');
 }
+function updateStars(val) { document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<val)); }
 
-function updateStars(val) {
-  document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('active', i < val));
-}
-
-// ===== KOMENTAR =====
 function submitComment() {
   if (!currentUser) { showToast('Login dulu untuk berkomentar!','error'); return; }
   const input = document.getElementById('commentInput');
-  const text = input.value.trim();
-  if (!text) return;
-  if (!allComments[currentMovie.id]) allComments[currentMovie.id] = [];
-  allComments[currentMovie.id].unshift({user:currentUser.username, text, time:new Date().toLocaleDateString('id')});
-  localStorage.setItem('cs_comments', JSON.stringify(allComments));
-  input.value = '';
-  renderComments(currentMovie.id);
-  showToast('Komentar terkirim!', 'success');
+  const text = input.value.trim(); if (!text) return;
+  if (!allComments[currentMovie.id]) allComments[currentMovie.id]=[];
+  allComments[currentMovie.id].unshift({user:currentUser.username,text,time:new Date().toLocaleDateString('id')});
+  localStorage.setItem('cs_comments',JSON.stringify(allComments));
+  input.value=''; renderComments(currentMovie.id); showToast('Komentar terkirim!','success');
 }
 
 function renderComments(id) {
-  const list = allComments[id] || [];
+  const list = allComments[id]||[];
   document.getElementById('commentsList').innerHTML = list.length
-    ? list.map(c=>`<div class="comment-card"><div class="comment-user">👤 ${escHtml(c.user)} <span style="color:var(--muted);font-weight:400;font-size:0.75rem">· ${c.time}</span></div><div class="comment-text">${escHtml(c.text)}</div></div>`).join('')
-    : '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:1rem">Belum ada komentar. Jadilah yang pertama!</div>';
+    ? list.map(c=>`<div class="comment-card"><div class="comment-user">👤 ${escHtml(c.user)} <span style="color:var(--muted);font-weight:400;font-size:.75rem">· ${c.time}</span></div><div class="comment-text">${escHtml(c.text)}</div></div>`).join('')
+    : '<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1rem">Belum ada komentar.</div>';
 }
 
-// ===== AUTH =====
-function openLogin() { isRegister=false; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
-function openRegister() { isRegister=true; setAuthMode(); document.getElementById('loginModal').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeLoginOutside(e) { if(e.target.id==='loginModal'){document.getElementById('loginModal').classList.remove('open');document.body.style.overflow='';} }
-function switchToRegister() { isRegister=!isRegister; setAuthMode(); }
-
-function setAuthMode() {
-  document.getElementById('authTitle').textContent = isRegister?'DAFTAR':'MASUK';
-  document.getElementById('authSubtitle').textContent = isRegister?'Buat akun CineStream kamu':'Selamat datang kembali';
-  document.getElementById('authBtnText').textContent = isRegister?'Daftar':'Masuk';
-  document.getElementById('emailGroup').style.display = isRegister?'block':'none';
-  document.getElementById('authSwitch').innerHTML = isRegister
-    ? 'Sudah punya akun? <a onclick="switchToRegister()">Masuk</a>'
-    : 'Belum punya akun? <a onclick="switchToRegister()">Daftar sekarang</a>';
+// ===== AUTH MODAL =====
+function openAuth(mode='login') {
+  authMode = mode;
+  renderAuthModal();
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow='hidden';
 }
+function closeAuth() {
+  document.getElementById('authModal').classList.remove('open');
+  document.body.style.overflow='';
+  clearInterval(otpTimer);
+}
+function closeAuthOutside(e) { if(e.target.id==='authModal') closeAuth(); }
 
-function handleAuth() {
-  const username = document.getElementById('authUsername').value.trim();
-  const password = document.getElementById('authPassword').value;
-  if (!username||!password) { showToast('Isi semua kolom!','error'); return; }
-  if (isRegister) {
-    const users = JSON.parse(localStorage.getItem('cs_users')||'{}');
-    if (users[username]) { showToast('Username sudah dipakai!','error'); return; }
-    users[username] = {password};
-    localStorage.setItem('cs_users', JSON.stringify(users));
-    currentUser = {username};
-    localStorage.setItem('cs_user', JSON.stringify(currentUser));
-    showToast(`Selamat datang, ${username}! 🎉`, 'success');
-  } else {
-    const users = JSON.parse(localStorage.getItem('cs_users')||'{}');
-    if (!users[username]||users[username].password!==password) { showToast('Username atau password salah!','error'); return; }
-    currentUser = {username};
-    localStorage.setItem('cs_user', JSON.stringify(currentUser));
-    showToast(`Halo, ${username}! 👋`, 'success');
+function renderAuthModal() {
+  const box = document.getElementById('authBox');
+  if (authMode === 'login') {
+    box.innerHTML = `
+      <h2>MASUK</h2>
+      <p>Selamat datang kembali di CineStream</p>
+      <div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Username kamu" autocomplete="username"/></div>
+      <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="form-err" id="authErr"></div>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doLogin()">Masuk</button>
+      <div class="form-switch">Belum punya akun? <a onclick="openAuth('register')">Daftar sekarang</a></div>
+      <div class="form-switch" style="margin-top:.35rem"><a onclick="openAuth('forgot')" style="color:var(--muted);font-size:.78rem">Lupa password?</a></div>`;
+  } else if (authMode === 'register') {
+    box.innerHTML = `
+      <h2>DAFTAR</h2>
+      <p>Buat akun CineStream kamu</p>
+      <div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Min. 3 karakter" autocomplete="username"/></div>
+      <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com" autocomplete="email"/></div>
+      <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="Min. 6 karakter" autocomplete="new-password"/></div>
+      <div class="form-err" id="authErr"></div>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doRegister()">Daftar & Kirim OTP</button>
+      <div class="form-switch">Sudah punya akun? <a onclick="openAuth('login')">Masuk</a></div>`;
+  } else if (authMode === 'otp') {
+    box.innerHTML = `
+      <h2>VERIFIKASI</h2>
+      <p>Masukkan kode OTP yang dikirim ke <b style="color:var(--text)">${escHtml(pendingEmail)}</b></p>
+      <div class="otp-wrap">
+        <input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/>
+        <input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/>
+        <input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/>
+        <input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/>
+        <input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/>
+        <input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/>
+      </div>
+      <div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div>
+      <div class="form-err" id="authErr"></div>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem" onclick="doVerifyOTP()">Verifikasi</button>
+      <div class="form-switch" style="margin-top:.75rem"><a onclick="openAuth('register')">← Kembali ke Daftar</a></div>`;
+    startOTPTimer(300);
+    setTimeout(() => document.getElementById('otp0').focus(), 100);
+  } else if (authMode === 'forgot') {
+    box.innerHTML = `
+      <h2>LUPA PASSWORD</h2>
+      <p>Masukkan email untuk menerima kode reset</p>
+      <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com"/></div>
+      <div class="form-err" id="authErr"></div>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doForgot()">Kirim OTP Reset</button>
+      <div class="form-switch"><a onclick="openAuth('login')">← Kembali ke Masuk</a></div>`;
+  } else if (authMode === 'reset') {
+    box.innerHTML = `
+      <h2>RESET PASSWORD</h2>
+      <p>Masukkan kode OTP dan password baru</p>
+      <div class="otp-wrap">
+        <input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/>
+        <input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/>
+        <input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/>
+        <input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/>
+        <input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/>
+        <input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/>
+      </div>
+      <div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div>
+      <div class="form-group"><label class="form-label">PASSWORD BARU</label><input class="form-input" id="aNewPass" type="password" placeholder="Min. 6 karakter"/></div>
+      <div class="form-err" id="authErr"></div>
+      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doResetPass()">Reset Password</button>`;
+    startOTPTimer(300);
+    setTimeout(() => document.getElementById('otp0').focus(), 100);
   }
-  document.getElementById('loginModal').classList.remove('open');
-  document.body.style.overflow = '';
-  updateNavbar();
 }
 
+// OTP input helpers
+function otpMove(el, nextIdx) {
+  el.value = el.value.replace(/[^0-9]/g,'');
+  if (el.value && nextIdx <= 5) document.getElementById('otp'+nextIdx).focus();
+}
+function otpBack(e, idx) {
+  if (e.key === 'Backspace' && !e.target.value && idx > 0) document.getElementById('otp'+(idx-1)).focus();
+}
+function getOTPValue() {
+  return [0,1,2,3,4,5].map(i => document.getElementById('otp'+i).value).join('');
+}
+
+function startOTPTimer(seconds) {
+  clearInterval(otpTimer);
+  let s = seconds;
+  const el = () => document.getElementById('otpCountdown');
+  otpTimer = setInterval(() => {
+    s--;
+    const min = Math.floor(s/60), sec = s%60;
+    if (el()) el().textContent = min+':'+(sec<10?'0':'')+sec;
+    if (s <= 0) { clearInterval(otpTimer); if(el()) el().closest('.otp-timer').textContent = 'Kode sudah kadaluarsa.'; }
+  }, 1000);
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  if (el) { el.textContent = msg; el.classList.add('show'); }
+}
+
+function setBtnLoading(text) {
+  const btn = document.getElementById('authBtn');
+  if (btn) { btn.textContent = text; btn.classList.add('btn-loading'); }
+}
+function setBtnReady(text) {
+  const btn = document.getElementById('authBtn');
+  if (btn) { btn.textContent = text; btn.classList.remove('btn-loading'); }
+}
+
+// ===== AUTH ACTIONS =====
+async function doLogin() {
+  const username = document.getElementById('aUsername').value.trim();
+  const password = document.getElementById('aPassword').value;
+  if (!username||!password) { showAuthErr('Isi semua kolom!'); return; }
+  setBtnLoading('Memuat...');
+  try {
+    const res = await fetch(WORKER_URL + '/api/login-user', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username, password})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      userToken = data.token;
+      localStorage.setItem('cs_token', userToken);
+      currentUser = { username: data.username };
+      updateNavbar(); closeAuth();
+      showToast(`Halo, ${data.username}! 👋`, 'success');
+    } else {
+      showAuthErr(data.error || 'Login gagal');
+      setBtnReady('Masuk');
+    }
+  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Masuk'); }
+}
+
+async function doRegister() {
+  const username = document.getElementById('aUsername').value.trim();
+  const email = document.getElementById('aEmail').value.trim();
+  const password = document.getElementById('aPassword').value;
+  if (!username||!email||!password) { showAuthErr('Isi semua kolom!'); return; }
+  setBtnLoading('Mengirim OTP...');
+  try {
+    const res = await fetch(WORKER_URL + '/api/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username, email, password})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      pendingEmail = email;
+      authMode = 'otp'; renderAuthModal();
+      showToast('OTP dikirim ke ' + email, 'success');
+    } else {
+      showAuthErr(data.error || 'Pendaftaran gagal');
+      setBtnReady('Daftar & Kirim OTP');
+    }
+  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Daftar & Kirim OTP'); }
+}
+
+async function doVerifyOTP() {
+  const otp = getOTPValue();
+  if (otp.length < 6) { showAuthErr('Masukkan 6 digit OTP!'); return; }
+  setBtnLoading('Memverifikasi...');
+  try {
+    const res = await fetch(WORKER_URL + '/api/verify-otp', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email: pendingEmail, otp})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      userToken = data.token;
+      localStorage.setItem('cs_token', userToken);
+      currentUser = { username: data.username };
+      clearInterval(otpTimer);
+      updateNavbar(); closeAuth();
+      showToast(`Selamat datang, ${data.username}! 🎉`, 'success');
+    } else {
+      showAuthErr(data.error || 'OTP salah');
+      setBtnReady('Verifikasi');
+    }
+  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Verifikasi'); }
+}
+
+async function doForgot() {
+  const email = document.getElementById('aEmail').value.trim();
+  if (!email) { showAuthErr('Masukkan email kamu!'); return; }
+  setBtnLoading('Mengirim...');
+  try {
+    const res = await fetch(WORKER_URL + '/api/forgot-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      pendingEmail = email;
+      authMode = 'reset'; renderAuthModal();
+      showToast('OTP reset dikirim!', 'success');
+    } else {
+      showAuthErr(data.error || 'Gagal');
+      setBtnReady('Kirim OTP Reset');
+    }
+  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Kirim OTP Reset'); }
+}
+
+async function doResetPass() {
+  const otp = getOTPValue();
+  const newPass = document.getElementById('aNewPass').value;
+  if (otp.length < 6) { showAuthErr('Masukkan 6 digit OTP!'); return; }
+  if (!newPass || newPass.length < 6) { showAuthErr('Password min. 6 karakter!'); return; }
+  setBtnLoading('Menyimpan...');
+  try {
+    const res = await fetch(WORKER_URL + '/api/reset-password', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email: pendingEmail, otp, newPassword: newPass})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      clearInterval(otpTimer); closeAuth();
+      showToast('Password berhasil direset! Silakan login.', 'success');
+      setTimeout(() => openAuth('login'), 500);
+    } else {
+      showAuthErr(data.error || 'Gagal reset');
+      setBtnReady('Reset Password');
+    }
+  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Reset Password'); }
+}
+
+// ===== NAVBAR =====
 function updateNavbar() {
   document.getElementById('navRight').innerHTML = currentUser ? `
-    <div class="user-avatar" title="${escHtml(currentUser.username)}">${currentUser.username[0].toUpperCase()}</div>
+    <div class="user-btn">
+      <div class="user-avatar">${currentUser.username[0].toUpperCase()}</div>
+      <span class="user-name">${escHtml(currentUser.username)}</span>
+    </div>
     <button class="btn btn-outline" onclick="logout()">Keluar</button>
   ` : `
-    <button class="btn btn-outline" onclick="openLogin()">Masuk</button>
-    <button class="btn btn-primary" onclick="openRegister()">Daftar</button>`;
+    <button class="btn btn-outline" onclick="openAuth('login')">Masuk</button>
+    <button class="btn btn-primary" onclick="openAuth('register')">Daftar</button>`;
 }
 
 function logout() {
-  currentUser = null;
-  localStorage.removeItem('cs_user');
+  currentUser = null; userToken = null;
+  localStorage.removeItem('cs_token');
   updateNavbar();
   showToast('Berhasil keluar!', 'success');
 }
 
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3000);
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ===== INIT =====
-updateNavbar();
-setAuthMode();
-loadFilms();
+init();
 </script>
 </body>
 </html>
