@@ -74,7 +74,6 @@
   .skeleton-info { padding:0.75rem; display:flex; flex-direction:column; gap:0.4rem; }
   .skeleton-line { height:10px; border-radius:4px; }
   .skeleton-line.short { width:60%; }
-  /* MODAL */
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(10px); }
   .modal-overlay.open { opacity:1; pointer-events:all; }
   .modal { background:var(--surface); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); transform:scale(0.9); transition:transform 0.25s; }
@@ -106,7 +105,6 @@
   .star-rating { display:flex; gap:0.25rem; margin-bottom:1rem; }
   .star { font-size:1.4rem; cursor:pointer; color:var(--border); transition:color 0.15s; }
   .star.active { color:var(--accent2); }
-  /* AUTH MODAL */
   .auth-modal { background:var(--surface); border-radius:16px; max-width:420px; width:100%; border:1px solid var(--border); padding:2.5rem; transform:scale(0.9); transition:transform 0.25s; }
   .modal-overlay.open .auth-modal { transform:scale(1); }
   .auth-modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.25rem; }
@@ -120,13 +118,11 @@
   .form-err.show { display:block; }
   .form-switch { text-align:center; margin-top:1rem; font-size:0.82rem; color:var(--muted); }
   .form-switch a { color:var(--accent); cursor:pointer; text-decoration:none; }
-  /* OTP input */
   .otp-wrap { display:flex; gap:0.5rem; justify-content:center; margin:1rem 0; }
   .otp-box { width:48px; height:56px; background:var(--card); border:2px solid var(--border); border-radius:8px; text-align:center; font-size:1.5rem; font-weight:700; color:var(--text); outline:none; font-family:'Bebas Neue',sans-serif; transition:border-color 0.2s; }
   .otp-box:focus { border-color:var(--accent); }
   .otp-timer { text-align:center; font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; }
   .otp-timer span { color:var(--accent2); font-weight:600; }
-  /* User dropdown */
   .user-btn { display:flex; align-items:center; gap:0.5rem; cursor:pointer; position:relative; }
   .user-avatar { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; }
   .user-name { font-size:0.85rem; font-weight:600; }
@@ -225,15 +221,15 @@
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="authModal" onclick="closeAuthOutside(event)">
-  <div class="auth-modal" id="authBox">
-    <!-- konten diisi JS -->
-  </div>
+  <div class="auth-modal" id="authBox"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const WORKER_URL = 'https://stream.internetdnsofficial.workers.dev';
+// ✅ FIXED: WORKER_URL kosong supaya semua request pakai path relatif
+// sehingga route cinestream.kraxx.my.id/api/* → worker Cloudflare
+const WORKER_URL = '';
 
 let movies = [];
 let currentMovie = null;
@@ -243,10 +239,9 @@ let userRatings = JSON.parse(localStorage.getItem('cs_ratings')) || {};
 let allComments = JSON.parse(localStorage.getItem('cs_comments')) || {};
 let iframeLoadTimer = null;
 let otpTimer = null;
-let authMode = 'login'; // login | register | otp | forgot | reset
+let authMode = 'login';
 let pendingEmail = '';
 
-// ===== INIT =====
 async function init() {
   updateNavbar();
   loadFilms();
@@ -260,11 +255,10 @@ async function init() {
         if (data.ok) { currentUser = { username: data.username, email: data.email }; updateNavbar(); }
         else { userToken = null; localStorage.removeItem('cs_token'); }
       }
-    } catch(e) { /* offline, biarkan */ }
+    } catch(e) {}
   }
 }
 
-// ===== LOAD FILM =====
 async function loadFilms() {
   showSkeletons();
   try {
@@ -280,9 +274,9 @@ async function loadFilms() {
 }
 
 function showSkeletons() {
-  document.getElementById('movieGrid').innerHTML = Array(8).fill(0).map(() => `
-    <div class="skeleton-card"><div class="skeleton skeleton-thumb"></div>
-    <div class="skeleton-info"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div></div>`).join('');
+  document.getElementById('movieGrid').innerHTML = Array(8).fill(0).map(function() {
+    return '<div class="skeleton-card"><div class="skeleton skeleton-thumb"></div><div class="skeleton-info"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div></div>';
+  }).join('');
 }
 
 function escHtml(s) {
@@ -291,15 +285,15 @@ function escHtml(s) {
 
 function renderHero() {
   const el = document.getElementById('heroSection');
-  if (!movies.length) { el.innerHTML=`<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film.</p></div>`; return; }
+  if (!movies.length) { el.innerHTML='<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film.</p></div>'; return; }
   const m = movies[0];
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  el.innerHTML = `<div class="hero" onclick="openModal(${data})"><div class="hero-bg"></div><div class="hero-gradient"></div><div class="hero-content fade-up"><span class="hero-badge">🔥 TERBARU</span><h1>${escHtml(m.title)}</h1><p>${escHtml(m.desc||'Klik untuk menonton.')}</p><div class="hero-meta">${m.rating?`<span class="rating">★ ${m.rating}</span>`:''}<span>${m.year}</span><span>${escHtml(m.genre)}</span>${m.duration?`<span>${escHtml(m.duration)}</span>`:''}</div><div class="hero-btns"><button class="btn-play">▶ Tonton Sekarang</button><button class="btn-info" onclick="event.stopPropagation()">ℹ Info</button></div></div></div>`;
+  el.innerHTML = '<div class="hero" onclick="openModal('+data+')"><div class="hero-bg"></div><div class="hero-gradient"></div><div class="hero-content fade-up"><span class="hero-badge">🔥 TERBARU</span><h1>'+escHtml(m.title)+'</h1><p>'+escHtml(m.desc||'Klik untuk menonton.')+'</p><div class="hero-meta">'+(m.rating?'<span class="rating">★ '+m.rating+'</span>':'')+'<span>'+m.year+'</span><span>'+escHtml(m.genre)+'</span>'+(m.duration?'<span>'+escHtml(m.duration)+'</span>':'')+'</div><div class="hero-btns"><button class="btn-play">▶ Tonton Sekarang</button><button class="btn-info" onclick="event.stopPropagation()">ℹ Info</button></div></div></div>';
 }
 
 function movieCard(m) {
   const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  return `<div class="movie-card fade-up" onclick="openModal(${data})"><div class="movie-thumb"><div class="placeholder-icon">${m.thumb||'🎬'}</div><div class="movie-quality">${escHtml(m.quality)}</div><div class="movie-overlay"><div class="play-icon">▶</div></div></div><div class="movie-info"><div class="movie-title">${escHtml(m.title)}</div><div class="movie-meta"><span>${m.year} · ${escHtml(m.genre)}</span>${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}</div></div></div>`;
+  return '<div class="movie-card fade-up" onclick="openModal('+data+')"><div class="movie-thumb"><div class="placeholder-icon">'+(m.thumb||'🎬')+'</div><div class="movie-quality">'+escHtml(m.quality)+'</div><div class="movie-overlay"><div class="play-icon">▶</div></div></div><div class="movie-info"><div class="movie-title">'+escHtml(m.title)+'</div><div class="movie-meta"><span>'+m.year+' · '+escHtml(m.genre)+'</span>'+(m.rating?'<span class="movie-rating">★ '+m.rating+'</span>':'')+'</div></div></div>';
 }
 
 function renderMovies(list) {
@@ -310,32 +304,29 @@ function renderMovies(list) {
 }
 
 function renderTrending() {
-  const sorted = [...movies].sort((a,b)=>(b.rating||0)-(a.rating||0)).slice(0,8);
+  const sorted = movies.slice().sort(function(a,b){ return (b.rating||0)-(a.rating||0); }).slice(0,8);
   document.getElementById('trendingRow').innerHTML = sorted.map(movieCard).join('');
   document.getElementById('trendingSection').style.display = movies.length ? 'block' : 'none';
 }
 
 function filterMovies(genre, btn) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   btn.classList.add('active');
-  renderMovies(genre==='Semua' ? [...movies] : movies.filter(m=>m.genre===genre));
+  renderMovies(genre==='Semua' ? movies.slice() : movies.filter(function(m){ return m.genre===genre; }));
 }
 
 function handleSearch(q) {
   const lower = q.toLowerCase().trim();
-  renderMovies(lower ? movies.filter(m=>m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower)) : [...movies]);
+  renderMovies(lower ? movies.filter(function(m){ return m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower); }) : movies.slice());
 }
 
-// ===== PLAYER =====
 function loadIframe(mv, embedUrl) {
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
   document.getElementById('videoPlaceholder').style.display = 'none';
-
   const loading = document.createElement('div');
   loading.className = 'player-loading';
-  loading.innerHTML = `<div class="spinner"></div><div style="font-size:.82rem">Memuat player...</div>`;
+  loading.innerHTML = '<div class="spinner"></div><div style="font-size:.82rem">Memuat player...</div>';
   mv.appendChild(loading);
-
   const iframe = document.createElement('iframe');
   iframe.style.cssText = 'width:100%;height:100%;border:none;display:none;';
   iframe.setAttribute('allowfullscreen','true');
@@ -343,22 +334,17 @@ function loadIframe(mv, embedUrl) {
   iframe.setAttribute('referrerpolicy','no-referrer');
   iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox');
   mv.appendChild(iframe);
-
-  iframeLoadTimer = setTimeout(() => {
-    iframe.remove(); loading.remove();
-    showPlayerError(mv, embedUrl);
-  }, 10000);
-
-  iframe.onload = () => { clearTimeout(iframeLoadTimer); loading.remove(); iframe.style.display='block'; };
-  iframe.onerror = () => { clearTimeout(iframeLoadTimer); iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); };
+  iframeLoadTimer = setTimeout(function() { iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); }, 10000);
+  iframe.onload = function() { clearTimeout(iframeLoadTimer); loading.remove(); iframe.style.display='block'; };
+  iframe.onerror = function() { clearTimeout(iframeLoadTimer); iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); };
   iframe.src = embedUrl;
 }
 
 function showPlayerError(mv, url) {
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
   const err = document.createElement('div');
   err.className = 'player-error';
-  err.innerHTML = `<div class="err-icon">⚠️</div><div class="err-title">Player gagal dimuat</div><div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed.</div><button class="err-btn" onclick="window.open('${escHtml(url)}','_blank')">Buka di Tab Baru</button>`;
+  err.innerHTML = '<div class="err-icon">⚠️</div><div class="err-title">Player gagal dimuat</div><div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed.</div><button class="err-btn" onclick="window.open(\''+escHtml(url)+'\',\'_blank\')">Buka di Tab Baru</button>';
   mv.appendChild(err);
 }
 
@@ -366,16 +352,16 @@ function openModal(m) {
   currentMovie = m;
   document.getElementById('modalTitle').textContent = m.title;
   document.getElementById('modalDesc').textContent = m.desc || '-';
-  document.getElementById('modalMeta').innerHTML = `<span>📅 ${m.year}</span><span>🎭 ${escHtml(m.genre)}</span>${m.duration?`<span>⏱ ${escHtml(m.duration)}</span>`:''}${m.rating?`<span class="movie-rating">★ ${m.rating}</span>`:''}<span>🎞 ${escHtml(m.quality)}</span>`;
+  document.getElementById('modalMeta').innerHTML = '<span>📅 '+m.year+'</span><span>🎭 '+escHtml(m.genre)+'</span>'+(m.duration?'<span>⏱ '+escHtml(m.duration)+'</span>':'')+(m.rating?'<span class="movie-rating">★ '+m.rating+'</span>':'')+'<span>🎞 '+escHtml(m.quality)+'</span>';
   const mv = document.getElementById('modalVideo');
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
   clearTimeout(iframeLoadTimer);
   if (m.embed && m.embed.trim()) {
     loadIframe(mv, m.embed.trim());
   } else {
     const vp = document.getElementById('videoPlaceholder');
     vp.style.display='flex';
-    vp.innerHTML=`<div style="font-size:3rem">${m.thumb||'🎬'}</div><div style="color:var(--muted);font-size:.85rem">Link video belum tersedia</div>`;
+    vp.innerHTML='<div style="font-size:3rem">'+(m.thumb||'🎬')+'</div><div style="color:var(--muted);font-size:.85rem">Link video belum tersedia</div>';
   }
   updateStars(userRatings[m.id]||0);
   renderComments(m.id);
@@ -388,28 +374,27 @@ function closeModal() {
   document.getElementById('movieModal').classList.remove('open');
   document.body.style.overflow='';
   const mv = document.getElementById('modalVideo');
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(e=>e.remove());
+  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
   const vp = document.getElementById('videoPlaceholder');
   vp.style.display='none'; vp.innerHTML='';
 }
 
 function closeModalOutside(e) { if(e.target.id==='movieModal') closeModal(); }
 
-// ===== RATING & KOMENTAR =====
 function setRating(val) {
   if (!currentUser) { showToast('Login dulu untuk memberi rating!','error'); return; }
   userRatings[currentMovie.id]=val;
   localStorage.setItem('cs_ratings',JSON.stringify(userRatings));
-  updateStars(val); showToast(`Rating ${val}★ tersimpan!`,'success');
+  updateStars(val); showToast('Rating '+val+'★ tersimpan!','success');
 }
-function updateStars(val) { document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<val)); }
+function updateStars(val) { document.querySelectorAll('.star').forEach(function(s,i){ s.classList.toggle('active',i<val); }); }
 
 function submitComment() {
   if (!currentUser) { showToast('Login dulu untuk berkomentar!','error'); return; }
   const input = document.getElementById('commentInput');
   const text = input.value.trim(); if (!text) return;
   if (!allComments[currentMovie.id]) allComments[currentMovie.id]=[];
-  allComments[currentMovie.id].unshift({user:currentUser.username,text,time:new Date().toLocaleDateString('id')});
+  allComments[currentMovie.id].unshift({user:currentUser.username,text:text,time:new Date().toLocaleDateString('id')});
   localStorage.setItem('cs_comments',JSON.stringify(allComments));
   input.value=''; renderComments(currentMovie.id); showToast('Komentar terkirim!','success');
 }
@@ -417,13 +402,12 @@ function submitComment() {
 function renderComments(id) {
   const list = allComments[id]||[];
   document.getElementById('commentsList').innerHTML = list.length
-    ? list.map(c=>`<div class="comment-card"><div class="comment-user">👤 ${escHtml(c.user)} <span style="color:var(--muted);font-weight:400;font-size:.75rem">· ${c.time}</span></div><div class="comment-text">${escHtml(c.text)}</div></div>`).join('')
+    ? list.map(function(c){ return '<div class="comment-card"><div class="comment-user">👤 '+escHtml(c.user)+' <span style="color:var(--muted);font-weight:400;font-size:.75rem">· '+c.time+'</span></div><div class="comment-text">'+escHtml(c.text)+'</div></div>'; }).join('')
     : '<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1rem">Belum ada komentar.</div>';
 }
 
-// ===== AUTH MODAL =====
-function openAuth(mode='login') {
-  authMode = mode;
+function openAuth(mode) {
+  authMode = mode || 'login';
   renderAuthModal();
   document.getElementById('authModal').classList.add('open');
   document.body.style.overflow='hidden';
@@ -438,73 +422,22 @@ function closeAuthOutside(e) { if(e.target.id==='authModal') closeAuth(); }
 function renderAuthModal() {
   const box = document.getElementById('authBox');
   if (authMode === 'login') {
-    box.innerHTML = `
-      <h2>MASUK</h2>
-      <p>Selamat datang kembali di CineStream</p>
-      <div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Username kamu" autocomplete="username"/></div>
-      <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <div class="form-err" id="authErr"></div>
-      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doLogin()">Masuk</button>
-      <div class="form-switch">Belum punya akun? <a onclick="openAuth('register')">Daftar sekarang</a></div>
-      <div class="form-switch" style="margin-top:.35rem"><a onclick="openAuth('forgot')" style="color:var(--muted);font-size:.78rem">Lupa password?</a></div>`;
+    box.innerHTML = '<h2>MASUK</h2><p>Selamat datang kembali di CineStream</p><div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Username kamu" autocomplete="username"/></div><div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doLogin()">Masuk</button><div class="form-switch">Belum punya akun? <a onclick="openAuth(\'register\')">Daftar sekarang</a></div><div class="form-switch" style="margin-top:.35rem"><a onclick="openAuth(\'forgot\')" style="color:var(--muted);font-size:.78rem">Lupa password?</a></div>';
   } else if (authMode === 'register') {
-    box.innerHTML = `
-      <h2>DAFTAR</h2>
-      <p>Buat akun CineStream kamu</p>
-      <div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Min. 3 karakter" autocomplete="username"/></div>
-      <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com" autocomplete="email"/></div>
-      <div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="Min. 6 karakter" autocomplete="new-password"/></div>
-      <div class="form-err" id="authErr"></div>
-      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doRegister()">Daftar & Kirim OTP</button>
-      <div class="form-switch">Sudah punya akun? <a onclick="openAuth('login')">Masuk</a></div>`;
+    box.innerHTML = '<h2>DAFTAR</h2><p>Buat akun CineStream kamu</p><div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Min. 3 karakter" autocomplete="username"/></div><div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com" autocomplete="email"/></div><div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="Min. 6 karakter" autocomplete="new-password"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doRegister()">Daftar & Kirim OTP</button><div class="form-switch">Sudah punya akun? <a onclick="openAuth(\'login\')">Masuk</a></div>';
   } else if (authMode === 'otp') {
-    box.innerHTML = `
-      <h2>VERIFIKASI</h2>
-      <p>Masukkan kode OTP yang dikirim ke <b style="color:var(--text)">${escHtml(pendingEmail)}</b></p>
-      <div class="otp-wrap">
-        <input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/>
-        <input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/>
-        <input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/>
-        <input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/>
-        <input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/>
-        <input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/>
-      </div>
-      <div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div>
-      <div class="form-err" id="authErr"></div>
-      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem" onclick="doVerifyOTP()">Verifikasi</button>
-      <div class="form-switch" style="margin-top:.75rem"><a onclick="openAuth('register')">← Kembali ke Daftar</a></div>`;
+    box.innerHTML = '<h2>VERIFIKASI</h2><p>Masukkan kode OTP yang dikirim ke <b style="color:var(--text)">'+escHtml(pendingEmail)+'</b></p><div class="otp-wrap"><input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/><input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/><input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/><input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/><input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/><input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/></div><div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem" onclick="doVerifyOTP()">Verifikasi</button><div class="form-switch" style="margin-top:.75rem"><a onclick="openAuth(\'register\')">← Kembali ke Daftar</a></div>';
     startOTPTimer(300);
-    setTimeout(() => document.getElementById('otp0').focus(), 100);
+    setTimeout(function(){ document.getElementById('otp0').focus(); }, 100);
   } else if (authMode === 'forgot') {
-    box.innerHTML = `
-      <h2>LUPA PASSWORD</h2>
-      <p>Masukkan email untuk menerima kode reset</p>
-      <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com"/></div>
-      <div class="form-err" id="authErr"></div>
-      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doForgot()">Kirim OTP Reset</button>
-      <div class="form-switch"><a onclick="openAuth('login')">← Kembali ke Masuk</a></div>`;
+    box.innerHTML = '<h2>LUPA PASSWORD</h2><p>Masukkan email untuk menerima kode reset</p><div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doForgot()">Kirim OTP Reset</button><div class="form-switch"><a onclick="openAuth(\'login\')">← Kembali ke Masuk</a></div>';
   } else if (authMode === 'reset') {
-    box.innerHTML = `
-      <h2>RESET PASSWORD</h2>
-      <p>Masukkan kode OTP dan password baru</p>
-      <div class="otp-wrap">
-        <input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/>
-        <input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/>
-        <input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/>
-        <input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/>
-        <input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/>
-        <input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/>
-      </div>
-      <div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div>
-      <div class="form-group"><label class="form-label">PASSWORD BARU</label><input class="form-input" id="aNewPass" type="password" placeholder="Min. 6 karakter"/></div>
-      <div class="form-err" id="authErr"></div>
-      <button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doResetPass()">Reset Password</button>`;
+    box.innerHTML = '<h2>RESET PASSWORD</h2><p>Masukkan kode OTP dan password baru</p><div class="otp-wrap"><input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/><input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/><input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/><input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/><input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/><input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/></div><div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div><div class="form-group"><label class="form-label">PASSWORD BARU</label><input class="form-input" id="aNewPass" type="password" placeholder="Min. 6 karakter"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doResetPass()">Reset Password</button>';
     startOTPTimer(300);
-    setTimeout(() => document.getElementById('otp0').focus(), 100);
+    setTimeout(function(){ document.getElementById('otp0').focus(); }, 100);
   }
 }
 
-// OTP input helpers
 function otpMove(el, nextIdx) {
   el.value = el.value.replace(/[^0-9]/g,'');
   if (el.value && nextIdx <= 5) document.getElementById('otp'+nextIdx).focus();
@@ -513,18 +446,22 @@ function otpBack(e, idx) {
   if (e.key === 'Backspace' && !e.target.value && idx > 0) document.getElementById('otp'+(idx-1)).focus();
 }
 function getOTPValue() {
-  return [0,1,2,3,4,5].map(i => document.getElementById('otp'+i).value).join('');
+  return [0,1,2,3,4,5].map(function(i){ return document.getElementById('otp'+i).value; }).join('');
 }
 
 function startOTPTimer(seconds) {
   clearInterval(otpTimer);
   let s = seconds;
-  const el = () => document.getElementById('otpCountdown');
-  otpTimer = setInterval(() => {
+  otpTimer = setInterval(function() {
     s--;
     const min = Math.floor(s/60), sec = s%60;
-    if (el()) el().textContent = min+':'+(sec<10?'0':'')+sec;
-    if (s <= 0) { clearInterval(otpTimer); if(el()) el().closest('.otp-timer').textContent = 'Kode sudah kadaluarsa.'; }
+    const el = document.getElementById('otpCountdown');
+    if (el) el.textContent = min+':'+(sec<10?'0':'')+sec;
+    if (s <= 0) {
+      clearInterval(otpTimer);
+      const timerEl = document.getElementById('otpTimerEl');
+      if (timerEl) timerEl.textContent = 'Kode sudah kadaluarsa.';
+    }
   }, 1000);
 }
 
@@ -532,7 +469,6 @@ function showAuthErr(msg) {
   const el = document.getElementById('authErr');
   if (el) { el.textContent = msg; el.classList.add('show'); }
 }
-
 function setBtnLoading(text) {
   const btn = document.getElementById('authBtn');
   if (btn) { btn.textContent = text; btn.classList.add('btn-loading'); }
@@ -542,7 +478,6 @@ function setBtnReady(text) {
   if (btn) { btn.textContent = text; btn.classList.remove('btn-loading'); }
 }
 
-// ===== AUTH ACTIONS =====
 async function doLogin() {
   const username = document.getElementById('aUsername').value.trim();
   const password = document.getElementById('aPassword').value;
@@ -551,7 +486,7 @@ async function doLogin() {
   try {
     const res = await fetch(WORKER_URL + '/api/login-user', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username, password})
+      body: JSON.stringify({username:username, password:password})
     });
     const data = await res.json();
     if (data.ok) {
@@ -559,7 +494,7 @@ async function doLogin() {
       localStorage.setItem('cs_token', userToken);
       currentUser = { username: data.username };
       updateNavbar(); closeAuth();
-      showToast(`Halo, ${data.username}! 👋`, 'success');
+      showToast('Halo, '+data.username+'! 👋', 'success');
     } else {
       showAuthErr(data.error || 'Login gagal');
       setBtnReady('Masuk');
@@ -576,7 +511,7 @@ async function doRegister() {
   try {
     const res = await fetch(WORKER_URL + '/api/register', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username, email, password})
+      body: JSON.stringify({username:username, email:email, password:password})
     });
     const data = await res.json();
     if (data.ok) {
@@ -597,7 +532,7 @@ async function doVerifyOTP() {
   try {
     const res = await fetch(WORKER_URL + '/api/verify-otp', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email: pendingEmail, otp})
+      body: JSON.stringify({email:pendingEmail, otp:otp})
     });
     const data = await res.json();
     if (data.ok) {
@@ -606,7 +541,7 @@ async function doVerifyOTP() {
       currentUser = { username: data.username };
       clearInterval(otpTimer);
       updateNavbar(); closeAuth();
-      showToast(`Selamat datang, ${data.username}! 🎉`, 'success');
+      showToast('Selamat datang, '+data.username+'! 🎉', 'success');
     } else {
       showAuthErr(data.error || 'OTP salah');
       setBtnReady('Verifikasi');
@@ -621,7 +556,7 @@ async function doForgot() {
   try {
     const res = await fetch(WORKER_URL + '/api/forgot-password', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email})
+      body: JSON.stringify({email:email})
     });
     const data = await res.json();
     if (data.ok) {
@@ -644,13 +579,13 @@ async function doResetPass() {
   try {
     const res = await fetch(WORKER_URL + '/api/reset-password', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email: pendingEmail, otp, newPassword: newPass})
+      body: JSON.stringify({email:pendingEmail, otp:otp, newPassword:newPass})
     });
     const data = await res.json();
     if (data.ok) {
       clearInterval(otpTimer); closeAuth();
       showToast('Password berhasil direset! Silakan login.', 'success');
-      setTimeout(() => openAuth('login'), 500);
+      setTimeout(function(){ openAuth('login'); }, 500);
     } else {
       showAuthErr(data.error || 'Gagal reset');
       setBtnReady('Reset Password');
@@ -658,17 +593,10 @@ async function doResetPass() {
   } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Reset Password'); }
 }
 
-// ===== NAVBAR =====
 function updateNavbar() {
-  document.getElementById('navRight').innerHTML = currentUser ? `
-    <div class="user-btn">
-      <div class="user-avatar">${currentUser.username[0].toUpperCase()}</div>
-      <span class="user-name">${escHtml(currentUser.username)}</span>
-    </div>
-    <button class="btn btn-outline" onclick="logout()">Keluar</button>
-  ` : `
-    <button class="btn btn-outline" onclick="openAuth('login')">Masuk</button>
-    <button class="btn btn-primary" onclick="openAuth('register')">Daftar</button>`;
+  document.getElementById('navRight').innerHTML = currentUser
+    ? '<div class="user-btn"><div class="user-avatar">'+currentUser.username[0].toUpperCase()+'</div><span class="user-name">'+escHtml(currentUser.username)+'</span></div><button class="btn btn-outline" onclick="logout()">Keluar</button>'
+    : '<button class="btn btn-outline" onclick="openAuth(\'login\')">Masuk</button><button class="btn btn-primary" onclick="openAuth(\'register\')">Daftar</button>';
 }
 
 function logout() {
@@ -678,10 +606,10 @@ function logout() {
   showToast('Berhasil keluar!', 'success');
 }
 
-function showToast(msg, type='success') {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast ${type} show`;
-  setTimeout(() => t.classList.remove('show'), 3500);
+  t.textContent = msg; t.className = 'toast '+(type||'success')+' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
 }
 
 init();
