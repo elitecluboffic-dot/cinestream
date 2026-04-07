@@ -1,0 +1,13 @@
+/*
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com;
+  style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+  connect-src 'self' https://cdn.tailwindcss.com;
+  img-src 'self' data: blob: https:;
+  media-src 'self' blob: https:;
+  font-src 'self' data:;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  upgrade-insecure-requests;
