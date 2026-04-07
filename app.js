@@ -1,41 +1,15 @@
 // ========================
-// CINEXX – APP.JS
+// CINEXX – APP.JS (ADMIN ONLY)
 // ========================
 
-// Ganti dengan URL Cloudflare Worker lo nanti
-const API_BASE = 'stream.internetdnsofficial.workers.dev';
-
-const IMG_BASE = 'https://image.tmdb.org/t/p/';
+const API_BASE = ''; // same domain
 
 // ========================
-// UTILS
+// API
 // ========================
-function posterUrl(path, size = 'w342') {
-  if (!path) return 'https://via.placeholder.com/342x513/12121a/444?text=No+Poster';
-  return `${IMG_BASE}${size}${path}`;
-}
-
-function backdropUrl(path) {
-  if (!path) return '';
-  return `${IMG_BASE}w1280${path}`;
-}
-
-function year(dateStr) {
-  if (!dateStr) return '–';
-  return dateStr.split('-')[0];
-}
-
-function formatRating(r) {
-  if (!r) return '–';
-  return (Math.round(r * 10) / 10).toFixed(1);
-}
-
-// ========================
-// API CALLS VIA WORKER
-// ========================
-async function apiFetch(endpoint) {
+async function apiFetch(path) {
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`);
+    const res = await fetch(API_BASE + path);
     if (!res.ok) throw new Error('API error');
     return await res.json();
   } catch (e) {
@@ -45,144 +19,135 @@ async function apiFetch(endpoint) {
 }
 
 // ========================
+// UTILS
+// ========================
+function placeholder(title) {
+  return `https://via.placeholder.com/342x513/12121a/444?text=${encodeURIComponent(title)}`;
+}
+
+// ========================
 // RENDER CARD
 // ========================
-function renderCard(item, type = 'movie') {
-  const title = item.title || item.name || 'Unknown';
-  const date = item.release_date || item.first_air_date || '';
-  const rating = formatRating(item.vote_average);
-  const quality = 'BLURAY';
-  const typeLabel = type === 'tv' ? 'SERIES' : 'FILM';
+function renderCard(item) {
+  const title = item.title || 'Unknown';
+  const year = item.year || '-';
+  const rating = item.rating || '-';
+  const quality = item.quality || 'HD';
 
   const card = document.createElement('div');
   card.className = 'movie-card';
+
   card.innerHTML = `
     <span class="movie-card-quality">${quality}</span>
-    <span class="movie-card-type">${typeLabel}</span>
-    <img src="${posterUrl(item.poster_path)}" alt="${title}" loading="lazy"/>
+    <span class="movie-card-type">FILM</span>
+    <img src="${placeholder(title)}" alt="${title}" loading="lazy"/>
     <div class="movie-card-info">
       <div class="movie-card-title">${title}</div>
       <div class="movie-card-meta">
-        <span>${year(date)}</span>
+        <span>${year}</span>
         <span class="movie-card-rating">⭐ ${rating}</span>
       </div>
     </div>
   `;
-  card.addEventListener('click', () => openDetail(item.id, type));
+
+  card.addEventListener('click', () => openDetail(item));
   return card;
 }
 
-function populateGrid(gridId, items, type) {
+function populateGrid(gridId, items) {
   const grid = document.getElementById(gridId);
-  if (!grid || !items) return;
+  if (!grid) return;
+
   grid.innerHTML = '';
-  items.forEach(item => grid.appendChild(renderCard(item, type)));
+
+  if (!items.length) {
+    grid.innerHTML = `<div style="color:#777">Tidak ada data</div>`;
+    return;
+  }
+
+  items.forEach(item => {
+    grid.appendChild(renderCard(item));
+  });
 }
 
 // ========================
-// HERO SECTION
+// HERO
 // ========================
 let heroMovies = [];
 let heroIndex = 0;
 
 function setHero(movie) {
-  const section = document.getElementById('heroSection');
+  if (!movie) return;
+
   const title = document.getElementById('heroTitle');
   const desc = document.getElementById('heroDesc');
   const meta = document.getElementById('heroMeta');
-  const watchBtn = document.getElementById('heroWatchBtn');
-  const infoBtn = document.getElementById('heroInfoBtn');
 
-  if (!movie) return;
+  title.textContent = movie.title;
+  desc.textContent = movie.desc || 'Tidak ada deskripsi.';
 
-  section.style.backgroundImage = `url('${backdropUrl(movie.backdrop_path)}')`;
-  title.textContent = movie.title || movie.name;
-  desc.textContent = movie.overview || 'Tidak ada deskripsi.';
-
-  const rating = formatRating(movie.vote_average);
-  const releaseYear = year(movie.release_date);
   meta.innerHTML = `
-    <span class="rating">⭐ ${rating}</span>
-    <span>${releaseYear}</span>
-    ${movie.genre_ids ? '' : ''}
+    <span>⭐ ${movie.rating || '-'}</span>
+    <span>${movie.year || '-'}</span>
+    <span>${movie.genre || '-'}</span>
   `;
 
-  watchBtn.onclick = () => {
-    window.location.href = `watch.html?id=${movie.id}&type=movie`;
+  document.getElementById('heroWatchBtn').onclick = () => {
+    if (movie.embed) window.open(movie.embed, '_blank');
   };
-  infoBtn.onclick = () => openDetail(movie.id, 'movie');
+
+  document.getElementById('heroInfoBtn').onclick = () => openDetail(movie);
 }
 
 function rotateHero() {
-  if (heroMovies.length === 0) return;
+  if (!heroMovies.length) return;
   setHero(heroMovies[heroIndex]);
-  heroIndex = (heroIndex + 1) % Math.min(heroMovies.length, 5);
+  heroIndex = (heroIndex + 1) % heroMovies.length;
 }
 
 // ========================
 // DETAIL MODAL
 // ========================
-async function openDetail(id, type) {
-  const data = await apiFetch(`/detail?id=${id}&type=${type}`);
-  if (!data) return;
-
-  const title = data.title || data.name || 'Unknown';
-  const rating = formatRating(data.vote_average);
-  const releaseYear = year(data.release_date || data.first_air_date);
-  const runtime = data.runtime ? `${data.runtime} mnt` : (data.number_of_seasons ? `${data.number_of_seasons} Season` : '');
-  const genres = data.genres || [];
-  const overview = data.overview || 'Tidak ada deskripsi.';
-
+function openDetail(movie) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
+
   overlay.innerHTML = `
     <div class="modal">
-      <div class="modal-header" style="background-image: url('${backdropUrl(data.backdrop_path)}')">
-        <div class="modal-header-overlay"></div>
-        <button class="modal-close" id="modalClose">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-title">${title}</div>
-        <div class="modal-meta">
-          <span class="modal-rating">⭐ ${rating}</span>
-          <span>${releaseYear}</span>
-          <span>${runtime}</span>
-          <span style="color:var(--accent);font-weight:600">${type === 'tv' ? 'SERIES' : 'FILM'}</span>
-        </div>
-        <div class="modal-genres">
-          ${genres.map(g => `<span class="genre-pill">${g.name}</span>`).join('')}
-        </div>
-        <p class="modal-desc">${overview}</p>
-        <div class="modal-actions">
-          <button class="btn-watch" onclick="window.location.href='watch.html?id=${id}&type=${type}'">▶ Tonton Sekarang</button>
-          <button class="btn-info" id="closeModalBtn">✕ Tutup</button>
-        </div>
-      </div>
+      <button class="modal-close">✕</button>
+      <h2>${movie.title}</h2>
+      <p><b>Rating:</b> ⭐ ${movie.rating || '-'}</p>
+      <p><b>Tahun:</b> ${movie.year || '-'}</p>
+      <p><b>Genre:</b> ${movie.genre || '-'}</p>
+      <p>${movie.desc || '-'}</p>
+      ${
+        movie.embed
+          ? `<button onclick="window.open('${movie.embed}','_blank')">▶ Tonton</button>`
+          : `<div style="color:#888">Tidak ada link video</div>`
+      }
     </div>
   `;
 
   document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden';
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal(overlay);
-  });
-  overlay.querySelector('#modalClose').addEventListener('click', () => closeModal(overlay));
-  overlay.querySelector('#closeModalBtn').addEventListener('click', () => closeModal(overlay));
-}
-
-function closeModal(overlay) {
-  overlay.remove();
-  document.body.style.overflow = '';
+  overlay.querySelector('.modal-close').onclick = () => overlay.remove();
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
 }
 
 // ========================
 // SEARCH
 // ========================
 function doSearch() {
-  const q = document.getElementById('searchInput')?.value?.trim();
+  const q = document.getElementById('searchInput')?.value?.toLowerCase();
   if (!q) return;
-  window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+
+  const filtered = heroMovies.filter(f =>
+    f.title.toLowerCase().includes(q)
+  );
+
+  populateGrid('trendingGrid', filtered);
 }
 
 document.addEventListener('keydown', (e) => {
@@ -190,39 +155,49 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ========================
-// SCROLL NAVBAR
-// ========================
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.navbar');
-  if (window.scrollY > 50) {
-    nav.classList.add('scrolled');
-  } else {
-    nav.classList.remove('scrolled');
-  }
-});
-
-// ========================
-// INIT HOMEPAGE
+// INIT
 // ========================
 async function initHome() {
-  const [trending, popular, topRated, series] = await Promise.all([
-    apiFetch('/trending'),
-    apiFetch('/popular?type=movie'),
-    apiFetch('/toprated?type=movie'),
-    apiFetch('/popular?type=tv'),
-  ]);
+  const films = await apiFetch('/api/films');
 
-  if (trending?.results) {
-    heroMovies = trending.results;
-    setHero(heroMovies[0]);
-    heroIndex = 1;
-    setInterval(rotateHero, 8000);
-    populateGrid('trendingGrid', trending.results, 'movie');
+  if (!films) {
+    console.error('API gagal');
+    return;
   }
 
-  if (popular?.results) populateGrid('popularGrid', popular.results, 'movie');
-  if (topRated?.results) populateGrid('topRatedGrid', topRated.results, 'movie');
-  if (series?.results) populateGrid('seriesGrid', series.results, 'tv');
+  if (!films.length) {
+    document.getElementById('heroTitle').textContent = 'Belum ada film';
+    return;
+  }
+
+  // HERO
+  heroMovies = films;
+  setHero(films[0]);
+  heroIndex = 1;
+  setInterval(rotateHero, 8000);
+
+  // TRENDING (terbaru)
+  populateGrid('trendingGrid', films.slice(0, 6));
+
+  // POPULAR (rating >= 7)
+  populateGrid(
+    'popularGrid',
+    films.filter(f => f.rating >= 7)
+  );
+
+  // TOP RATED
+  populateGrid(
+    'topRatedGrid',
+    [...films].sort((a, b) => b.rating - a.rating).slice(0, 6)
+  );
+
+  // SERIES (opsional, berdasarkan genre)
+  populateGrid(
+    'seriesGrid',
+    films.filter(f =>
+      (f.genre || '').toLowerCase().includes('series')
+    )
+  );
 }
 
 // ========================
