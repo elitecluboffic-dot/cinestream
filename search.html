@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pencarian – CineXX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav class="navbar scrolled">
+  <a href="index.html" style="text-decoration:none">
+    <div class="nav-brand">CINE<span>XX</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Beranda</a></li>
+    <li><a href="movies.html">Film</a></li>
+    <li><a href="series.html">Series</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Cari film..." />
+      <button onclick="doSearch()">🔍</button>
+    </div>
+  </div>
+</nav>
+
+<div class="search-container">
+  <h1 class="search-heading" id="searchHeading">Mencari...</h1>
+  <div class="movie-grid" id="searchGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+  <p id="noResult" style="display:none;color:var(--muted);margin-top:2rem;">Tidak ada hasil ditemukan.</p>
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">CINE<span>XX</span></div>
+  <p>© 2026 CineXX.</p>
+</footer>
+
+<script src="app.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const query = params.get('q') || '';
+
+async function runSearch() {
+  if (!query) return;
+  document.getElementById('searchHeading').textContent = `Hasil untuk: "${query}"`;
+  document.getElementById('searchInput').value = query;
+
+  const data = await apiFetch(`/search?q=${encodeURIComponent(query)}`);
+  const grid = document.getElementById('searchGrid');
+  grid.innerHTML = '';
+
+  if (!data?.results?.length) {
+    document.getElementById('noResult').style.display = 'block';
+    return;
+  }
+
+  data.results.forEach(item => {
+    const type = item.media_type || (item.title ? 'movie' : 'tv');
+    grid.appendChild(renderCard(item, type));
+  });
+}
+
+runSearch();
+</script>
+</body>
+</html>
