@@ -1,618 +1,112 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CineStream — Nonton Film Online</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --border: #2a2a3a;
-    --accent: #e63946; --accent2: #f4a261; --text: #f0f0f5; --muted: #7a7a9a; --radius: 10px;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
-  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
-  nav { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 5vw; display:flex; align-items:center; justify-content:space-between; height:64px; }
-  .logo { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:2px; color:var(--text); text-decoration:none; }
-  .logo span { color:var(--accent); }
-  .nav-links { display:flex; gap:2rem; list-style:none; }
-  .nav-links a { color:var(--muted); text-decoration:none; font-size:0.9rem; font-weight:500; transition:color 0.2s; }
-  .nav-links a:hover { color:var(--text); }
-  .nav-right { display:flex; gap:0.75rem; align-items:center; }
-  .btn { padding:0.5rem 1.25rem; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; }
-  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
-  .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
-  .btn-primary { background:var(--accent); color:#fff; }
-  .btn-primary:hover { background:#c1121f; }
-  .btn-loading { opacity:0.6; pointer-events:none; }
-  .search-wrap { padding:1.5rem 5vw 0; display:flex; gap:0.75rem; align-items:center; }
-  .search-input { flex:1; max-width:480px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:0.65rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.95rem; outline:none; transition:border-color 0.2s; }
-  .search-input:focus { border-color:var(--accent); }
-  .search-input::placeholder { color:var(--muted); }
-  .hero { position:relative; height:520px; margin:1.5rem 5vw; border-radius:16px; overflow:hidden; cursor:pointer; }
-  .hero-bg { position:absolute; inset:0; background:linear-gradient(135deg,#1a0a0f 0%,#0d0d2b 50%,#0a1a0a 100%); }
-  .hero-gradient { position:absolute; inset:0; background:linear-gradient(to right,rgba(10,10,15,0.95) 40%,transparent 100%),linear-gradient(to top,rgba(10,10,15,0.8) 0%,transparent 60%); }
-  .hero-content { position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding:3rem; }
-  .hero-badge { display:inline-block; background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; letter-spacing:2px; padding:0.25rem 0.75rem; border-radius:4px; margin-bottom:1rem; width:fit-content; }
-  .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,6vw,4.5rem); line-height:1; letter-spacing:2px; margin-bottom:0.75rem; }
-  .hero p { font-size:0.95rem; color:var(--muted); max-width:500px; line-height:1.6; margin-bottom:1.5rem; }
-  .hero-meta { display:flex; gap:1rem; align-items:center; margin-bottom:1.5rem; font-size:0.85rem; color:var(--muted); }
-  .hero-meta .rating { color:var(--accent2); font-weight:600; }
-  .hero-btns { display:flex; gap:0.75rem; }
-  .btn-play { background:var(--accent); color:#fff; padding:0.75rem 2rem; border-radius:8px; font-size:0.95rem; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; gap:0.5rem; transition:background 0.2s; }
-  .btn-play:hover { background:#c1121f; }
-  .btn-info { background:rgba(255,255,255,0.1); color:#fff; padding:0.75rem 1.5rem; border-radius:8px; font-size:0.95rem; font-weight:600; border:1px solid rgba(255,255,255,0.2); cursor:pointer; backdrop-filter:blur(10px); transition:background 0.2s; }
-  .btn-info:hover { background:rgba(255,255,255,0.18); }
-  section { padding:2rem 5vw; }
-  .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
-  .section-title { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:1px; }
-  .section-title span { color:var(--accent); }
-  .filter-tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
-  .tab { padding:0.4rem 1rem; border-radius:100px; font-size:0.8rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--muted); transition:all 0.2s; font-family:'DM Sans',sans-serif; }
-  .tab:hover,.tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .movie-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; }
-  .movie-card { background:var(--card); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:transform 0.25s,box-shadow 0.25s; border:1px solid var(--border); }
-  .movie-card:hover { transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,0,0,0.5); border-color:var(--accent); }
-  .movie-thumb { aspect-ratio:2/3; background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-  .movie-thumb .placeholder-icon { font-size:3rem; opacity:0.3; }
-  .movie-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.25s; }
-  .movie-card:hover .movie-overlay { opacity:1; }
-  .play-icon { width:48px; height:48px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
-  .movie-quality { position:absolute; top:8px; right:8px; background:var(--accent); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:4px; letter-spacing:1px; }
-  .movie-info { padding:0.75rem; }
-  .movie-title { font-size:0.85rem; font-weight:600; margin-bottom:0.3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .movie-meta { display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--muted); }
-  .movie-rating { color:var(--accent2); font-weight:600; }
-  .scroll-row { display:flex; gap:1rem; overflow-x:auto; padding-bottom:0.5rem; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
-  .scroll-row .movie-card { min-width:160px; flex-shrink:0; }
-  .skeleton { background:linear-gradient(90deg,var(--card) 25%,var(--border) 50%,var(--card) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius); }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .skeleton-card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
-  .skeleton-thumb { aspect-ratio:2/3; }
-  .skeleton-info { padding:0.75rem; display:flex; flex-direction:column; gap:0.4rem; }
-  .skeleton-line { height:10px; border-radius:4px; }
-  .skeleton-line.short { width:60%; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(10px); }
-  .modal-overlay.open { opacity:1; pointer-events:all; }
-  .modal { background:var(--surface); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid var(--border); transform:scale(0.9); transition:transform 0.25s; }
-  .modal-overlay.open .modal { transform:scale(1); }
-  .modal-video { aspect-ratio:16/9; background:#000; border-radius:16px 16px 0 0; overflow:hidden; position:relative; }
-  .modal-video iframe { width:100%; height:100%; border:none; display:block; }
-  .modal-video .video-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1rem; color:var(--muted); font-size:0.9rem; }
-  .player-error { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
-  .player-error .err-icon { font-size:2.5rem; }
-  .player-error .err-title { font-size:0.95rem; font-weight:600; color:var(--text); }
-  .player-error .err-msg { font-size:0.8rem; text-align:center; max-width:300px; line-height:1.5; }
-  .player-error .err-btn { margin-top:0.5rem; background:var(--accent); color:#fff; border:none; padding:0.55rem 1.25rem; border-radius:6px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
-  .player-loading { width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0.75rem; background:#000; color:var(--muted); }
-  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .modal-body { padding:1.5rem; }
-  .modal-title { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.5rem; }
-  .modal-meta { display:flex; gap:1rem; color:var(--muted); font-size:0.82rem; margin-bottom:1rem; flex-wrap:wrap; }
-  .modal-desc { font-size:0.9rem; line-height:1.7; color:rgba(240,240,245,0.8); margin-bottom:1.5rem; }
-  .modal-close { position:absolute; top:1rem; right:1rem; background:rgba(0,0,0,0.7); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; z-index:10; }
-  .comments-section { margin-top:1.5rem; }
-  .comments-title { font-weight:700; margin-bottom:1rem; font-size:1rem; }
-  .comment-input-wrap { display:flex; gap:0.75rem; margin-bottom:1rem; }
-  .comment-input { flex:1; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:0.65rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; resize:none; }
-  .comment-input:focus { border-color:var(--accent); }
-  .comment-card { background:var(--card); border-radius:8px; padding:0.85rem 1rem; margin-bottom:0.65rem; border:1px solid var(--border); }
-  .comment-user { font-weight:600; font-size:0.82rem; margin-bottom:0.25rem; }
-  .comment-text { font-size:0.85rem; color:rgba(240,240,245,0.75); line-height:1.5; }
-  .star-rating { display:flex; gap:0.25rem; margin-bottom:1rem; }
-  .star { font-size:1.4rem; cursor:pointer; color:var(--border); transition:color 0.15s; }
-  .star.active { color:var(--accent2); }
-  .auth-modal { background:var(--surface); border-radius:16px; max-width:420px; width:100%; border:1px solid var(--border); padding:2.5rem; transform:scale(0.9); transition:transform 0.25s; }
-  .modal-overlay.open .auth-modal { transform:scale(1); }
-  .auth-modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:1px; margin-bottom:0.25rem; }
-  .auth-modal p { color:var(--muted); font-size:0.85rem; margin-bottom:1.5rem; }
-  .form-group { margin-bottom:1rem; }
-  .form-label { font-size:0.8rem; font-weight:600; margin-bottom:0.4rem; display:block; color:var(--muted); letter-spacing:0.5px; }
-  .form-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:0.7rem 1rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
-  .form-input:focus { border-color:var(--accent); }
-  .form-input.error { border-color:var(--accent); }
-  .form-err { color:var(--accent); font-size:0.78rem; margin-top:0.4rem; display:none; }
-  .form-err.show { display:block; }
-  .form-switch { text-align:center; margin-top:1rem; font-size:0.82rem; color:var(--muted); }
-  .form-switch a { color:var(--accent); cursor:pointer; text-decoration:none; }
-  .otp-wrap { display:flex; gap:0.5rem; justify-content:center; margin:1rem 0; }
-  .otp-box { width:48px; height:56px; background:var(--card); border:2px solid var(--border); border-radius:8px; text-align:center; font-size:1.5rem; font-weight:700; color:var(--text); outline:none; font-family:'Bebas Neue',sans-serif; transition:border-color 0.2s; }
-  .otp-box:focus { border-color:var(--accent); }
-  .otp-timer { text-align:center; font-size:0.8rem; color:var(--muted); margin-bottom:0.75rem; }
-  .otp-timer span { color:var(--accent2); font-weight:600; }
-  .user-btn { display:flex; align-items:center; gap:0.5rem; cursor:pointer; position:relative; }
-  .user-avatar { width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; }
-  .user-name { font-size:0.85rem; font-weight:600; }
-  footer { border-top:1px solid var(--border); padding:2rem 5vw; text-align:center; color:var(--muted); font-size:0.8rem; margin-top:2rem; }
-  .toast { position:fixed; bottom:2rem; right:2rem; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1.25rem; font-size:0.85rem; z-index:999; transform:translateY(100px); opacity:0; transition:all 0.3s; max-width:320px; }
-  .toast.show { transform:translateY(0); opacity:1; }
-  .toast.success { border-color:#2d9e6b; }
-  .toast.error { border-color:var(--accent); }
-  @media(max-width:640px) { .nav-links{display:none;} .hero{height:380px;margin:1rem 4vw;} .hero-content{padding:1.5rem;} .movie-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .scroll-row .movie-card{min-width:130px;} }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-  .fade-up { animation:fadeUp 0.4s ease forwards; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineXX – Nonton Film & Series Online</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<nav>
-  <a href="#" class="logo">CINE<span>STREAM</span></a>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">CINE<span>XX</span></div>
   <ul class="nav-links">
-    <li><a href="#">Beranda</a></li>
-    <li><a href="#">Film</a></li>
-    <li><a href="#">Genre</a></li>
+    <li><a href="index.html" class="active">Beranda</a></li>
+    <li><a href="movies.html">Film</a></li>
+    <li><a href="series.html">Series</a></li>
+    <li><a href="genre.html">Genre</a></li>
   </ul>
-  <div class="nav-right" id="navRight"></div>
+  <div class="nav-right">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Cari film, series..." />
+      <button onclick="doSearch()">🔍</button>
+    </div>
+  </div>
 </nav>
 
-<div class="search-wrap">
-  <input class="search-input" id="searchInput" type="text" placeholder="🔍  Cari film, genre..." oninput="handleSearch(this.value)" />
-</div>
-
-<div id="heroSection"></div>
-
-<section>
-  <div class="filter-tabs">
-    <button class="tab active" onclick="filterMovies('Semua',this)">Semua</button>
-    <button class="tab" onclick="filterMovies('Action',this)">Action</button>
-    <button class="tab" onclick="filterMovies('Drama',this)">Drama</button>
-    <button class="tab" onclick="filterMovies('Komedi',this)">Komedi</button>
-    <button class="tab" onclick="filterMovies('Horror',this)">Horror</button>
-    <button class="tab" onclick="filterMovies('Sci-Fi',this)">Sci-Fi</button>
-    <button class="tab" onclick="filterMovies('Animasi',this)">Animasi</button>
-  </div>
-  <div class="section-header">
-    <h2 class="section-title">SEMUA <span>FILM</span></h2>
-    <span id="filmCount" style="font-size:0.82rem;color:var(--muted)"></span>
-  </div>
-  <div class="movie-grid" id="movieGrid"></div>
-  <div id="emptyGrid" style="display:none;text-align:center;padding:3rem;color:var(--muted)">
-    <div style="font-size:3rem;margin-bottom:0.75rem">🔍</div>Film tidak ditemukan
+<!-- HERO -->
+<section class="hero" id="heroSection">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🔥 TRENDING #1</div>
+    <h1 class="hero-title" id="heroTitle">Loading...</h1>
+    <p class="hero-desc" id="heroDesc">Loading description...</p>
+    <div class="hero-meta" id="heroMeta"></div>
+    <div class="hero-actions">
+      <button class="btn-watch" id="heroWatchBtn">▶ Tonton Sekarang</button>
+      <button class="btn-info" id="heroInfoBtn">ℹ Info</button>
+    </div>
   </div>
 </section>
 
-<section id="trendingSection" style="display:none">
-  <div class="section-header">
-    <h2 class="section-title">TRENDING <span>MINGGU INI</span></h2>
+<!-- TRENDING -->
+<section class="section">
+  <h2 class="section-title">🔥 Trending Minggu Ini</h2>
+  <div class="movie-grid" id="trendingGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
   </div>
-  <div class="scroll-row" id="trendingRow"></div>
 </section>
 
-<footer>
-  <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;display:block;margin-bottom:0.5rem">CINE<span style="color:var(--accent)">STREAM</span></span>
-  <p>© 2024 CineStream. Semua konten berlisensi dan telah mendapat izin.</p>
+<!-- POPULAR MOVIES -->
+<section class="section">
+  <h2 class="section-title">🎬 Film Populer</h2>
+  <div class="movie-grid" id="popularGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+</section>
+
+<!-- TOP RATED -->
+<section class="section">
+  <h2 class="section-title">⭐ Rating Tertinggi</h2>
+  <div class="movie-grid" id="topRatedGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+</section>
+
+<!-- POPULAR SERIES -->
+<section class="section">
+  <h2 class="section-title">📺 Series Populer</h2>
+  <div class="movie-grid" id="seriesGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">CINE<span>XX</span></div>
+  <p>Nonton film & series online terlengkap. Data dari TMDB.</p>
+  <div class="footer-links">
+    <a href="#">Tentang</a>
+    <a href="#">Kontak</a>
+    <a href="#">DMCA</a>
+    <a href="#">Privasi</a>
+  </div>
+  <p class="footer-note">© 2026 CineXX. Untuk keperluan edukasi saja.</p>
 </footer>
 
-<!-- MOVIE MODAL -->
-<div class="modal-overlay" id="movieModal" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <div class="modal-video" id="modalVideo">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <div id="videoPlaceholder" class="video-placeholder"></div>
-    </div>
-    <div class="modal-body">
-      <h2 class="modal-title" id="modalTitle"></h2>
-      <div class="modal-meta" id="modalMeta"></div>
-      <p class="modal-desc" id="modalDesc"></p>
-      <div style="margin-bottom:1rem">
-        <div style="font-size:0.82rem;font-weight:600;margin-bottom:0.5rem;color:var(--muted)">BERI RATING</div>
-        <div class="star-rating" id="starRating">
-          <span class="star" onclick="setRating(1)">★</span>
-          <span class="star" onclick="setRating(2)">★</span>
-          <span class="star" onclick="setRating(3)">★</span>
-          <span class="star" onclick="setRating(4)">★</span>
-          <span class="star" onclick="setRating(5)">★</span>
-        </div>
-      </div>
-      <div class="comments-section">
-        <div class="comments-title">💬 Komentar</div>
-        <div class="comment-input-wrap">
-          <textarea class="comment-input" id="commentInput" rows="2" placeholder="Tulis komentar..."></textarea>
-          <button class="btn btn-primary" onclick="submitComment()" style="align-self:flex-end;padding:0.65rem 1.25rem">Kirim</button>
-        </div>
-        <div id="commentsList"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="modal-overlay" id="authModal" onclick="closeAuthOutside(event)">
-  <div class="auth-modal" id="authBox"></div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ✅ FIXED: WORKER_URL kosong supaya semua request pakai path relatif
-// sehingga route cinestream.kraxx.my.id/api/* → worker Cloudflare
-const WORKER_URL = 'https://stream.internetdnsofficial.workers.dev';
-
-let movies = [];
-let currentMovie = null;
-let currentUser = null;
-let userToken = localStorage.getItem('cs_token') || null;
-let userRatings = JSON.parse(localStorage.getItem('cs_ratings')) || {};
-let allComments = JSON.parse(localStorage.getItem('cs_comments')) || {};
-let iframeLoadTimer = null;
-let otpTimer = null;
-let authMode = 'login';
-let pendingEmail = '';
-
-async function init() {
-  updateNavbar();
-  loadFilms();
-  if (userToken) {
-    try {
-      const res = await fetch(WORKER_URL + '/api/me', {
-        headers: { 'Authorization': 'Bearer ' + userToken }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.ok) { currentUser = { username: data.username, email: data.email }; updateNavbar(); }
-        else { userToken = null; localStorage.removeItem('cs_token'); }
-      }
-    } catch(e) {}
-  }
-}
-
-async function loadFilms() {
-  showSkeletons();
-  try {
-    const res = await fetch(WORKER_URL + '/api/films');
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    movies = Array.isArray(data) ? data : [];
-  } catch(e) {
-    movies = [];
-    showToast('Gagal memuat film.', 'error');
-  }
-  renderHero(); renderMovies(movies); renderTrending();
-}
-
-function showSkeletons() {
-  document.getElementById('movieGrid').innerHTML = Array(8).fill(0).map(function() {
-    return '<div class="skeleton-card"><div class="skeleton skeleton-thumb"></div><div class="skeleton-info"><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div></div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function renderHero() {
-  const el = document.getElementById('heroSection');
-  if (!movies.length) { el.innerHTML='<div style="margin:1.5rem 5vw;background:var(--card);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:.75rem"><div style="font-size:3rem">🎬</div><p>Belum ada film.</p></div>'; return; }
-  const m = movies[0];
-  const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  el.innerHTML = '<div class="hero" onclick="openModal('+data+')"><div class="hero-bg"></div><div class="hero-gradient"></div><div class="hero-content fade-up"><span class="hero-badge">🔥 TERBARU</span><h1>'+escHtml(m.title)+'</h1><p>'+escHtml(m.desc||'Klik untuk menonton.')+'</p><div class="hero-meta">'+(m.rating?'<span class="rating">★ '+m.rating+'</span>':'')+'<span>'+m.year+'</span><span>'+escHtml(m.genre)+'</span>'+(m.duration?'<span>'+escHtml(m.duration)+'</span>':'')+'</div><div class="hero-btns"><button class="btn-play">▶ Tonton Sekarang</button><button class="btn-info" onclick="event.stopPropagation()">ℹ Info</button></div></div></div>';
-}
-
-function movieCard(m) {
-  const data = JSON.stringify(m).replace(/"/g,'&quot;');
-  return '<div class="movie-card fade-up" onclick="openModal('+data+')"><div class="movie-thumb"><div class="placeholder-icon">'+(m.thumb||'🎬')+'</div><div class="movie-quality">'+escHtml(m.quality)+'</div><div class="movie-overlay"><div class="play-icon">▶</div></div></div><div class="movie-info"><div class="movie-title">'+escHtml(m.title)+'</div><div class="movie-meta"><span>'+m.year+' · '+escHtml(m.genre)+'</span>'+(m.rating?'<span class="movie-rating">★ '+m.rating+'</span>':'')+'</div></div></div>';
-}
-
-function renderMovies(list) {
-  const grid = document.getElementById('movieGrid'), empty = document.getElementById('emptyGrid');
-  document.getElementById('filmCount').textContent = list.length + ' film';
-  if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none'; grid.innerHTML = list.map(movieCard).join('');
-}
-
-function renderTrending() {
-  const sorted = movies.slice().sort(function(a,b){ return (b.rating||0)-(a.rating||0); }).slice(0,8);
-  document.getElementById('trendingRow').innerHTML = sorted.map(movieCard).join('');
-  document.getElementById('trendingSection').style.display = movies.length ? 'block' : 'none';
-}
-
-function filterMovies(genre, btn) {
-  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
-  btn.classList.add('active');
-  renderMovies(genre==='Semua' ? movies.slice() : movies.filter(function(m){ return m.genre===genre; }));
-}
-
-function handleSearch(q) {
-  const lower = q.toLowerCase().trim();
-  renderMovies(lower ? movies.filter(function(m){ return m.title.toLowerCase().includes(lower)||m.genre.toLowerCase().includes(lower); }) : movies.slice());
-}
-
-function loadIframe(mv, embedUrl) {
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
-  document.getElementById('videoPlaceholder').style.display = 'none';
-  const loading = document.createElement('div');
-  loading.className = 'player-loading';
-  loading.innerHTML = '<div class="spinner"></div><div style="font-size:.82rem">Memuat player...</div>';
-  mv.appendChild(loading);
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'width:100%;height:100%;border:none;display:none;';
-  iframe.setAttribute('allowfullscreen','true');
-  iframe.setAttribute('allow','autoplay; fullscreen; encrypted-media; picture-in-picture');
-  iframe.setAttribute('referrerpolicy','no-referrer');
-  iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox');
-  mv.appendChild(iframe);
-  iframeLoadTimer = setTimeout(function() { iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); }, 10000);
-  iframe.onload = function() { clearTimeout(iframeLoadTimer); loading.remove(); iframe.style.display='block'; };
-  iframe.onerror = function() { clearTimeout(iframeLoadTimer); iframe.remove(); loading.remove(); showPlayerError(mv, embedUrl); };
-  iframe.src = embedUrl;
-}
-
-function showPlayerError(mv, url) {
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
-  const err = document.createElement('div');
-  err.className = 'player-error';
-  err.innerHTML = '<div class="err-icon">⚠️</div><div class="err-title">Player gagal dimuat</div><div class="err-msg">Server video menolak koneksi atau tidak mengizinkan embed.</div><button class="err-btn" onclick="window.open(\''+escHtml(url)+'\',\'_blank\')">Buka di Tab Baru</button>';
-  mv.appendChild(err);
-}
-
-function openModal(m) {
-  currentMovie = m;
-  document.getElementById('modalTitle').textContent = m.title;
-  document.getElementById('modalDesc').textContent = m.desc || '-';
-  document.getElementById('modalMeta').innerHTML = '<span>📅 '+m.year+'</span><span>🎭 '+escHtml(m.genre)+'</span>'+(m.duration?'<span>⏱ '+escHtml(m.duration)+'</span>':'')+(m.rating?'<span class="movie-rating">★ '+m.rating+'</span>':'')+'<span>🎞 '+escHtml(m.quality)+'</span>';
-  const mv = document.getElementById('modalVideo');
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
-  clearTimeout(iframeLoadTimer);
-  if (m.embed && m.embed.trim()) {
-    loadIframe(mv, m.embed.trim());
-  } else {
-    const vp = document.getElementById('videoPlaceholder');
-    vp.style.display='flex';
-    vp.innerHTML='<div style="font-size:3rem">'+(m.thumb||'🎬')+'</div><div style="color:var(--muted);font-size:.85rem">Link video belum tersedia</div>';
-  }
-  updateStars(userRatings[m.id]||0);
-  renderComments(m.id);
-  document.getElementById('movieModal').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-
-function closeModal() {
-  clearTimeout(iframeLoadTimer);
-  document.getElementById('movieModal').classList.remove('open');
-  document.body.style.overflow='';
-  const mv = document.getElementById('modalVideo');
-  mv.querySelectorAll('iframe,.player-error,.player-loading').forEach(function(e){ e.remove(); });
-  const vp = document.getElementById('videoPlaceholder');
-  vp.style.display='none'; vp.innerHTML='';
-}
-
-function closeModalOutside(e) { if(e.target.id==='movieModal') closeModal(); }
-
-function setRating(val) {
-  if (!currentUser) { showToast('Login dulu untuk memberi rating!','error'); return; }
-  userRatings[currentMovie.id]=val;
-  localStorage.setItem('cs_ratings',JSON.stringify(userRatings));
-  updateStars(val); showToast('Rating '+val+'★ tersimpan!','success');
-}
-function updateStars(val) { document.querySelectorAll('.star').forEach(function(s,i){ s.classList.toggle('active',i<val); }); }
-
-function submitComment() {
-  if (!currentUser) { showToast('Login dulu untuk berkomentar!','error'); return; }
-  const input = document.getElementById('commentInput');
-  const text = input.value.trim(); if (!text) return;
-  if (!allComments[currentMovie.id]) allComments[currentMovie.id]=[];
-  allComments[currentMovie.id].unshift({user:currentUser.username,text:text,time:new Date().toLocaleDateString('id')});
-  localStorage.setItem('cs_comments',JSON.stringify(allComments));
-  input.value=''; renderComments(currentMovie.id); showToast('Komentar terkirim!','success');
-}
-
-function renderComments(id) {
-  const list = allComments[id]||[];
-  document.getElementById('commentsList').innerHTML = list.length
-    ? list.map(function(c){ return '<div class="comment-card"><div class="comment-user">👤 '+escHtml(c.user)+' <span style="color:var(--muted);font-weight:400;font-size:.75rem">· '+c.time+'</span></div><div class="comment-text">'+escHtml(c.text)+'</div></div>'; }).join('')
-    : '<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:1rem">Belum ada komentar.</div>';
-}
-
-function openAuth(mode) {
-  authMode = mode || 'login';
-  renderAuthModal();
-  document.getElementById('authModal').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeAuth() {
-  document.getElementById('authModal').classList.remove('open');
-  document.body.style.overflow='';
-  clearInterval(otpTimer);
-}
-function closeAuthOutside(e) { if(e.target.id==='authModal') closeAuth(); }
-
-function renderAuthModal() {
-  const box = document.getElementById('authBox');
-  if (authMode === 'login') {
-    box.innerHTML = '<h2>MASUK</h2><p>Selamat datang kembali di CineStream</p><div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Username kamu" autocomplete="username"/></div><div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doLogin()">Masuk</button><div class="form-switch">Belum punya akun? <a onclick="openAuth(\'register\')">Daftar sekarang</a></div><div class="form-switch" style="margin-top:.35rem"><a onclick="openAuth(\'forgot\')" style="color:var(--muted);font-size:.78rem">Lupa password?</a></div>';
-  } else if (authMode === 'register') {
-    box.innerHTML = '<h2>DAFTAR</h2><p>Buat akun CineStream kamu</p><div class="form-group"><label class="form-label">USERNAME</label><input class="form-input" id="aUsername" type="text" placeholder="Min. 3 karakter" autocomplete="username"/></div><div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com" autocomplete="email"/></div><div class="form-group"><label class="form-label">PASSWORD</label><input class="form-input" id="aPassword" type="password" placeholder="Min. 6 karakter" autocomplete="new-password"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doRegister()">Daftar & Kirim OTP</button><div class="form-switch">Sudah punya akun? <a onclick="openAuth(\'login\')">Masuk</a></div>';
-  } else if (authMode === 'otp') {
-    box.innerHTML = '<h2>VERIFIKASI</h2><p>Masukkan kode OTP yang dikirim ke <b style="color:var(--text)">'+escHtml(pendingEmail)+'</b></p><div class="otp-wrap"><input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/><input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/><input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/><input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/><input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/><input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/></div><div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem" onclick="doVerifyOTP()">Verifikasi</button><div class="form-switch" style="margin-top:.75rem"><a onclick="openAuth(\'register\')">← Kembali ke Daftar</a></div>';
-    startOTPTimer(300);
-    setTimeout(function(){ document.getElementById('otp0').focus(); }, 100);
-  } else if (authMode === 'forgot') {
-    box.innerHTML = '<h2>LUPA PASSWORD</h2><p>Masukkan email untuk menerima kode reset</p><div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="aEmail" type="email" placeholder="email@example.com"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doForgot()">Kirim OTP Reset</button><div class="form-switch"><a onclick="openAuth(\'login\')">← Kembali ke Masuk</a></div>';
-  } else if (authMode === 'reset') {
-    box.innerHTML = '<h2>RESET PASSWORD</h2><p>Masukkan kode OTP dan password baru</p><div class="otp-wrap"><input class="otp-box" id="otp0" maxlength="1" oninput="otpMove(this,1)" onkeydown="otpBack(event,0)"/><input class="otp-box" id="otp1" maxlength="1" oninput="otpMove(this,2)" onkeydown="otpBack(event,1)"/><input class="otp-box" id="otp2" maxlength="1" oninput="otpMove(this,3)" onkeydown="otpBack(event,2)"/><input class="otp-box" id="otp3" maxlength="1" oninput="otpMove(this,4)" onkeydown="otpBack(event,3)"/><input class="otp-box" id="otp4" maxlength="1" oninput="otpMove(this,5)" onkeydown="otpBack(event,4)"/><input class="otp-box" id="otp5" maxlength="1" onkeydown="otpBack(event,5)"/></div><div class="otp-timer" id="otpTimerEl">Kode berlaku <span id="otpCountdown">5:00</span></div><div class="form-group"><label class="form-label">PASSWORD BARU</label><input class="form-input" id="aNewPass" type="password" placeholder="Min. 6 karakter"/></div><div class="form-err" id="authErr"></div><button class="btn btn-primary" id="authBtn" style="width:100%;padding:.85rem;margin-top:.5rem" onclick="doResetPass()">Reset Password</button>';
-    startOTPTimer(300);
-    setTimeout(function(){ document.getElementById('otp0').focus(); }, 100);
-  }
-}
-
-function otpMove(el, nextIdx) {
-  el.value = el.value.replace(/[^0-9]/g,'');
-  if (el.value && nextIdx <= 5) document.getElementById('otp'+nextIdx).focus();
-}
-function otpBack(e, idx) {
-  if (e.key === 'Backspace' && !e.target.value && idx > 0) document.getElementById('otp'+(idx-1)).focus();
-}
-function getOTPValue() {
-  return [0,1,2,3,4,5].map(function(i){ return document.getElementById('otp'+i).value; }).join('');
-}
-
-function startOTPTimer(seconds) {
-  clearInterval(otpTimer);
-  let s = seconds;
-  otpTimer = setInterval(function() {
-    s--;
-    const min = Math.floor(s/60), sec = s%60;
-    const el = document.getElementById('otpCountdown');
-    if (el) el.textContent = min+':'+(sec<10?'0':'')+sec;
-    if (s <= 0) {
-      clearInterval(otpTimer);
-      const timerEl = document.getElementById('otpTimerEl');
-      if (timerEl) timerEl.textContent = 'Kode sudah kadaluarsa.';
-    }
-  }, 1000);
-}
-
-function showAuthErr(msg) {
-  const el = document.getElementById('authErr');
-  if (el) { el.textContent = msg; el.classList.add('show'); }
-}
-function setBtnLoading(text) {
-  const btn = document.getElementById('authBtn');
-  if (btn) { btn.textContent = text; btn.classList.add('btn-loading'); }
-}
-function setBtnReady(text) {
-  const btn = document.getElementById('authBtn');
-  if (btn) { btn.textContent = text; btn.classList.remove('btn-loading'); }
-}
-
-async function doLogin() {
-  const username = document.getElementById('aUsername').value.trim();
-  const password = document.getElementById('aPassword').value;
-  if (!username||!password) { showAuthErr('Isi semua kolom!'); return; }
-  setBtnLoading('Memuat...');
-  try {
-    const res = await fetch(WORKER_URL + '/api/login-user', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username:username, password:password})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      userToken = data.token;
-      localStorage.setItem('cs_token', userToken);
-      currentUser = { username: data.username };
-      updateNavbar(); closeAuth();
-      showToast('Halo, '+data.username+'! 👋', 'success');
-    } else {
-      showAuthErr(data.error || 'Login gagal');
-      setBtnReady('Masuk');
-    }
-  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Masuk'); }
-}
-
-async function doRegister() {
-  const username = document.getElementById('aUsername').value.trim();
-  const email = document.getElementById('aEmail').value.trim();
-  const password = document.getElementById('aPassword').value;
-  if (!username||!email||!password) { showAuthErr('Isi semua kolom!'); return; }
-  setBtnLoading('Mengirim OTP...');
-  try {
-    const res = await fetch(WORKER_URL + '/api/register', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({username:username, email:email, password:password})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      pendingEmail = email;
-      authMode = 'otp'; renderAuthModal();
-      showToast('OTP dikirim ke ' + email, 'success');
-    } else {
-      showAuthErr(data.error || 'Pendaftaran gagal');
-      setBtnReady('Daftar & Kirim OTP');
-    }
-  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Daftar & Kirim OTP'); }
-}
-
-async function doVerifyOTP() {
-  const otp = getOTPValue();
-  if (otp.length < 6) { showAuthErr('Masukkan 6 digit OTP!'); return; }
-  setBtnLoading('Memverifikasi...');
-  try {
-    const res = await fetch(WORKER_URL + '/api/verify-otp', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:pendingEmail, otp:otp})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      userToken = data.token;
-      localStorage.setItem('cs_token', userToken);
-      currentUser = { username: data.username };
-      clearInterval(otpTimer);
-      updateNavbar(); closeAuth();
-      showToast('Selamat datang, '+data.username+'! 🎉', 'success');
-    } else {
-      showAuthErr(data.error || 'OTP salah');
-      setBtnReady('Verifikasi');
-    }
-  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Verifikasi'); }
-}
-
-async function doForgot() {
-  const email = document.getElementById('aEmail').value.trim();
-  if (!email) { showAuthErr('Masukkan email kamu!'); return; }
-  setBtnLoading('Mengirim...');
-  try {
-    const res = await fetch(WORKER_URL + '/api/forgot-password', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:email})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      pendingEmail = email;
-      authMode = 'reset'; renderAuthModal();
-      showToast('OTP reset dikirim!', 'success');
-    } else {
-      showAuthErr(data.error || 'Gagal');
-      setBtnReady('Kirim OTP Reset');
-    }
-  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Kirim OTP Reset'); }
-}
-
-async function doResetPass() {
-  const otp = getOTPValue();
-  const newPass = document.getElementById('aNewPass').value;
-  if (otp.length < 6) { showAuthErr('Masukkan 6 digit OTP!'); return; }
-  if (!newPass || newPass.length < 6) { showAuthErr('Password min. 6 karakter!'); return; }
-  setBtnLoading('Menyimpan...');
-  try {
-    const res = await fetch(WORKER_URL + '/api/reset-password', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email:pendingEmail, otp:otp, newPassword:newPass})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      clearInterval(otpTimer); closeAuth();
-      showToast('Password berhasil direset! Silakan login.', 'success');
-      setTimeout(function(){ openAuth('login'); }, 500);
-    } else {
-      showAuthErr(data.error || 'Gagal reset');
-      setBtnReady('Reset Password');
-    }
-  } catch(e) { showAuthErr('Koneksi gagal.'); setBtnReady('Reset Password'); }
-}
-
-function updateNavbar() {
-  document.getElementById('navRight').innerHTML = currentUser
-    ? '<div class="user-btn"><div class="user-avatar">'+currentUser.username[0].toUpperCase()+'</div><span class="user-name">'+escHtml(currentUser.username)+'</span></div><button class="btn btn-outline" onclick="logout()">Keluar</button>'
-    : '<button class="btn btn-outline" onclick="openAuth(\'login\')">Masuk</button><button class="btn btn-primary" onclick="openAuth(\'register\')">Daftar</button>';
-}
-
-function logout() {
-  currentUser = null; userToken = null;
-  localStorage.removeItem('cs_token');
-  updateNavbar();
-  showToast('Berhasil keluar!', 'success');
-}
-
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast '+(type||'success')+' show';
-  setTimeout(function(){ t.classList.remove('show'); }, 3500);
-}
-
-init();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
