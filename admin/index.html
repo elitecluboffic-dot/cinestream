@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin – CineXX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
+      --border: #ffffff14; --accent: #e50914; --gold: #f5c518;
+      --text: #f0f0f0; --muted: #777; --radius: 8px;
+      --green: #22c55e; --blue: #3b82f6; --orange: #f97316;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+    /* LOGIN */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: var(--bg);
+    }
+    .login-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 380px; text-align: center;
+    }
+    .login-logo { font-family: 'Bebas Neue', cursive; font-size: 2.5rem; letter-spacing: 3px; margin-bottom: 0.2rem; }
+    .login-logo span { color: var(--accent); }
+    .login-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 1.5px; margin-bottom: 2rem; }
+    .login-err { background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.25); color: #f87171; border-radius: 6px; padding: 0.6rem; font-size: 0.8rem; margin-bottom: 1rem; display: none; }
+
+    /* LAYOUT */
+    #adminPanel { display: none; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 220px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .logo { padding: 1.2rem 1.2rem 1rem; border-bottom: 1px solid var(--border); }
+    .logo-text { font-family: 'Bebas Neue', cursive; font-size: 1.5rem; letter-spacing: 2px; }
+    .logo-text span { color: var(--accent); }
+    .logo-sub { font-size: 0.6rem; color: var(--muted); letter-spacing: 1.5px; margin-top: 2px; }
+    .nav-section { padding: 1rem 0; flex: 1; }
+    .nav-label { font-size: 0.6rem; color: var(--muted); letter-spacing: 1.5px; padding: 0 1.2rem; margin-bottom: 0.4rem; font-weight: 600; text-transform: uppercase; }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.2rem;
+      cursor: pointer; font-size: 0.82rem; color: var(--muted); transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(229,9,20,0.08); color: var(--text); border-left-color: var(--accent); }
+    .nav-icon { width: 18px; text-align: center; font-size: 14px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .page-title { font-size: 1rem; font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+    .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* STATS */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; }
+    .stat-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* PANEL */
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.2rem; }
+    .panel-header { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 0.88rem; font-weight: 600; }
+    .panel-body { padding: 1.2rem; }
+
+    /* BUTTONS */
+    .btn { border: none; border-radius: 6px; padding: 0.45rem 1rem; font-size: 0.8rem; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #c4070f; }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: #222230; }
+    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.72rem; }
+    .btn-icon { background: none; border: 1px solid var(--border); color: var(--muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon:hover { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: rgba(229,9,20,0.1); color: #f87171; border: 1px solid rgba(229,9,20,0.2); }
+    .btn-danger:hover { background: rgba(229,9,20,0.2); }
+    .btn-success { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+    /* FORMS */
+    input, select, textarea {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 6px; padding: 0.5rem 0.8rem; font-size: 0.82rem; font-family: 'DM Sans', sans-serif;
+      width: 100%; outline: none; transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    select option { background: var(--surface2); }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 0.35rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { text-align: left; padding: 0.6rem 0.8rem; color: var(--muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+    td { padding: 0.65rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:hover td { background: rgba(255,255,255,0.015); }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 4px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.5px; }
+    .badge-movie { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .badge-tv { background: rgba(249,115,22,0.15); color: #fb923c; }
+    .badge-active { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .badge-hidden { background: rgba(120,120,120,0.12); color: var(--muted); }
+    .badge-featured { background: rgba(245,197,24,0.15); color: var(--gold); }
+
+    /* POSTER */
+    .poster-thumb { width: 36px; height: 54px; border-radius: 4px; object-fit: cover; background: var(--surface2); display: block; }
+    .poster-placeholder { width: 36px; height: 54px; border-radius: 4px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 0.55rem; }
+
+    /* MODAL */
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-bg.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-head h2 { font-size: 1rem; font-weight: 600; }
+    .modal-body { padding: 1.5rem; }
+    .modal-foot { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+    /* TABS */
+    .tab-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.2rem; }
+    .tab { padding: 0.6rem 1rem; font-size: 0.8rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab:hover { color: var(--text); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ALERT */
+    .alert { padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+    .alert-success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #4ade80; }
+    .alert-error { background: rgba(229,9,20,0.1); border: 1px solid rgba(229,9,20,0.2); color: #f87171; }
+    .alert-info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa; }
+    .alert-warn { background: rgba(245,197,24,0.08); border: 1px solid rgba(245,197,24,0.2); color: var(--gold); }
+
+    /* TOGGLE */
+    .toggle { width: 38px; height: 22px; background: var(--surface2); border: 1px solid var(--border); border-radius: 11px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .toggle.on { background: var(--green); border-color: var(--green); }
+    .toggle::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: left 0.2s; }
+    .toggle.on::after { left: 18px; }
+
+    /* PROGRESS */
+    .progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; margin: 0.3rem 0; }
+    .progress-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* TMDB RESULTS */
+    .tmdb-result { display: flex; align-items: center; gap: 0.8rem; padding: 0.65rem; border-radius: 6px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; margin-bottom: 0.3rem; }
+    .tmdb-result:hover { background: var(--surface2); border-color: var(--border); }
+    .tmdb-result.selected { border-color: var(--accent); background: rgba(229,9,20,0.05); }
+    .tmdb-poster { width: 44px; height: 66px; border-radius: 4px; object-fit: cover; background: var(--surface2); flex-shrink: 0; }
+    .tmdb-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .tmdb-sub { font-size: 0.72rem; color: var(--muted); }
+
+    /* GRID */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    /* LOG */
+    .log-entry { padding: 0.5rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 0.7rem; }
+    .log-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .log-time { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+    .log-msg { font-size: 0.78rem; flex: 1; }
+
+    /* SERVER STATUS */
+    .server-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; }
+    .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .dot-red { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .dot-yellow { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+
+    /* NOTIFICATION TOAST */
+    #toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.75rem 1.2rem; font-size: 0.82rem;
+      transform: translateY(80px); opacity: 0; transition: all 0.3s;
+      max-width: 300px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.toast-success { border-color: rgba(34,197,94,0.4); color: #4ade80; }
+    #toast.toast-error { border-color: rgba(229,9,20,0.4); color: #f87171; }
+    #toast.toast-info { border-color: rgba(59,130,246,0.4); color: #60a5fa; }
+
+    /* SEARCH BAR */
+    .search-input-wrap { position: relative; }
+    .search-input-wrap .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.75rem; pointer-events: none; }
+    .search-input-wrap input { padding-left: 2rem; }
+
+    /* SEPARATOR */
+    hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+    /* SETTING ROW */
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-info { flex: 1; }
+    .setting-label { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.15rem; }
+    .setting-desc { font-size: 0.72rem; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .nav-item span, .logo-sub { display: none; }
+      .logo-text { font-size: 1rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">CINE<span>XX</span></div>
+    <div class="login-sub">ADMIN PANEL</div>
+    <div class="login-err" id="loginErr">Password salah. Coba lagi.</div>
+    <div class="form-group" style="text-align:left">
+      <label>Password Admin</label>
+      <input type="password" id="loginPass" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:0.7rem;font-size:0.9rem;margin-top:0.5rem" onclick="doLogin()">Masuk</button>
+    <p style="font-size:0.7rem;color:var(--muted);margin-top:1.5rem">Default password: <code style="background:var(--surface2);padding:0.1rem 0.4rem;border-radius:3px">admin123</code></p>
+  </div>
+</div>
+
+<!-- ===================== ADMIN PANEL ===================== -->
+<div id="adminPanel">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-text">CINE<span>XX</span></div>
+      <div class="logo-sub">ADMIN PANEL</div>
+    </div>
+    <nav class="nav-section">
+      <div class="nav-label">Dashboard</div>
+      <div class="nav-item active" onclick="navigate('dashboard',this)">
+        <span class="nav-icon">📊</span><span>Overview</span>
+      </div>
+
+      <div class="nav-label" style="margin-top:1rem">Konten</div>
+      <div class="nav-item" onclick="navigate('movies',this)">
+        <span class="nav-icon">🎬</span><span>Film</span>
+      </div>
+      <div class="nav-item" onclick="navigate('series',this)">
+        <span class="nav-icon">📺</span><span>Series / TV</span>
+      </div>
+      <div class="nav-item" onclick="navigate('featured',this)">
+        <span class="nav-icon">⭐</span><span>Featured Hero</span>
+      </div>
+
+      <div class="nav-label" style="margin-top:1rem">Sistem</div>
+      <div class="nav-item" onclick="navigate('servers',this)">
+        <span class="nav-icon">🖥️</span><span>Server Embed</span>
+      </div>
+      <div class="nav-item" onclick="navigate('settings',this)">
+        <span class="nav-icon">⚙️</span><span>Pengaturan</span>
+      </div>
+      <div class="nav-item" onclick="navigate('logs',this)">
+        <span class="nav-icon">📋</span><span>Log Aktivitas</span>
+      </div>
+    </nav>
+    <div style="padding:1rem;border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:0.6rem">
+        <div class="avatar" title="Logout" onclick="logout()">A</div>
+        <div style="font-size:0.72rem">
+          <div style="font-weight:600">Admin</div>
+          <div style="color:var(--muted);cursor:pointer" onclick="logout()">Logout</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title" id="pageTitle">Dashboard Overview</span>
+      <div class="topbar-right">
+        <span id="workerStatusBadge" class="server-status">
+          <span class="dot-yellow"></span> Mengecek...
+        </span>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal('movie')">+ Tambah Film</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ====== DASHBOARD ====== -->
+      <div class="page active" id="page-dashboard">
+        <div id="dashAlertBox"></div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Film Tersimpan</div>
+            <div class="stat-value" id="statMovies">0</div>
+            <div class="stat-sub">ditambah manual</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Series Tersimpan</div>
+            <div class="stat-value" id="statSeries">0</div>
+            <div class="stat-sub">ditambah manual</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Film Featured</div>
+            <div class="stat-value" id="statFeatured">0</div>
+            <div class="stat-sub">tampil di hero section</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Worker API</div>
+            <div class="stat-value" style="font-size:1rem;padding-top:0.4rem" id="statWorker">—</div>
+            <div class="stat-sub">Cloudflare Worker</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">🔥 Trending dari TMDB</span>
+              <button class="btn btn-ghost btn-sm" onclick="loadTrending()">↻ Refresh</button>
+            </div>
+            <div class="panel-body" id="trendingList">
+              <div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data trending...</p></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">📁 Film Tersimpan Terakhir</span>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('movies',document.querySelectorAll('.nav-item')[1])">Semua</button>
+            </div>
+            <div class="panel-body" id="recentFilmsList">
+              <div class="empty-state"><div class="empty-icon">🎬</div><p>Belum ada film tersimpan.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📈 Status Endpoint Worker</span></div>
+          <div class="panel-body">
+            <div class="grid-3" id="endpointStatus">
+              <div>
+                <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem">/trending</div>
+                <div class="progress-bar"><div class="progress-fill" id="ep1" style="width:0%"></div></div>
+                <div style="font-size:0.68rem;color:var(--muted);margin-top:0.2rem" id="ep1txt">Menunggu...</div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem">/popular</div>
+                <div class="progress-bar"><div class="progress-fill" id="ep2" style="width:0%"></div></div>
+                <div style="font-size:0.68rem;color:var(--muted);margin-top:0.2rem" id="ep2txt">Menunggu...</div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem">/search</div>
+                <div class="progress-bar"><div class="progress-fill" id="ep3" style="width:0%"></div></div>
+                <div style="font-size:0.68rem;color:var(--muted);margin-top:0.2rem" id="ep3txt">Menunggu...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== MOVIES ====== -->
+      <div class="page" id="page-movies">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">🎬 Daftar Film Tersimpan</span>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <div class="search-input-wrap" style="width:200px">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Cari judul..." oninput="filterTable('moviesBody',this.value)">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddModal('movie')">+ Tambah</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" id="moviesWrap">
+              <div class="empty-state"><div class="empty-icon">🎬</div><p>Belum ada film. Klik "+ Tambah" untuk menambah.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SERIES ====== -->
+      <div class="page" id="page-series">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📺 Daftar Series Tersimpan</span>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <div class="search-input-wrap" style="width:200px">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Cari judul..." oninput="filterTable('seriesBody',this.value)">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddModal('tv')">+ Tambah</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap" id="seriesWrap">
+              <div class="empty-state"><div class="empty-icon">📺</div><p>Belum ada series. Klik "+ Tambah" untuk menambah.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== FEATURED ====== -->
+      <div class="page" id="page-featured">
+        <div class="alert alert-info">⚡ Film di featured akan muncul di <strong>Hero Section</strong> halaman utama CineXX secara bergantian setiap 8 detik.</div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">⭐ Film Featured / Hero</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal('movie')">+ Tambah</button>
+          </div>
+          <div class="panel-body" id="featuredWrap">
+            <div class="empty-state"><div class="empty-icon">⭐</div><p>Belum ada film featured.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SERVERS ====== -->
+      <div class="page" id="page-servers">
+        <div class="alert alert-warn">🖥️ Server embed adalah sumber video yang digunakan saat pengguna menonton film. Urutan server menentukan prioritas.</div>
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Server Embed Video</span>
+            <button class="btn btn-primary btn-sm" onclick="openServerModal()">+ Tambah Server</button>
+          </div>
+          <div class="panel-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nama Server</th>
+                    <th>URL Template</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="serverTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">📋 Panduan URL Template</span></div>
+          <div class="panel-body" style="font-size:0.82rem;line-height:1.8;color:#bbb">
+            <p>Gunakan placeholder berikut dalam URL template server:</p>
+            <ul style="margin:0.5rem 0 0 1.2rem">
+              <li><code style="background:var(--surface2);padding:0.1rem 0.4rem;border-radius:3px">{id}</code> → TMDB ID film/series</li>
+              <li><code style="background:var(--surface2);padding:0.1rem 0.4rem;border-radius:3px">{type}</code> → <code style="background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px">movie</code> atau <code style="background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px">tv</code></li>
+            </ul>
+            <p style="margin-top:0.8rem">Contoh: <code style="background:var(--surface2);padding:0.1rem 0.4rem;border-radius:3px">https://vidsrc.to/embed/{type}/{id}</code></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SETTINGS ====== -->
+      <div class="page" id="page-settings">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">⚙️ Konfigurasi Worker API</span></div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label>Worker URL *</label>
+                <input type="text" id="cfgWorkerUrl" placeholder="https://stream.xxx.workers.dev">
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">URL Cloudflare Worker kamu</div>
+              </div>
+              <div class="form-group">
+                <label>Nama Situs</label>
+                <input type="text" id="cfgSiteName" placeholder="CineXX">
+              </div>
+              <div class="form-group">
+                <label>Tagline / Deskripsi</label>
+                <input type="text" id="cfgDesc" placeholder="Nonton film & series online">
+              </div>
+              <div class="form-group">
+                <label>Bahasa Konten</label>
+                <select id="cfgLang">
+                  <option value="id-ID">Bahasa Indonesia</option>
+                  <option value="en-US">English (US)</option>
+                  <option value="ja-JP">日本語</option>
+                  <option value="ko-KR">한국어</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Jumlah Film per Halaman</label>
+                <select id="cfgPerPage">
+                  <option value="12">12</option>
+                  <option value="20" selected>20</option>
+                  <option value="30">30</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="saveSettings()">💾 Simpan Konfigurasi</button>
+            </div>
+          </div>
+          <div>
+            <div class="panel" style="margin-bottom:1rem">
+              <div class="panel-header"><span class="panel-title">🔐 Password Admin</span></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label>Password Baru</label>
+                  <input type="password" id="newPass" placeholder="Minimal 6 karakter">
+                </div>
+                <div class="form-group">
+                  <label>Konfirmasi Password</label>
+                  <input type="password" id="confirmPass" placeholder="Ulangi password baru">
+                </div>
+                <button class="btn btn-ghost" onclick="changePassword()">🔑 Ganti Password</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><span class="panel-title">🎛️ Fitur Situs</span></div>
+              <div class="panel-body">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <div class="setting-label">Mode Maintenance</div>
+                    <div class="setting-desc">Tampilkan halaman "sedang dalam perbaikan"</div>
+                  </div>
+                  <div class="toggle" id="toggleMaintenance" onclick="this.classList.toggle('on');saveSwitches()"></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <div class="setting-label">NSFW Filter</div>
+                    <div class="setting-desc">Sembunyikan konten dewasa dari TMDB</div>
+                  </div>
+                  <div class="toggle on" id="toggleNsfw" onclick="this.classList.toggle('on');saveSwitches()"></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <div class="setting-label">Rotasi Hero Otomatis</div>
+                    <div class="setting-desc">Hero section berganti setiap 8 detik</div>
+                  </div>
+                  <div class="toggle on" id="toggleHeroRotate" onclick="this.classList.toggle('on');saveSwitches()"></div>
+                </div>
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <div class="setting-label">Tampilkan Rating TMDB</div>
+                    <div class="setting-desc">Tampilkan bintang rating di card film</div>
+                  </div>
+                  <div class="toggle on" id="toggleRating" onclick="this.classList.toggle('on');saveSwitches()"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">🗄️ Manajemen Data</span></div>
+          <div class="panel-body" style="display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-ghost" onclick="exportData()">📥 Export Backup JSON</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📤 Import dari JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+            <div style="flex:1"></div>
+            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Reset Semua Data</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== LOGS ====== -->
+      <div class="page" id="page-logs">
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">📋 Log Aktivitas Admin</span>
+            <button class="btn btn-ghost btn-sm" onclick="clearLogs()">🗑️ Hapus Log</button>
+          </div>
+          <div class="panel-body" id="logListWrap">
+            <div class="empty-state"><div class="empty-icon">📋</div><p>Belum ada aktivitas tercatat.</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+</div><!-- /adminPanel -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ====== ADD FILM MODAL ====== -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="addModalTitle">Tambah Film</h2>
+      <button class="btn-icon" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tab-row">
+        <div class="tab active" onclick="switchTab('tabTmdb',this)">🔍 Cari dari TMDB</div>
+        <div class="tab" onclick="switchTab('tabManual',this)">✏️ Input Manual</div>
+      </div>
+
+      <!-- TMDB TAB -->
+      <div class="tab-content active" id="tabTmdb">
+        <div class="form-group">
+          <label>Cari judul film atau series</label>
+          <div style="display:flex;gap:0.5rem">
+            <input type="text" id="tmdbQ" placeholder="Contoh: Avatar, Breaking Bad..." onkeydown="if(event.key==='Enter')doTMDBSearch()">
+            <button class="btn btn-primary" onclick="doTMDBSearch()" style="white-space:nowrap">Cari</button>
+          </div>
+        </div>
+        <div id="tmdbResultsBox" style="max-height:280px;overflow-y:auto"></div>
+        <div id="tmdbSelected" style="display:none;margin-top:0.8rem;padding:0.8rem;background:rgba(34,197,94,0.05);border-radius:6px;border:1px solid rgba(34,197,94,0.2)">
+          <div style="font-size:0.72rem;color:var(--green);margin-bottom:0.25rem">✓ Dipilih:</div>
+          <div id="tmdbSelectedInfo" style="font-size:0.85rem;font-weight:600"></div>
+        </div>
+      </div>
+
+      <!-- MANUAL TAB -->
+      <div class="tab-content" id="tabManual">
+        <div class="form-row">
+          <div class="form-group">
+            <label>TMDB ID</label>
+            <input type="text" id="mId" placeholder="Contoh: 550">
+          </div>
+          <div class="form-group">
+            <label>Tipe Konten</label>
+            <select id="mType">
+              <option value="movie">Film (Movie)</option>
+              <option value="tv">Series (TV)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Judul *</label>
+          <input type="text" id="mTitle" placeholder="Judul film / series">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tahun Rilis</label>
+            <input type="text" id="mYear" placeholder="2024">
+          </div>
+          <div class="form-group">
+            <label>Rating (0–10)</label>
+            <input type="text" id="mRating" placeholder="7.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>URL Poster</label>
+          <input type="text" id="mPoster" placeholder="https://image.tmdb.org/t/p/w342/...">
+        </div>
+        <div class="form-group">
+          <label>Sinopsis</label>
+          <textarea id="mOverview" placeholder="Deskripsi singkat film..."></textarea>
+        </div>
+      </div>
+
+      <hr>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Kategori / Genre Tag</label>
+          <input type="text" id="mCategory" placeholder="Action, Drama, Thriller...">
+        </div>
+        <div class="form-group">
+          <label>Tampilkan di Featured Hero?</label>
+          <select id="mFeatured">
+            <option value="no">Tidak</option>
+            <option value="yes">Ya – Tampilkan di Hero</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Kualitas</label>
+        <select id="mQuality">
+          <option value="BLURAY">BLURAY</option>
+          <option value="HD">HD</option>
+          <option value="FHD">FHD 1080p</option>
+          <option value="CAM">CAM</option>
+          <option value="WEBDL">WEB-DL</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('addModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveFilm()">💾 Simpan Film</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SERVER MODAL ====== -->
+<div class="modal-bg" id="serverModal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head">
+      <h2>Tambah Server Embed</h2>
+      <button class="btn-icon" onclick="closeModal('serverModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nama Server *</label>
+        <input type="text" id="srvName" placeholder="Server 5">
+      </div>
+      <div class="form-group">
+        <label>URL Template *</label>
+        <input type="text" id="srvUrl" placeholder="https://example.com/embed/{type}/{id}">
+        <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Gunakan <code>{id}</code> dan <code>{type}</code> sebagai placeholder</div>
+      </div>
+      <div class="form-group">
+        <label>Status Awal</label>
+        <select id="srvActive">
+          <option value="1">Aktif</option>
+          <option value="0">Nonaktif</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('serverModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveServer()">Simpan Server</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================
+// CONSTANTS & STATE
+// ========================
+const IMG = 'https://image.tmdb.org/t/p/';
+const DEFAULT_WORKER = 'https://stream.internetdnsofficial.workers.dev';
+const DEFAULT_PASS_HASH = btoa('cinestream2009');
+
+let db = {
+  films: [],
+  servers: [
+    { id: 1, name: 'Server 1', url: 'https://vidsrc.to/embed/{type}/{id}', active: 1 },
+    { id: 2, name: 'Server 2', url: 'https://2embed.cc/embed/{id}', active: 1 },
+    { id: 3, name: 'Server 3', url: 'https://embedsu.com/embed/{type}/{id}', active: 1 },
+    { id: 4, name: 'Server 4', url: 'https://player.videasy.net/{type}/{id}', active: 1 },
+  ],
+  settings: {
+    workerUrl: DEFAULT_WORKER,
+    siteName: 'CineXX',
+    desc: 'Nonton film & series online',
+    lang: 'id-ID',
+    perPage: 20,
+    passHash: DEFAULT_PASS_HASH,
+  },
+  switches: {
+    maintenance: false,
+    nsfw: true,
+    heroRotate: true,
+    rating: true,
+  },
+  logs: [],
+};
+
+let selectedTMDB = null;
+let currentAddType = 'movie';
+
+// ========================
+// STORAGE
+// ========================
+function loadDB() {
+  try {
+    const raw = localStorage.getItem('cinexx_db');
+    if (raw) {
+      const saved = JSON.parse(raw);
+      db.films = saved.films || db.films;
+      db.servers = saved.servers || db.servers;
+      db.logs = saved.logs || db.logs;
+      if (saved.settings) db.settings = { ...db.settings, ...saved.settings };
+      if (saved.switches) db.switches = { ...db.switches, ...saved.switches };
+    }
+  } catch (e) {}
+}
+
+function saveDB() {
+  try { localStorage.setItem('cinexx_db', JSON.stringify(db)); } catch (e) {}
+}
+
+// ========================
+// AUTH
+// ========================
+function doLogin() {
+  const pass = document.getElementById('loginPass').value;
+  const stored = db.settings.passHash || DEFAULT_PASS_HASH;
+  if (btoa(pass) === stored) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    addLog('Admin login berhasil', 'success');
+    initPanel();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    setTimeout(() => { document.getElementById('loginErr').style.display = 'none'; }, 3000);
+  }
+}
+
+function logout() {
+  if (!confirm('Yakin mau logout?')) return;
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
+
+// ========================
+// TOAST
+// ========================
+let toastTimer = null;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show toast-' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+// ========================
+// LOG
+// ========================
+function addLog(msg, type = 'info') {
+  db.logs.unshift({ msg, type, time: new Date().toLocaleTimeString('id-ID') });
+  if (db.logs.length > 100) db.logs = db.logs.slice(0, 100);
+  saveDB();
+}
+
+function renderLogs() {
+  const el = document.getElementById('logListWrap');
+  if (!db.logs.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Belum ada aktivitas.</p></div>';
+    return;
+  }
+  el.innerHTML = db.logs.map(l => `
+    <div class="log-entry">
+      <div class="log-dot" style="background:${l.type==='error'?'var(--accent)':l.type==='success'?'var(--green)':'var(--blue)'}"></div>
+      <div class="log-msg">${l.msg}</div>
+      <div class="log-time">${l.time}</div>
+    </div>
+  `).join('');
+}
+
+function clearLogs() {
+  if (!confirm('Hapus semua log?')) return;
+  db.logs = [];
+  saveDB();
+  renderLogs();
+}
+
+// ========================
+// NAVIGATION
+// ========================
+function navigate(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  el.classList.add('active');
+  const titles = {
+    dashboard: 'Dashboard Overview',
+    movies: 'Kelola Film',
+    series: 'Kelola Series / TV',
+    featured: 'Featured Hero Section',
+    servers: 'Server Embed Video',
+    settings: 'Pengaturan Sistem',
+    logs: 'Log Aktivitas',
+  };
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  if (page === 'movies') renderMoviesTable();
+  if (page === 'series') renderSeriesTable();
+  if (page === 'featured') renderFeatured();
+  if (page === 'servers') renderServers();
+  if (page === 'logs') renderLogs();
+  if (page === 'settings') loadSettings();
+}
+
+// ========================
+// STATS
+// ========================
+function updateStats() {
+  const movies = db.films.filter(f => f.type === 'movie').length;
+  const series = db.films.filter(f => f.type === 'tv').length;
+  const featured = db.films.filter(f => f.featured === 'yes').length;
+  document.getElementById('statMovies').textContent = movies;
+  document.getElementById('statSeries').textContent = series;
+  document.getElementById('statFeatured').textContent = featured;
+}
+
+// ========================
+// WORKER CHECK
+// ========================
+async function checkWorker() {
+  const url = (db.settings.workerUrl || DEFAULT_WORKER).replace(/\/$/, '');
+  const badge = document.getElementById('workerStatusBadge');
+  const stat = document.getElementById('statWorker');
+  try {
+    const t0 = Date.now();
+    const res = await fetch(url + '/trending', { signal: AbortSignal.timeout(6000) });
+    const ms = Date.now() - t0;
+    if (res.ok) {
+      badge.innerHTML = '<span class="dot-green"></span> Worker Online (' + ms + 'ms)';
+      if (stat) stat.innerHTML = '<span style="color:var(--green);font-size:1.2rem">Online</span>';
+      checkEndpoints(url);
+      addLog('Worker online: ' + url + ' (' + ms + 'ms)', 'success');
+    } else {
+      badge.innerHTML = '<span class="dot-red"></span> Error ' + res.status;
+      if (stat) stat.innerHTML = '<span style="color:var(--accent);font-size:1.2rem">Error</span>';
+    }
+  } catch (e) {
+    badge.innerHTML = '<span class="dot-red"></span> Offline / CORS Error';
+    if (stat) stat.innerHTML = '<span style="color:var(--accent);font-size:1.2rem">Offline</span>';
+    addLog('Worker tidak bisa dijangkau: ' + url, 'error');
+  }
+}
+
+async function checkEndpoints(baseUrl) {
+  const endpoints = [
+    { path: '/trending', fill: 'ep1', txt: 'ep1txt' },
+    { path: '/popular?type=movie', fill: 'ep2', txt: 'ep2txt' },
+    { path: '/search?q=test', fill: 'ep3', txt: 'ep3txt' },
+  ];
+  for (const ep of endpoints) {
+    try {
+      const t0 = Date.now();
+      const res = await fetch(baseUrl + ep.path, { signal: AbortSignal.timeout(5000) });
+      const ms = Date.now() - t0;
+      const pct = Math.max(10, Math.min(100, 100 - (ms / 50)));
+      document.getElementById(ep.fill).style.width = pct + '%';
+      document.getElementById(ep.txt).style.color = res.ok ? 'var(--green)' : 'var(--accent)';
+      document.getElementById(ep.txt).textContent = res.ok ? '✓ OK (' + ms + 'ms)' : '✗ Error ' + res.status;
+    } catch (e) {
+      document.getElementById(ep.fill).style.width = '0%';
+      document.getElementById(ep.txt).style.color = 'var(--accent)';
+      document.getElementById(ep.txt).textContent = '✗ Tidak bisa dijangkau';
+    }
+  }
+}
+
+// ========================
+// TRENDING
+// ========================
+async function loadTrending() {
+  const el = document.getElementById('trendingList');
+  el.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat trending...</p></div>';
+  const url = (db.settings.workerUrl || DEFAULT_WORKER).replace(/\/$/, '');
+  try {
+    const res = await fetch(url + '/trending');
+    const data = await res.json();
+    if (data.results && data.results.length) {
+      el.innerHTML = data.results.slice(0, 8).map(m => `
+        <div style="display:flex;align-items:center;gap:0.8rem;padding:0.55rem 0;border-bottom:1px solid var(--border)">
+          <img src="${m.poster_path ? IMG+'w92'+m.poster_path : ''}"
+               onerror="this.style.display='none'"
+               style="width:30px;height:45px;border-radius:3px;object-fit:cover;flex-shrink:0;background:var(--surface2)">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.title || m.name}</div>
+            <div style="font-size:0.68rem;color:var(--muted)">⭐ ${(m.vote_average||0).toFixed(1)} &middot; ${m.media_type === 'tv' ? 'Series' : 'Film'}</div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="quickAddFromTrending(${m.id},'${m.media_type||'movie'}','${(m.title||m.name||'').replace(/'/g, '&#39;').slice(0,40)}','${m.poster_path||''}','${(m.release_date||m.first_air_date||'').split('-')[0]||''}',${m.vote_average||0})">+ Simpan</button>
+        </div>
+      `).join('');
+    } else {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Gagal memuat. Cek koneksi worker.</p></div>';
+    }
+  } catch (e) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Worker tidak bisa dijangkau.</p></div>';
+  }
+}
+
+function quickAddFromTrending(id, type, title, poster, year, rating) {
+  if (db.films.find(f => String(f.tmdbId) === String(id))) {
+    toast('⚠️ "' + title + '" sudah ada di daftar.', 'error');
+    return;
+  }
+  const film = {
+    id: Date.now(), tmdbId: id, type, title,
+    year: year || '—',
+    rating: rating ? parseFloat(rating).toFixed(1) : '—',
+    poster: poster ? IMG + 'w342' + poster : '',
+    overview: '', featured: 'no', category: '', quality: 'BLURAY',
+    addedAt: new Date().toLocaleString('id-ID'),
+  };
+  db.films.push(film);
+  saveDB();
+  updateStats();
+  renderRecentFilms();
+  toast('✓ "' + title + '" berhasil disimpan!', 'success');
+  addLog('Film disimpan dari trending: ' + title + ' [' + type + ':' + id + ']', 'success');
+}
+
+function renderRecentFilms() {
+  const el = document.getElementById('recentFilmsList');
+  if (!db.films.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>Belum ada film tersimpan.</p></div>';
+    return;
+  }
+  const recent = [...db.films].reverse().slice(0, 6);
+  el.innerHTML = recent.map(f => `
+    <div style="display:flex;align-items:center;gap:0.8rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:0.8rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.title}</div>
+      <span class="badge ${f.type==='tv'?'badge-tv':'badge-movie'}">${f.type==='tv'?'TV':'FILM'}</span>
+      <button class="btn-icon" title="Hapus" onclick="removeFilm(${f.id})">🗑</button>
+    </div>
+  `).join('');
+}
+
+// ========================
+// FILM TABLE RENDERS
+// ========================
+function filmRow(f) {
+  return `<tr>
+    <td>${f.poster ? `<img class="poster-thumb" src="${f.poster}" onerror="this.style.opacity='0.3'">` : `<div class="poster-placeholder">N/A</div>`}</td>
+    <td>
+      <div style="font-weight:600;font-size:0.82rem">${f.title}</div>
+      <div style="font-size:0.68rem;color:var(--muted)">TMDB: ${f.tmdbId||'—'}</div>
+    </td>
+    <td>${f.year||'—'}</td>
+    <td>${f.rating ? '⭐ ' + f.rating : '—'}</td>
+    <td><span class="badge" style="background:rgba(100,100,100,0.15);color:var(--muted)">${f.quality||'HD'}</span></td>
+    <td>${f.featured==='yes'?'<span class="badge badge-featured">FEATURED</span>':'<span class="badge badge-hidden">—</span>'}</td>
+    <td>
+      <div style="display:flex;gap:0.3rem">
+        <button class="btn btn-ghost btn-sm" onclick="toggleFeatured(${f.id})">${f.featured==='yes'?'Unfeature':'Feature'}</button>
+        <button class="btn btn-danger btn-sm" onclick="removeFilm(${f.id})">Hapus</button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+function renderMoviesTable() {
+  const el = document.getElementById('moviesWrap');
+  const movies = db.films.filter(f => f.type === 'movie');
+  if (!movies.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>Belum ada film. Klik "+ Tambah" untuk menambah dari TMDB.</p></div>';
+    return;
+  }
+  el.innerHTML = `<table>
+    <thead><tr><th>Poster</th><th>Judul</th><th>Tahun</th><th>Rating</th><th>Kualitas</th><th>Featured</th><th>Aksi</th></tr></thead>
+    <tbody id="moviesBody">${movies.map(filmRow).join('')}</tbody>
+  </table>`;
+}
+
+function renderSeriesTable() {
+  const el = document.getElementById('seriesWrap');
+  const series = db.films.filter(f => f.type === 'tv');
+  if (!series.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📺</div><p>Belum ada series. Klik "+ Tambah" untuk menambah dari TMDB.</p></div>';
+    return;
+  }
+  el.innerHTML = `<table>
+    <thead><tr><th>Poster</th><th>Judul</th><th>Tahun</th><th>Rating</th><th>Kualitas</th><th>Featured</th><th>Aksi</th></tr></thead>
+    <tbody id="seriesBody">${series.map(filmRow).join('')}</tbody>
+  </table>`;
+}
+
+function renderFeatured() {
+  const el = document.getElementById('featuredWrap');
+  const feat = db.films.filter(f => f.featured === 'yes');
+  if (!feat.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⭐</div><p>Belum ada film featured. Tambah film lalu set "Featured".</p></div>';
+    return;
+  }
+  el.innerHTML = `<table>
+    <thead><tr><th>Poster</th><th>Judul</th><th>Tipe</th><th>Tahun</th><th>Kategori</th><th>Aksi</th></tr></thead>
+    <tbody>${feat.map(f => `<tr>
+      <td>${f.poster ? `<img class="poster-thumb" src="${f.poster}" onerror="this.style.opacity='0.3'">` : `<div class="poster-placeholder">N/A</div>`}</td>
+      <td><div style="font-weight:600;font-size:0.82rem">${f.title}</div></td>
+      <td><span class="badge ${f.type==='tv'?'badge-tv':'badge-movie'}">${f.type==='tv'?'SERIES':'FILM'}</span></td>
+      <td>${f.year||'—'}</td>
+      <td>${f.category||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="toggleFeatured(${f.id})">Hapus dari Featured</button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function toggleFeatured(id) {
+  const f = db.films.find(x => x.id === id);
+  if (!f) return;
+  f.featured = f.featured === 'yes' ? 'no' : 'yes';
+  saveDB();
+  updateStats();
+  renderMoviesTable();
+  renderSeriesTable();
+  renderFeatured();
+  toast(f.featured === 'yes' ? '⭐ "' + f.title + '" ditambahkan ke featured!' : '✓ Dihapus dari featured.', 'info');
+  addLog((f.featured==='yes'?'Featured ditambah: ':'Featured dihapus: ') + f.title, 'info');
+}
+
+function filterTable(tbodyId, q) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function removeFilm(id) {
+  const f = db.films.find(x => x.id === id);
+  if (!f) return;
+  if (!confirm('Hapus "' + f.title + '" dari daftar?')) return;
+  db.films = db.films.filter(x => x.id !== id);
+  saveDB();
+  updateStats();
+  renderMoviesTable();
+  renderSeriesTable();
+  renderFeatured();
+  renderRecentFilms();
+  toast('🗑️ "' + f.title + '" dihapus.', 'error');
+  addLog('Film dihapus: ' + f.title, 'error');
+}
+
+// ========================
+// SERVERS
+// ========================
+function renderServers() {
+  const tbody = document.getElementById('serverTbody');
+  tbody.innerHTML = db.servers.map((s, i) => `
+    <tr>
+      <td style="color:var(--muted)">${i + 1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td style="font-family:monospace;font-size:0.72rem;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.url}</td>
+      <td><span class="badge ${s.active ? 'badge-active' : 'badge-hidden'}">${s.active ? 'AKTIF' : 'NONAKTIF'}</span></td>
+      <td>
+        <div style="display:flex;gap:0.3rem">
+          <button class="btn btn-ghost btn-sm" onclick="toggleServer(${s.id})">${s.active ? 'Nonaktifkan' : 'Aktifkan'}</button>
+          <button class="btn btn-danger btn-sm" onclick="removeServer(${s.id})">Hapus</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleServer(id) {
+  const s = db.servers.find(x => x.id === id);
+  if (s) {
+    s.active = s.active ? 0 : 1;
+    saveDB();
+    renderServers();
+    addLog('Server ' + s.name + ': ' + (s.active ? 'diaktifkan' : 'dinonaktifkan'), 'info');
+  }
+}
+
+function removeServer(id) {
+  if (!confirm('Hapus server ini?')) return;
+  const s = db.servers.find(x => x.id === id);
+  db.servers = db.servers.filter(x => x.id !== id);
+  saveDB();
+  renderServers();
+  if (s) addLog('Server dihapus: ' + s.name, 'error');
+}
+
+function openServerModal() {
+  document.getElementById('srvName').value = '';
+  document.getElementById('srvUrl').value = '';
+  document.getElementById('srvActive').value = '1';
+  document.getElementById('serverModal').classList.add('open');
+}
+
+function saveServer() {
+  const name = document.getElementById('srvName').value.trim();
+  const url = document.getElementById('srvUrl').value.trim();
+  const active = parseInt(document.getElementById('srvActive').value);
+  if (!name || !url) { toast('Nama dan URL wajib diisi!', 'error'); return; }
+  db.servers.push({ id: Date.now(), name, url, active });
+  saveDB();
+  closeModal('serverModal');
+  renderServers();
+  toast('✓ Server "' + name + '" ditambahkan!', 'success');
+  addLog('Server embed baru: ' + name, 'success');
+}
+
+// ========================
+// MODAL
+// ========================
+function openAddModal(type = 'movie') {
+  currentAddType = type;
+  selectedTMDB = null;
+  document.getElementById('addModalTitle').textContent = type === 'tv' ? 'Tambah Series / TV' : 'Tambah Film';
+  document.getElementById('tmdbQ').value = '';
+  document.getElementById('tmdbResultsBox').innerHTML = '';
+  document.getElementById('tmdbSelected').style.display = 'none';
+  document.getElementById('mCategory').value = '';
+  document.getElementById('mFeatured').value = 'no';
+  document.getElementById('mQuality').value = 'BLURAY';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function switchTab(tabId, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ========================
+// TMDB SEARCH
+// ========================
+async function doTMDBSearch() {
+  const q = document.getElementById('tmdbQ').value.trim();
+  if (!q) return;
+  const el = document.getElementById('tmdbResultsBox');
+  el.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.8rem">🔍 Mencari...</div>';
+  const url = (db.settings.workerUrl || DEFAULT_WORKER).replace(/\/$/, '');
+  try {
+    const res = await fetch(url + '/search?q=' + encodeURIComponent(q));
+    const data = await res.json();
+    if (data.results && data.results.length) {
+      el.innerHTML = data.results.slice(0, 10).map(m => `
+        <div class="tmdb-result" onclick="selectTMDBItem(${m.id},'${m.media_type||'movie'}','${(m.title||m.name||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;')}','${m.poster_path||''}','${m.release_date||m.first_air_date||''}',${m.vote_average||0},this)">
+          <img class="tmdb-poster" src="${m.poster_path ? IMG+'w92'+m.poster_path : ''}"
+               onerror="this.style.background='var(--surface2)';this.style.opacity='0.3'">
+          <div style="flex:1;min-width:0">
+            <div class="tmdb-title">${m.title || m.name}</div>
+            <div class="tmdb-sub">
+              ⭐ ${(m.vote_average||0).toFixed(1)} &middot;
+              ${(m.release_date||m.first_air_date||'').split('-')[0]||'—'} &middot;
+              <span style="color:${m.media_type==='tv'?'var(--orange)':'var(--blue)'}">${m.media_type==='tv'?'Series':'Film'}</span>
+            </div>
+          </div>
+          <span style="font-size:0.7rem;color:var(--muted)">Pilih →</span>
+        </div>
+      `).join('');
+    } else {
+      el.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--muted);font-size:0.8rem">Tidak ada hasil ditemukan.</div>';
+    }
+  } catch (e) {
+    el.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--accent);font-size:0.8rem">❌ Gagal menghubungi worker API.</div>';
+  }
+}
+
+function selectTMDBItem(id, type, title, poster, date, rating, el) {
+  selectedTMDB = { id, type, title, poster, date, rating };
+  document.querySelectorAll('.tmdb-result').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('tmdbSelected').style.display = 'block';
+  document.getElementById('tmdbSelectedInfo').textContent = title + ' (' + (date.split('-')[0] || '—') + ')';
+}
+
+// ========================
+// SAVE FILM
+// ========================
+function saveFilm() {
+  const activeTab = document.querySelector('.tab-content.active').id;
+  const featured = document.getElementById('mFeatured').value;
+  const category = document.getElementById('mCategory').value.trim();
+  const quality = document.getElementById('mQuality').value;
+
+  let film = null;
+
+  if (activeTab === 'tabTmdb') {
+    if (!selectedTMDB) { toast('Pilih film dari hasil pencarian TMDB!', 'error'); return; }
+    const { id, type, title, poster, date, rating } = selectedTMDB;
+    if (db.films.find(f => String(f.tmdbId) === String(id))) {
+      toast('⚠️ Film ini sudah ada di daftar!', 'error'); return;
+    }
+    film = {
+      id: Date.now(), tmdbId: id, type, title,
+      year: (date || '').split('-')[0] || '—',
+      rating: rating ? parseFloat(rating).toFixed(1) : '—',
+      poster: poster ? IMG + 'w342' + poster : '',
+      overview: '', featured, category, quality,
+      addedAt: new Date().toLocaleString('id-ID'),
+    };
+  } else {
+    const title = document.getElementById('mTitle').value.trim();
+    if (!title) { toast('Judul wajib diisi!', 'error'); return; }
+    film = {
+      id: Date.now(),
+      tmdbId: document.getElementById('mId').value.trim(),
+      type: document.getElementById('mType').value,
+      title,
+      year: document.getElementById('mYear').value.trim() || '—',
+      rating: document.getElementById('mRating').value.trim() || '—',
+      poster: document.getElementById('mPoster').value.trim(),
+      overview: document.getElementById('mOverview').value.trim(),
+      featured, category, quality,
+      addedAt: new Date().toLocaleString('id-ID'),
+    };
+  }
+
+  db.films.push(film);
+  saveDB();
+  closeModal('addModal');
+  updateStats();
+  renderRecentFilms();
+  toast('✓ "' + film.title + '" berhasil disimpan!', 'success');
+  addLog('Film ditambahkan: ' + film.title + ' [' + film.type + ':' + (film.tmdbId||'manual') + ']', 'success');
+
+  // Refresh active table
+  if (film.type === 'movie' && document.getElementById('page-movies').classList.contains('active')) renderMoviesTable();
+  if (film.type === 'tv' && document.getElementById('page-series').classList.contains('active')) renderSeriesTable();
+}
+
+// ========================
+// SETTINGS
+// ========================
+function loadSettings() {
+  const s = db.settings;
+  document.getElementById('cfgWorkerUrl').value = s.workerUrl || DEFAULT_WORKER;
+  document.getElementById('cfgSiteName').value = s.siteName || 'CineXX';
+  document.getElementById('cfgDesc').value = s.desc || '';
+  const lang = document.getElementById('cfgLang');
+  if (lang) lang.value = s.lang || 'id-ID';
+  const pp = document.getElementById('cfgPerPage');
+  if (pp) pp.value = s.perPage || 20;
+
+  const sw = db.switches;
+  setToggle('toggleMaintenance', sw.maintenance);
+  setToggle('toggleNsfw', sw.nsfw);
+  setToggle('toggleHeroRotate', sw.heroRotate);
+  setToggle('toggleRating', sw.rating);
+}
+
+function setToggle(id, val) {
+  const el = document.getElementById(id);
+  if (el) { el.classList.toggle('on', !!val); }
+}
+
+function saveSwitches() {
+  db.switches.maintenance = document.getElementById('toggleMaintenance').classList.contains('on');
+  db.switches.nsfw = document.getElementById('toggleNsfw').classList.contains('on');
+  db.switches.heroRotate = document.getElementById('toggleHeroRotate').classList.contains('on');
+  db.switches.rating = document.getElementById('toggleRating').classList.contains('on');
+  saveDB();
+}
+
+function saveSettings() {
+  const url = document.getElementById('cfgWorkerUrl').value.trim();
+  db.settings.workerUrl = url || DEFAULT_WORKER;
+  db.settings.siteName = document.getElementById('cfgSiteName').value.trim() || 'CineXX';
+  db.settings.desc = document.getElementById('cfgDesc').value.trim();
+  db.settings.lang = document.getElementById('cfgLang').value;
+  db.settings.perPage = parseInt(document.getElementById('cfgPerPage').value) || 20;
+  saveDB();
+  toast('✓ Pengaturan berhasil disimpan!', 'success');
+  addLog('Pengaturan sistem diperbarui', 'info');
+  checkWorker();
+}
+
+function changePassword() {
+  const p1 = document.getElementById('newPass').value;
+  const p2 = document.getElementById('confirmPass').value;
+  if (!p1 || p1.length < 6) { toast('Password minimal 6 karakter!', 'error'); return; }
+  if (p1 !== p2) { toast('Password tidak cocok!', 'error'); return; }
+  db.settings.passHash = btoa(p1);
+  saveDB();
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+  toast('✓ Password berhasil diubah!', 'success');
+  addLog('Password admin diubah', 'info');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cinexx_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  addLog('Data diekspor ke JSON', 'info');
+  toast('📥 Backup berhasil diunduh.', 'success');
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (imported.films) db.films = imported.films;
+      if (imported.servers) db.servers = imported.servers;
+      if (imported.settings) db.settings = { ...db.settings, ...imported.settings };
+      if (imported.switches) db.switches = { ...db.switches, ...imported.switches };
+      if (imported.logs) db.logs = imported.logs;
+      saveDB();
+      toast('✓ Data berhasil diimpor!', 'success');
+      addLog('Data diimpor dari file JSON', 'success');
+      updateStats();
+      renderRecentFilms();
+    } catch (err) {
+      toast('❌ File JSON tidak valid!', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAllData() {
+  if (!confirm('⚠️ Hapus SEMUA data film dan log? Pengaturan tidak akan ikut terhapus.\n\nTindakan ini tidak bisa dibatalkan!')) return;
+  db.films = [];
+  db.logs = [];
+  saveDB();
+  updateStats();
+  renderRecentFilms();
+  renderMoviesTable();
+  renderSeriesTable();
+  renderFeatured();
+  toast('🗑️ Semua data dihapus.', 'error');
+  addLog('RESET: semua data film dan log dihapus', 'error');
+}
+
+// ========================
+// MODAL OUTSIDE CLICK
+// ========================
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => {
+    if (e.target === bg) bg.classList.remove('open');
+  });
+});
+
+document.getElementById('tmdbQ').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doTMDBSearch();
+});
+
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ========================
+// INIT
+// ========================
+function initPanel() {
+  updateStats();
+  renderRecentFilms();
+  checkWorker();
+  setTimeout(loadTrending, 600);
+}
+
+loadDB();
+</script>
+</body>
+</html>
