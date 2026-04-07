@@ -1,0 +1,25 @@
+# =============================================
+# robots.txt for CINESTREAM
+# =============================================
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /sitemap.xml
+
+# Jangan di-crawl halaman sensitif
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /api/
+Disallow: /functions/
+Disallow: /private/
+Disallow: /*?token=
+Disallow: /*?*
+Disallow: /upload
+
+# Crawl delay (opsional, biar tidak terlalu agresif)
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://cinestream.kraxx.my.id/sitemap.xml
