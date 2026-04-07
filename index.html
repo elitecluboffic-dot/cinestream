@@ -4,125 +4,488 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CINESTREAM - Public Foto</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <script>
-    tailwind.config = {
-      content: ["*"],
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
-    body {
-      background: #0a0a0a;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:       #e11d48;
+      --pink-light: #fb7185;
+      --pink-glow:  rgba(225, 29, 72, 0.18);
+      --rose:       #be123c;
+      --bg:         #07070d;
+      --bg2:        #0f0f1a;
+      --bg3:        #161625;
+      --surface:    rgba(255,255,255,0.04);
+      --surface2:   rgba(255,255,255,0.07);
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+      --text:       #f8fafc;
+      --muted:      #94a3b8;
+      --muted2:     #475569;
+      --radius-sm:  10px;
+      --radius-md:  16px;
+      --radius-lg:  22px;
+      --radius-xl:  32px;
+      --nav-h:      68px;
     }
 
-    /* Nebula Video Background */
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Nebula Background ── */
     .hero-video {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       object-fit: cover;
       z-index: -2;
-      filter: brightness(0.5) contrast(1.1) saturate(1.4);
+      filter: brightness(0.22) saturate(1.6) contrast(1.15);
     }
-
     .overlay {
-      position: fixed;
-      top: 0; left: 0;
+      position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
-      background: linear-gradient(180deg, rgba(10,10,20,0.85) 0%, rgba(15,10,35,0.9) 100%);
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(225,29,72,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.10) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(7,7,13,0.7) 0%, rgba(7,7,13,0.92) 100%);
       z-index: -1;
     }
 
+    /* ── Navbar ── */
     .navbar {
-      background: rgba(15, 15, 20, 0.95);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky; top: 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(7,7,13,0.88);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar-inner {
+      max-width: 1440px; margin: 0 auto;
+      height: 100%; display: flex; align-items: center;
+      padding: 0 28px; gap: 24px;
+    }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .navbar-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #e11d48, #9333ea);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff;
+      box-shadow: 0 0 20px rgba(225,29,72,0.35);
+    }
+    .navbar-title {
+      font-size: 18px; font-weight: 800;
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, #fff 40%, #fb7185);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .search-wrap {
+      flex: 1; max-width: 480px; position: relative;
+    }
+    .search-wrap i {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--muted2); font-size: 14px; pointer-events: none;
+    }
+    #search {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0 20px 0 42px;
+      height: 42px;
+      color: var(--text);
+      font-size: 14px; font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #search::placeholder { color: var(--muted2); }
+    #search:focus {
+      border-color: rgba(225,29,72,0.5);
+      background: var(--surface2);
+    }
+    .navbar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 18px; height: 40px;
+      border-radius: 100px;
+      font-size: 13.5px; font-weight: 600; font-family: inherit;
+      cursor: pointer; border: none; outline: none;
+      text-decoration: none; white-space: nowrap;
+      transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      letter-spacing: 0.01em;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(225,29,72,0.30);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(225,29,72,0.45);
+      filter: brightness(1.08);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+    .btn-outline:hover { background: var(--surface2); }
+
+    .btn-link {
+      background: none; border: none;
+      color: var(--muted); font-size: 13.5px; font-weight: 500;
+      cursor: pointer; padding: 0 8px; height: auto;
+      letter-spacing: 0; transition: color 0.2s;
+    }
+    .btn-link:hover { color: var(--text); }
+
+    .badge-admin {
+      background: rgba(139,92,246,0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(139,92,246,0.25);
+      font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .badge-admin:hover { background: rgba(139,92,246,0.25); }
+
+    /* ── Feed grid ── */
+    #feed {
+      columns: 1; gap: 20px;
+      padding: 32px 0 80px;
+    }
+    @media (min-width: 640px)  { #feed { columns: 2; } }
+    @media (min-width: 1024px) { #feed { columns: 3; } }
+    @media (min-width: 1280px) { #feed { columns: 4; } }
+    @media (min-width: 1536px) { #feed { columns: 5; } }
+
+    .feed-wrap {
+      max-width: 1440px; margin: 0 auto; padding: 0 24px;
+      position: relative; z-index: 10;
     }
 
+    /* ── Cards ── */
     .card {
-      background: rgba(30, 30, 40, 0.95);
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      break-inside: avoid; margin-bottom: 20px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.35s, border-color 0.35s;
+      will-change: transform;
     }
     .card:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 25px 50px -12px rgba(236, 72, 153, 0.3);
-      border-color: rgba(236, 72, 153, 0.4);
+      transform: translateY(-8px);
+      border-color: rgba(225,29,72,0.30);
+      box-shadow: 0 24px 48px -8px rgba(0,0,0,0.6),
+                  0 0 0 1px rgba(225,29,72,0.15);
+    }
+    .card-media {
+      width: 100%; display: block;
+      aspect-ratio: 4/3; object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .card:hover .card-media { transform: scale(1.04); }
+    .card-body { padding: 14px 16px 16px; }
+    .card-title {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .card-author { font-size: 12px; color: var(--muted); }
+    .card-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .card-stat {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12.5px; font-weight: 500;
+    }
+    .card-stat.likes { color: #fb7185; }
+    .card-stat.comments { color: var(--muted); }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; padding: 16px;
+    }
+    .modal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-xl);
+      max-width: 1100px; width: 100%;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 60px 120px rgba(0,0,0,0.8);
+      display: flex; flex-direction: row;
+      max-height: 92vh;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px; z-index: 10;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border2);
+      color: var(--muted); font-size: 17px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+    .modal-media-pane {
+      flex: 3; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; min-height: 400px;
+    }
+    .modal-media-pane img,
+    .modal-media-pane video {
+      max-height: 80vh; width: 100%;
+      object-fit: contain; border-radius: var(--radius-md);
     }
 
-    .btn-pink {
-      background: linear-gradient(90deg, #e11d48, #db2777);
-      transition: all 0.3s ease;
+    .modal-info-pane {
+      flex: 2; display: flex; flex-direction: column;
+      height: 80vh; max-height: 80vh;
+      border-left: 1px solid var(--border);
     }
-    .btn-pink:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 25px rgba(225, 29, 72, 0.5);
+    .modal-header {
+      padding: 22px 22px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .modal-author { font-size: 13px; color: var(--muted); }
+
+    .modal-actions {
+      display: flex; align-items: center; gap: 20px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-action-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--muted); transition: color 0.2s;
+      padding: 6px 0;
+    }
+    .modal-action-btn:hover { color: var(--text); }
+    .modal-action-btn.liked { color: #fb7185; }
+
+    .modal-comments {
+      flex: 1; overflow-y: auto; padding: 16px 22px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .modal-comments::-webkit-scrollbar { width: 4px; }
+    .modal-comments::-webkit-scrollbar-track { background: transparent; }
+    .modal-comments::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    .comment-item { display: flex; flex-direction: column; gap: 3px; }
+    .comment-user { font-size: 13px; font-weight: 600; color: #fb7185; }
+    .comment-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+
+    .modal-comment-form {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center;
+    }
+    .modal-comment-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0 16px; height: 40px;
+      color: var(--text); font-size: 13.5px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .modal-comment-form input::placeholder { color: var(--muted2); }
+    .modal-comment-form input:focus { border-color: rgba(225,29,72,0.5); }
+    .modal-comment-form .btn-send {
+      height: 40px; padding: 0 20px; border-radius: 100px;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .modal-comment-form .btn-send:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .modal-login-hint {
+      padding: 14px 22px; text-align: center;
+      color: var(--muted2); font-size: 13px;
+      border-top: 1px solid var(--border);
     }
 
-    .modal-content {
-      background: #18181b;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+    /* ── Upload Modal ── */
+    #upload-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; padding: 20px;
+    }
+    .upload-box {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+    }
+    .upload-title {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .upload-subtitle {
+      font-size: 13.5px; color: var(--muted); margin-bottom: 28px;
+    }
+    .upload-field { margin-bottom: 16px; }
+    .upload-field label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .upload-file-area {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px dashed var(--border2);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-file-area:hover { border-color: var(--pink-light); background: var(--surface2); }
+    .upload-file-area input[type="file"] {
+      width: 100%; opacity: 0; position: absolute;
+      inset: 0; cursor: pointer;
+    }
+    .upload-file-label {
+      position: relative; display: block;
+      cursor: pointer;
+    }
+    .upload-file-icon { font-size: 28px; color: var(--muted2); margin-bottom: 8px; }
+    .upload-file-text { font-size: 13.5px; color: var(--muted); }
+    .upload-file-text span { color: #fb7185; font-weight: 600; }
+
+    .upload-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 16px; height: 44px;
+      color: var(--text); font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .upload-input:focus { border-color: rgba(225,29,72,0.5); }
+    .upload-input::placeholder { color: var(--muted2); }
+
+    .upload-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .btn-upload-submit {
+      width: 100%; height: 48px; border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff; font-size: 15px; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: all 0.22s;
+      box-shadow: 0 6px 24px rgba(225,29,72,0.35);
+      font-family: inherit;
+    }
+    .btn-upload-submit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .btn-upload-cancel {
+      width: 100%; height: 44px; border-radius: var(--radius-md);
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .btn-upload-cancel:hover { background: var(--surface2); color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .modal-box { flex-direction: column; max-height: 95vh; }
+      .modal-info-pane { flex: none; height: auto; max-height: 50vh; border-left: none; border-top: 1px solid var(--border); }
+      .modal-media-pane { min-height: 260px; }
+      .search-wrap { max-width: 220px; }
+    }
+    @media (max-width: 580px) {
+      .search-wrap { display: none; }
+      .navbar-inner { padding: 0 16px; gap: 12px; }
     }
   </style>
 
   <script>
     let token = localStorage.getItem('token')
     let currentUser = null
+
     async function checkAuth() {
-      if (!token) {
-        renderNavbar()
-        return
-      }
+      if (!token) { renderNavbar(); return }
       try {
-        const res = await fetch('/api/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        const res = await fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
         if (res.ok) currentUser = await res.json()
-      } catch (e) {}
+      } catch(e) {}
       renderNavbar()
     }
+
     function renderNavbar() {
       const nav = document.getElementById('navbar')
       nav.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between navbar sticky top-0 z-50">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-thumbtack text-3xl text-pink-600"></i>
-            <h1 class="text-2xl font-bold text-white">CINESTREAM</h1>
+        <div class="navbar-inner">
+          <a class="navbar-brand" href="/">
+            <div class="navbar-logo"><i class="fa-solid fa-film"></i></div>
+            <span class="navbar-title">CINESTREAM</span>
+          </a>
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="search" type="text" placeholder="Cari foto atau video...">
           </div>
-       
-          <div class="flex-1 max-w-md mx-8">
-            <input id="search" type="text" placeholder="Cari foto atau video..."
-                   class="w-full bg-zinc-900/80 border border-zinc-700 rounded-3xl px-6 py-3 focus:outline-none focus:border-pink-500 text-white placeholder:text-zinc-500">
-          </div>
-          <div class="flex items-center gap-4">
+          <div class="navbar-actions">
             ${currentUser ? `
-              <button onclick="showUploadModal()" class="btn-pink text-white px-6 py-2.5 rounded-3xl flex items-center gap-2 transition-all font-medium">
-                <i class="fa-solid fa-upload"></i> Unggah
+              <button onclick="showUploadModal()" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-up-from-bracket" style="font-size:12px"></i> Unggah
               </button>
-              ${currentUser.role === 'admin' ? `<a href="/admin.html" class="font-medium text-white hover:text-pink-500">Admin Panel</a>` : ''}
-              <button onclick="logout()" class="text-zinc-400 hover:text-white font-medium">Logout</button>
+              ${currentUser.role === 'admin' ? `<a href="/admin.html" class="badge-admin"><i class="fa-solid fa-shield-halved" style="font-size:11px"></i> Admin</a>` : ''}
+              <button onclick="logout()" class="btn btn-ghost">Keluar</button>
             ` : `
-              <a href="/login.html" class="font-medium text-zinc-400 hover:text-white">Masuk</a>
-              <a href="/register.html" class="bg-white text-black px-6 py-2.5 rounded-3xl transition-all font-medium">Daftar</a>
+              <a href="/login.html" class="btn btn-link">Masuk</a>
+              <a href="/register.html" class="btn btn-primary">Daftar Gratis</a>
             `}
           </div>
         </div>
       `
     }
+
     let allPosts = []
     let displayed = 0
     const PAGE_SIZE = 12
+
     async function loadPosts() {
       try {
         const res = await fetch('/api/posts?approved=true')
@@ -130,10 +493,9 @@
         displayed = 0
         document.getElementById('feed').innerHTML = ''
         renderMorePosts()
-      } catch (e) {
-        console.error(e)
-      }
+      } catch(e) { console.error(e) }
     }
+
     function renderMorePosts() {
       const container = document.getElementById('feed')
       const start = displayed
@@ -141,24 +503,20 @@
       for (let i = start; i < end; i++) {
         const p = allPosts[i]
         const card = document.createElement('div')
-        card.className = "break-inside-avoid mb-6 cursor-pointer group"
+        card.className = 'card'
         card.innerHTML = `
-          <div class="card rounded-3xl overflow-hidden">
+          <div style="overflow:hidden">
             ${p.type === 'image'
-              ? `<img src="${p.url}" class="w-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-300">`
-              : `<video src="${p.url}" class="w-full aspect-[4/3] object-cover" muted loop autoplay playsinline></video>`
+              ? `<img src="${p.url}" class="card-media">`
+              : `<video src="${p.url}" class="card-media" muted loop autoplay playsinline></video>`
             }
-            <div class="p-4">
-              <p class="font-semibold text-lg text-white line-clamp-1">${p.title}</p>
-              <p class="text-sm text-zinc-400">by ${p.username}</p>
-              <div class="flex justify-between items-center mt-3 text-sm">
-                <div class="flex items-center gap-1 text-pink-500">
-                  <i class="fa-solid fa-heart"></i> ${p.likes || 0}
-                </div>
-                <div class="flex items-center gap-1 text-zinc-400">
-                  <i class="fa-solid fa-comment"></i> ${p.comments ? p.comments.length : 0}
-                </div>
-              </div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${p.title}</div>
+            <div class="card-author">oleh <strong style="color:var(--muted)">${p.username}</strong></div>
+            <div class="card-meta">
+              <div class="card-stat likes"><i class="fa-solid fa-heart"></i> ${p.likes || 0}</div>
+              <div class="card-stat comments"><i class="fa-solid fa-comment"></i> ${p.comments ? p.comments.length : 0}</div>
             </div>
           </div>
         `
@@ -171,75 +529,75 @@
         sentinel.id = 'sentinel'
         container.appendChild(sentinel)
         const observer = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting) {
-            observer.disconnect()
-            renderMorePosts()
-          }
+          if (entries[0].isIntersecting) { observer.disconnect(); renderMorePosts() }
         })
         observer.observe(sentinel)
       }
     }
+
     let currentPost = null
     function showPostModal(post) {
       currentPost = post
       const modal = document.getElementById('modal')
       modal.classList.remove('hidden')
+      const likedBySelf = post.likedBy && currentUser && post.likedBy.includes(currentUser.id)
       modal.innerHTML = `
-        <div class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onclick="if(event.target.id==='modal') hideModal()">
-          <div onclick="event.stopImmediatePropagation()" class="modal-content bg-zinc-900 rounded-3xl max-w-6xl w-full overflow-hidden shadow-2xl relative">
-            <button onclick="hideModal()" class="absolute top-4 right-4 z-50 w-11 h-11 flex items-center justify-center text-4xl text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200">✕</button>
-            <div class="flex flex-col lg:flex-row">
-              <div class="lg:w-3/5 bg-black flex items-center justify-center p-4">
-                ${post.type === 'image'
-                  ? `<img src="${post.url}" class="max-h-[85vh] w-full object-contain rounded-2xl">`
-                  : `<video src="${post.url}" controls class="max-h-[85vh] w-full rounded-2xl"></video>`
+        <div class="modal-backdrop" id="modal-backdrop" onclick="if(event.target.id==='modal-backdrop')hideModal()">
+          <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="hideModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-media-pane">
+              ${post.type === 'image'
+                ? `<img src="${post.url}">`
+                : `<video src="${post.url}" controls></video>`
+              }
+            </div>
+            <div class="modal-info-pane">
+              <div class="modal-header">
+                <div class="modal-title">${post.title}</div>
+                <div class="modal-author">oleh ${post.username}</div>
+              </div>
+              <div class="modal-actions">
+                <button onclick="toggleLike()" class="modal-action-btn ${likedBySelf ? 'liked' : ''}">
+                  <i class="fa-solid fa-heart"></i>
+                  <span id="modal-likes">${post.likes || 0}</span> suka
+                </button>
+                <div class="modal-action-btn" style="cursor:default">
+                  <i class="fa-solid fa-comment"></i>
+                  <span>${post.comments ? post.comments.length : 0}</span> komentar
+                </div>
+              </div>
+              <div class="modal-comments" id="comments-list">
+                ${(post.comments || []).length === 0
+                  ? `<p style="color:var(--muted2);font-size:13px;text-align:center;padding:20px 0">Belum ada komentar</p>`
+                  : (post.comments || []).map(c => `
+                      <div class="comment-item">
+                        <span class="comment-user">${c.username}</span>
+                        <span class="comment-text">${c.text}</span>
+                      </div>
+                    `).join('')
                 }
               </div>
-              <div class="lg:w-2/5 flex flex-col h-[85vh]">
-                <div class="p-6 border-b border-zinc-800">
-                  <h2 class="text-2xl font-bold text-white">${post.title}</h2>
-                  <p class="text-zinc-400">by ${post.username}</p>
+              ${currentUser ? `
+                <div class="modal-comment-form">
+                  <input id="comment-input" type="text" placeholder="Tulis komentar...">
+                  <button class="btn-send" onclick="postComment()">Kirim</button>
                 </div>
-                <div class="p-6 flex gap-8 text-xl border-b border-zinc-800">
-                  <button onclick="toggleLike()" class="flex items-center gap-3 text-white hover:text-pink-500 transition-colors">
-                    <i class="fa-solid fa-heart ${post.likedBy && post.likedBy.includes(currentUser?.id) ? 'text-pink-500' : 'text-zinc-400'}"></i>
-                    <span id="modal-likes" class="text-lg">${post.likes || 0}</span>
-                  </button>
-                  <div class="flex items-center gap-3 text-zinc-400">
-                    <i class="fa-solid fa-comment"></i>
-                    <span class="text-lg">${post.comments ? post.comments.length : 0}</span>
-                  </div>
+              ` : `
+                <div class="modal-login-hint">
+                  <a href="/login.html" style="color:#fb7185">Masuk</a> untuk memberikan komentar
                 </div>
-                <div class="flex-1 overflow-y-auto p-6 space-y-5 text-white" id="comments-list">
-                  ${(post.comments || []).map(c => `
-                    <div>
-                      <strong class="text-pink-400">${c.username}</strong>
-                      <p class="text-zinc-300 text-[15px] mt-1">${c.text}</p>
-                    </div>
-                  `).join('')}
-                </div>
-                ${currentUser ? `
-                  <div class="p-6 border-t border-zinc-800">
-                    <div class="flex gap-3">
-                      <input id="comment-input" type="text" placeholder="Tulis komentar..."
-                             class="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-3 text-white focus:outline-none focus:border-pink-500">
-                      <button onclick="postComment()" class="bg-pink-600 hover:bg-pink-700 px-8 rounded-3xl font-medium transition-all">Kirim</button>
-                    </div>
-                  </div>
-                ` : `
-                  <div class="p-6 text-center text-zinc-500 border-t border-zinc-800">
-                    Login untuk memberikan komentar
-                  </div>
-                `}
-              </div>
+              `}
             </div>
           </div>
         </div>
       `
     }
+
     function hideModal() {
       document.getElementById('modal').classList.add('hidden')
+      document.getElementById('modal').innerHTML = ''
     }
+
     async function toggleLike() {
       if (!currentUser) return alert('Login dulu')
       const res = await fetch('/api/like', {
@@ -253,6 +611,7 @@
         showPostModal(currentPost)
       }
     }
+
     async function postComment() {
       const input = document.getElementById('comment-input')
       if (!input.value.trim()) return
@@ -268,21 +627,37 @@
         showPostModal(currentPost)
       }
     }
+
     function showUploadModal() {
-      const modalHTML = `
-        <div id="upload-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
-          <div class="bg-zinc-900 rounded-3xl p-8 max-w-md w-full mx-4 text-white">
-            <h2 class="text-2xl font-bold mb-6">Unggah Foto / Video</h2>
+      const html = `
+        <div id="upload-modal">
+          <div class="upload-box">
+            <div class="upload-title">Unggah Konten</div>
+            <div class="upload-subtitle">Foto atau video akan ditinjau sebelum ditampilkan</div>
             <form id="upload-form">
-              <input type="file" id="file-input" accept="image/*,video/*" class="block w-full mb-4 bg-zinc-800 border border-zinc-700 rounded-2xl p-4 text-white">
-              <input id="title-input" type="text" placeholder="Judul postingan" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-4 mb-6 text-white" required>
-              <button type="submit" class="w-full bg-pink-600 text-white py-4 rounded-3xl text-lg font-medium hover:bg-pink-700">Unggah Sekarang</button>
+              <div class="upload-field">
+                <label>File</label>
+                <div class="upload-file-area">
+                  <label class="upload-file-label">
+                    <input type="file" id="file-input" accept="image/*,video/*" style="position:absolute;opacity:0;inset:0;cursor:pointer">
+                    <div class="upload-file-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="upload-file-text">Seret file ke sini atau <span>pilih file</span></div>
+                  </label>
+                </div>
+              </div>
+              <div class="upload-field">
+                <label>Judul</label>
+                <input id="title-input" class="upload-input" type="text" placeholder="Masukkan judul postingan" required>
+              </div>
+              <div class="upload-actions">
+                <button type="submit" class="btn-upload-submit"><i class="fa-solid fa-arrow-up-from-bracket"></i> Unggah Sekarang</button>
+                <button type="button" class="btn-upload-cancel" onclick="document.getElementById('upload-modal').remove()">Batal</button>
+              </div>
             </form>
-            <button onclick="document.getElementById('upload-modal').remove()" class="mt-4 text-zinc-400 hover:text-white w-full py-3">Batal</button>
           </div>
         </div>
       `
-      document.body.insertAdjacentHTML('beforeend', modalHTML)
+      document.body.insertAdjacentHTML('beforeend', html)
       document.getElementById('upload-form').addEventListener('submit', async e => {
         e.preventDefault()
         const file = document.getElementById('file-input').files[0]
@@ -305,33 +680,38 @@
         }
       })
     }
+
     function logout() {
       localStorage.removeItem('token')
       location.reload()
     }
-    document.addEventListener('keydown', (e) => {
-      if (e.key === "Escape") {
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
         const modal = document.getElementById('modal')
         if (!modal.classList.contains('hidden')) hideModal()
       }
     })
+
     window.onload = () => {
       checkAuth()
       loadPosts()
     }
   </script>
 </head>
-<body class="font-sans">
+<body>
   <!-- Nebula Background -->
   <video class="hero-video" autoplay muted loop playsinline>
     <source src="https://assets.mixkit.co/videos/preview/343/343-large.mp4" type="video/mp4">
   </video>
   <div class="overlay"></div>
 
-  <nav id="navbar" class="sticky top-0 bg-white shadow-sm z-50"></nav>
-  <div class="max-w-7xl mx-auto px-4 pt-8 relative z-10">
-    <div id="feed" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5 gap-8"></div>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="feed-wrap">
+    <div id="feed"></div>
   </div>
+
   <div id="modal" class="hidden"></div>
 </body>
 </html>
