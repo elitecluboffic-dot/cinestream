@@ -4,95 +4,417 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masuk - CINESTREAM</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script>
-    tailwind.config = { content: ["*"], theme: { extend: {} } }
-  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #f5004f;
+      --pink-dim: #c4003f;
+      --bg: #080a0f;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text: #f0f0f0;
+      --muted: #6b7280;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    /* Cinematic background */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(245,0,79,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(120,0,200,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 100% at 50% 50%, #0d0f18 0%, #080a0f 100%);
+    }
+
+    /* Film grain overlay */
+    .grain {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px 128px;
+    }
+
+    /* Decorative film strip lines */
+    .line-l, .line-r {
+      position: fixed; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(to bottom, transparent 0%, var(--border) 30%, var(--border) 70%, transparent 100%);
+      z-index: 1;
+    }
+    .line-l { left: 12%; }
+    .line-r { right: 12%; }
+
+    /* Card */
+    .card {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 440px;
+      margin: 0 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 44px 44px;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 40px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(245,0,79,0.04);
+      animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo */
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 36px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--pink);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff;
+      box-shadow: 0 4px 16px rgba(245,0,79,0.4);
+    }
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+
+    /* Heading */
+    .heading { font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .subheading { font-size: 14px; color: var(--muted); margin-bottom: 36px; line-height: 1.5; }
+
+    /* Input */
+    .input-wrap {
+      position: relative; margin-bottom: 14px;
+    }
+    .input-icon {
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 14px; pointer-events: none;
+    }
+    .input-field {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px 18px 15px 44px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input-field::placeholder { color: #404550; }
+    .input-field:focus {
+      border-color: var(--pink);
+      background: rgba(245,0,79,0.04);
+      box-shadow: 0 0 0 3px rgba(245,0,79,0.1);
+    }
+
+    /* OTP boxes */
+    .otp-row {
+      display: flex; gap: 10px; margin-bottom: 14px;
+    }
+    .otp-box {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 58px;
+      text-align: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 1px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      caret-color: var(--pink);
+    }
+    .otp-box:focus {
+      border-color: var(--pink);
+      background: rgba(245,0,79,0.04);
+      box-shadow: 0 0 0 3px rgba(245,0,79,0.1);
+    }
+
+    /* Button */
+    .btn-primary {
+      width: 100%;
+      background: var(--pink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(245,0,79,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--pink-dim);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(245,0,79,0.4);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 10px;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* Message */
+    .msg {
+      font-size: 13px;
+      min-height: 20px;
+      margin-top: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .msg.success { color: #34d399; }
+    .msg.error   { color: #f87171; }
+    .msg.info    { color: var(--muted); }
+
+    /* Step transition */
+    .step { transition: all 0.3s ease; }
+    .step.hidden { display: none; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin: 20px 0 0;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-text { font-size: 12px; color: #383d47; }
+
+    /* Footer */
+    .card-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .card-footer span { font-size: 12px; color: #383d47; }
+    .card-footer i { font-size: 11px; color: #383d47; }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    /* OTP hint */
+    .otp-hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .otp-hint span { color: rgba(245,0,79,0.8); font-weight: 500; }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-  <div class="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md">
-    <div class="flex justify-center mb-8">
-      <i class="fa-solid fa-thumbtack text-6xl text-pink-600"></i>
-    </div>
-    <h1 class="text-3xl font-bold text-center mb-2">Masuk ke CINESTREAM</h1>
-    <p class="text-center text-gray-500 mb-8">Masukkan email untuk menerima kode OTP</p>
+<body>
+  <div class="bg-layer"></div>
+  <div class="grain"></div>
+  <div class="line-l"></div>
+  <div class="line-r"></div>
 
-    <div id="step-email">
-      <input id="email-input" type="email" placeholder="Email Anda" value="elitecluboffic@gmail.com"
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-4 focus:outline-none focus:border-pink-500">
-      <button onclick="sendOTP()" 
-              class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
-        Kirim Kode OTP
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
+      <div class="logo-text">CINESTREAM</div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div id="step-email" class="step">
+      <h1 class="heading">Selamat datang</h1>
+      <p class="subheading">Masukkan email untuk menerima kode verifikasi</p>
+
+      <div class="input-wrap">
+        <i class="fa-regular fa-envelope input-icon"></i>
+        <input id="email-input" type="email" placeholder="Email Anda"
+               value="elitecluboffic@gmail.com" class="input-field"
+               onkeydown="if(event.key==='Enter') sendOTP()">
+      </div>
+
+      <button onclick="sendOTP()" class="btn-primary" id="btn-send">
+        <div class="spinner" id="spin-send"></div>
+        <span id="btn-send-text">Kirim Kode OTP</span>
+        <i class="fa-solid fa-arrow-right" id="btn-send-icon" style="font-size:13px"></i>
       </button>
     </div>
 
-    <div id="step-otp" class="hidden">
-      <input id="otp-input" type="text" maxlength="6" placeholder="Masukkan 6 digit OTP" 
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-4 text-center text-2xl tracking-widest focus:outline-none focus:border-pink-500">
-      <button onclick="verifyOTP()" 
-              class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
-        Verifikasi OTP
+    <!-- Step 2: OTP -->
+    <div id="step-otp" class="step hidden">
+      <h1 class="heading">Cek email kamu</h1>
+      <p class="otp-hint">Kode 6 digit telah dikirim ke<br><span id="email-display"></span></p>
+
+      <div class="otp-row" id="otp-row">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      </div>
+
+      <button onclick="verifyOTP()" class="btn-primary" id="btn-verify">
+        <div class="spinner" id="spin-verify"></div>
+        <span id="btn-verify-text">Verifikasi</span>
+        <i class="fa-solid fa-shield-check" id="btn-verify-icon" style="font-size:13px"></i>
       </button>
-      <button onclick="backToEmail()" class="mt-4 text-gray-500 w-full">← Kembali</button>
+
+      <button onclick="backToEmail()" class="btn-ghost">
+        <i class="fa-solid fa-arrow-left" style="margin-right:6px;font-size:12px"></i>Ganti email
+      </button>
     </div>
 
-    <p id="message" class="text-center mt-6 text-sm text-gray-500"></p>
+    <p id="message" class="msg info"></p>
+
+    <div class="card-footer">
+      <i class="fa-solid fa-lock"></i>
+      <span>Login aman dengan OTP — tanpa password</span>
+    </div>
   </div>
 
   <script>
+    // OTP box logic
+    const otpBoxes = document.querySelectorAll('.otp-box');
+    otpBoxes.forEach((box, i) => {
+      box.addEventListener('input', e => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val;
+        if (val && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
+        if (getOTPValue().length === 6) verifyOTP();
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && i > 0) {
+          otpBoxes[i - 1].focus();
+          otpBoxes[i - 1].value = '';
+        }
+      });
+      box.addEventListener('paste', e => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        pasted.split('').forEach((ch, idx) => { if (otpBoxes[idx]) otpBoxes[idx].value = ch; });
+        if (otpBoxes[pasted.length - 1]) otpBoxes[pasted.length - 1].focus();
+        if (pasted.length === 6) verifyOTP();
+      });
+    });
+
+    function getOTPValue() {
+      return Array.from(otpBoxes).map(b => b.value).join('');
+    }
+
+    function setMsg(text, type = 'info') {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
+
+    function setLoading(btnId, spinId, iconId, loading) {
+      document.getElementById(btnId).disabled = loading;
+      document.getElementById(spinId).style.display = loading ? 'block' : 'none';
+      document.getElementById(iconId).style.display = loading ? 'none' : 'inline';
+    }
+
     async function sendOTP() {
       const email = document.getElementById('email-input').value.trim();
-      const messageEl = document.getElementById('message');
-
-      if (!email) return messageEl.textContent = "Masukkan email terlebih dahulu";
-
-      messageEl.textContent = "Mengirim OTP...";
-
-      const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        document.getElementById('step-email').classList.add('hidden');
-        document.getElementById('step-otp').classList.remove('hidden');
-        messageEl.textContent = "Kode OTP telah dikirim ke email Anda";
-      } else {
-        messageEl.textContent = data.error || "Gagal mengirim OTP";
+      if (!email) return setMsg("Masukkan email terlebih dahulu", 'error');
+      setLoading('btn-send', 'spin-send', 'btn-send-icon', true);
+      setMsg("Mengirim kode...", 'info');
+      try {
+        const res = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('email-display').textContent = email;
+          document.getElementById('step-email').classList.add('hidden');
+          document.getElementById('step-otp').classList.remove('hidden');
+          otpBoxes[0].focus();
+          setMsg("Kode dikirim! Cek inbox atau spam kamu.", 'success');
+        } else {
+          setMsg(data.error || "Gagal mengirim OTP", 'error');
+        }
+      } catch {
+        setMsg("Terjadi kesalahan jaringan", 'error');
       }
+      setLoading('btn-send', 'spin-send', 'btn-send-icon', false);
     }
 
     async function verifyOTP() {
       const email = document.getElementById('email-input').value.trim();
-      const otp = document.getElementById('otp-input').value.trim();
-      const messageEl = document.getElementById('message');
-
-      if (otp.length !== 6) return messageEl.textContent = "OTP harus 6 digit";
-
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        localStorage.setItem('token', data.token);
-        window.location.href = '/';
-      } else {
-        messageEl.textContent = data.error || "OTP salah";
+      const otp = getOTPValue();
+      if (otp.length !== 6) return setMsg("Masukkan 6 digit kode OTP", 'error');
+      setLoading('btn-verify', 'spin-verify', 'btn-verify-icon', true);
+      setMsg("Memverifikasi...", 'info');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          setMsg("Login berhasil! Mengalihkan...", 'success');
+          setTimeout(() => window.location.href = '/', 800);
+        } else {
+          setMsg(data.error || "OTP salah atau kadaluarsa", 'error');
+          otpBoxes.forEach(b => b.value = '');
+          otpBoxes[0].focus();
+          setLoading('btn-verify', 'spin-verify', 'btn-verify-icon', false);
+        }
+      } catch {
+        setMsg("Terjadi kesalahan jaringan", 'error');
+        setLoading('btn-verify', 'spin-verify', 'btn-verify-icon', false);
       }
     }
 
     function backToEmail() {
       document.getElementById('step-email').classList.remove('hidden');
       document.getElementById('step-otp').classList.add('hidden');
-      document.getElementById('message').textContent = '';
+      otpBoxes.forEach(b => b.value = '');
+      setMsg('', 'info');
     }
   </script>
 </body>
