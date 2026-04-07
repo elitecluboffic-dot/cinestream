@@ -3,15 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CINESTREAM - Public Foto & Video</title>
-  
+  <title>CINESTREAM - Public Foto</title>
+ 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <script>
     tailwind.config = {
       content: ["*"],
-      theme: { extend: {} }
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
     }
   </script>
 
@@ -41,12 +47,11 @@
             <i class="fa-solid fa-thumbtack text-3xl text-pink-600"></i>
             <h1 class="text-2xl font-bold text-gray-900">CINESTREAM</h1>
           </div>
-          
+         
           <div class="flex-1 max-w-md mx-8">
-            <input id="search" type="text" placeholder="Cari foto atau video..." 
+            <input id="search" type="text" placeholder="Cari foto atau video..."
                    class="w-full bg-gray-100 border border-gray-300 rounded-3xl px-6 py-3 focus:outline-none focus:border-pink-500">
           </div>
-
           <div class="flex items-center gap-4">
             ${currentUser ? `
               <button onclick="showUploadModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-3xl flex items-center gap-2 transition-all">
@@ -87,15 +92,15 @@
       for (let i = start; i < end; i++) {
         const p = allPosts[i]
         const card = document.createElement('div')
-        card.className = "break-inside-avoid mb-6 cursor-pointer"
+        card.className = "break-inside-avoid mb-6 cursor-pointer group"
         card.innerHTML = `
-          <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
-            ${p.type === 'image' 
-              ? `<img src="${p.url}" class="w-full object-cover" style="aspect-ratio: ${Math.random()*0.6 + 0.8}">`
-              : `<video src="${p.url}" class="w-full" muted loop autoplay playsinline></video>`
+          <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300">
+            ${p.type === 'image'
+              ? `<img src="${p.url}" class="w-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-300">`
+              : `<video src="${p.url}" class="w-full aspect-[4/3] object-cover" muted loop autoplay playsinline></video>`
             }
             <div class="p-4">
-              <p class="font-semibold text-gray-900">${p.title}</p>
+              <p class="font-semibold text-gray-900 line-clamp-1">${p.title}</p>
               <p class="text-sm text-gray-500">by ${p.username}</p>
               <div class="flex justify-between items-center mt-3 text-sm">
                 <div class="flex items-center gap-1"><i class="fa-solid fa-heart text-pink-500"></i> ${p.likes || 0}</div>
@@ -107,8 +112,8 @@
         card.onclick = () => showPostModal(p)
         container.appendChild(card)
       }
-      displayed = end
 
+      displayed = end
       if (displayed < allPosts.length) {
         const sentinel = document.createElement('div')
         sentinel.id = 'sentinel'
@@ -129,46 +134,74 @@
       currentPost = post
       const modal = document.getElementById('modal')
       modal.classList.remove('hidden')
+
       modal.innerHTML = `
-        <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onclick="if(event.target.id==='modal')hideModal()">
-          <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-4xl w-full mx-4 overflow-hidden">
-            <div class="flex flex-col md:flex-row">
-              <div class="flex-1 bg-black">
-                ${post.type === 'image' 
-                  ? `<img src="${post.url}" class="w-full max-h-[80vh] object-contain">`
-                  : `<video src="${post.url}" controls class="w-full max-h-[80vh]"></video>`
+        <div class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onclick="if(event.target.id==='modal') hideModal()">
+          
+          <div onclick="event.stopImmediatePropagation()" 
+               class="bg-zinc-900 rounded-3xl max-w-6xl w-full overflow-hidden shadow-2xl relative">
+            
+            <!-- Close Button -->
+            <button onclick="hideModal()" 
+                    class="absolute top-4 right-4 z-50 w-11 h-11 flex items-center justify-center text-4xl text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200">
+              ✕
+            </button>
+
+            <div class="flex flex-col lg:flex-row">
+              <!-- Media Section -->
+              <div class="lg:w-3/5 bg-black flex items-center justify-center p-4">
+                ${post.type === 'image'
+                  ? `<img src="${post.url}" class="max-h-[85vh] w-full object-contain rounded-2xl">`
+                  : `<video src="${post.url}" controls class="max-h-[85vh] w-full rounded-2xl"></video>`
                 }
               </div>
-              <div class="flex-1 p-6">
-                <h2 class="text-2xl font-bold">${post.title}</h2>
-                <p class="text-gray-500">by ${post.username}</p>
-                
-                <div class="flex gap-6 my-6 text-xl">
-                  <button onclick="toggleLike()" class="flex items-center gap-2">
-                    <i class="fa-solid fa-heart ${post.likedBy && post.likedBy.includes(currentUser?.id) ? 'text-pink-500' : 'text-gray-400'}"></i>
-                    <span id="modal-likes">${post.likes || 0}</span>
+
+              <!-- Info Section -->
+              <div class="lg:w-2/5 flex flex-col h-[85vh]">
+                <div class="p-6 border-b border-zinc-800">
+                  <h2 class="text-2xl font-bold text-white">${post.title}</h2>
+                  <p class="text-zinc-400">by ${post.username}</p>
+                </div>
+
+                <!-- Like & Comment Count -->
+                <div class="p-6 flex gap-8 text-xl border-b border-zinc-800">
+                  <button onclick="toggleLike()" class="flex items-center gap-3 text-white hover:text-pink-500 transition-colors">
+                    <i class="fa-solid fa-heart ${post.likedBy && post.likedBy.includes(currentUser?.id) ? 'text-pink-500' : 'text-zinc-400'}"></i>
+                    <span id="modal-likes" class="text-lg">${post.likes || 0}</span>
                   </button>
-                  <div class="flex items-center gap-2 text-gray-600">
-                    <i class="fa-solid fa-comment"></i> ${post.comments ? post.comments.length : 0}
+                  <div class="flex items-center gap-3 text-zinc-400">
+                    <i class="fa-solid fa-comment"></i>
+                    <span class="text-lg">${post.comments ? post.comments.length : 0}</span>
                   </div>
                 </div>
 
-                <div class="max-h-96 overflow-y-auto mb-6 space-y-4" id="comments-list">
+                <!-- Comments -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-5 text-white" id="comments-list">
                   ${(post.comments || []).map(c => `
                     <div>
-                      <strong class="text-sm">${c.username}</strong>
-                      <p class="text-gray-600 text-sm">${c.text}</p>
+                      <strong class="text-pink-400">${c.username}</strong>
+                      <p class="text-zinc-300 text-[15px] mt-1">${c.text}</p>
                     </div>
                   `).join('')}
                 </div>
 
+                <!-- Comment Input -->
                 ${currentUser ? `
-                  <div class="flex gap-2">
-                    <input id="comment-input" type="text" placeholder="Tulis komentar..." 
-                           class="flex-1 border border-gray-300 rounded-3xl px-5 py-3 focus:outline-none focus:border-pink-500">
-                    <button onclick="postComment()" class="bg-pink-600 text-white px-8 rounded-3xl">Kirim</button>
+                  <div class="p-6 border-t border-zinc-800">
+                    <div class="flex gap-3">
+                      <input id="comment-input" type="text" placeholder="Tulis komentar..."
+                             class="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-3 text-white focus:outline-none focus:border-pink-500">
+                      <button onclick="postComment()" 
+                              class="bg-pink-600 hover:bg-pink-700 px-8 rounded-3xl font-medium transition-all">
+                        Kirim
+                      </button>
+                    </div>
                   </div>
-                ` : `<p class="text-sm text-gray-500">Login untuk memberikan komentar</p>`}
+                ` : `
+                  <div class="p-6 text-center text-zinc-500 border-t border-zinc-800">
+                    Login untuk memberikan komentar
+                  </div>
+                `}
               </div>
             </div>
           </div>
@@ -197,6 +230,7 @@
     async function postComment() {
       const input = document.getElementById('comment-input')
       if (!input.value.trim()) return
+
       const res = await fetch('/api/comment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -211,28 +245,33 @@
     }
 
     function showUploadModal() {
+      // (Upload modal tetap sama, hanya sedikit di-improve)
       const modalHTML = `
-        <div id="upload-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]">
-          <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+        <div id="upload-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
+          <div class="bg-zinc-900 rounded-3xl p-8 max-w-md w-full mx-4 text-white">
             <h2 class="text-2xl font-bold mb-6">Unggah Foto / Video</h2>
             <form id="upload-form">
-              <input type="file" id="file-input" accept="image/*,video/*" class="block w-full mb-4 border border-gray-300 rounded-2xl p-3">
-              <input id="title-input" type="text" placeholder="Judul postingan" 
-                     class="w-full border border-gray-300 rounded-3xl px-5 py-4 mb-6" required>
-              <button type="submit" class="w-full bg-pink-600 text-white py-4 rounded-3xl text-lg font-medium hover:bg-pink-700">Unggah Sekarang</button>
+              <input type="file" id="file-input" accept="image/*,video/*" 
+                     class="block w-full mb-4 bg-zinc-800 border border-zinc-700 rounded-2xl p-4 text-white">
+              <input id="title-input" type="text" placeholder="Judul postingan"
+                     class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-4 mb-6 text-white" required>
+              <button type="submit" class="w-full bg-pink-600 text-white py-4 rounded-3xl text-lg font-medium hover:bg-pink-700">
+                Unggah Sekarang
+              </button>
             </form>
-            <button onclick="document.getElementById('upload-modal').remove()" class="mt-4 text-gray-500 w-full">Batal</button>
+            <button onclick="document.getElementById('upload-modal').remove()" 
+                    class="mt-4 text-zinc-400 hover:text-white w-full py-3">Batal</button>
           </div>
         </div>
       `
       document.body.insertAdjacentHTML('beforeend', modalHTML)
-
+      // ... (event listener tetap sama)
       document.getElementById('upload-form').addEventListener('submit', async e => {
         e.preventDefault()
         const file = document.getElementById('file-input').files[0]
         const title = document.getElementById('title-input').value
         if (!file) return alert('Pilih file terlebih dahulu')
-
+        
         const formData = new FormData()
         formData.append('file', file)
         formData.append('title', title)
@@ -258,6 +297,14 @@
       location.reload()
     }
 
+    // ESC Key Support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Escape") {
+        const modal = document.getElementById('modal')
+        if (!modal.classList.contains('hidden')) hideModal()
+      }
+    })
+
     window.onload = () => {
       checkAuth()
       loadPosts()
@@ -266,11 +313,11 @@
 </head>
 <body class="bg-gray-50 font-sans">
   <nav id="navbar" class="sticky top-0 bg-white shadow-sm z-50"></nav>
-  
+ 
   <div class="max-w-7xl mx-auto px-4 pt-8">
     <div id="feed" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5 gap-6"></div>
   </div>
-
+  
   <div id="modal" class="hidden"></div>
 </body>
 </html>
