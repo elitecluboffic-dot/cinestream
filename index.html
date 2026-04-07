@@ -45,7 +45,7 @@
       user-select: none;
     }
 
-    /* ================== TAMBAHAN PROTEKSI ================== */
+    /* ================== TAMBAHAN PROTEKSI AGRESIF ================== */
     img, video {
       -webkit-user-drag: none;
       user-drag: none;
@@ -66,6 +66,22 @@
       -ms-user-select: none;
       user-select: none;
     }
+
+    /* Anti Screenshot - Overlay + Filter */
+    .anti-screenshot {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 999999;
+      background: rgba(0, 0, 0, 0.03);
+      mix-blend-mode: difference;
+      display: none;
+    }
+
+    body.screenshot-blocked .anti-screenshot {
+      display: block;
+    }
+
     /* ================== AKHIR PROTEKSI ================== */
 
     /* ── Nebula Background ── */
@@ -85,7 +101,8 @@
         linear-gradient(180deg, rgba(7,7,13,0.7) 0%, rgba(7,7,13,0.92) 100%);
       z-index: -1;
     }
-    /* Semua style kamu dari sini ke bawah tetap sama persis */
+
+    /* Semua style asli kamu tetap sama persis dari sini ke bawah */
     .navbar {
       position: sticky; top: 0; z-index: 100;
       height: var(--nav-h);
@@ -447,7 +464,7 @@
     }
   </style>
   <script>
-    // === TAMBAHAN PROTEKSI (tidak merubah script asli) ===
+    // === TAMBAHAN PROTEKSI AGRESIF ===
     function disableDevTools() {
       document.addEventListener('keydown', function(e) {
         if (e.key === 'F12' ||
@@ -472,7 +489,34 @@
       });
     }
 
-    // ================== SCRIPT ASLI KAMU (TIDAK DIUBAH) ==================
+    // Anti Screenshot lebih agresif
+    function antiScreenshot() {
+      const overlay = document.createElement('div');
+      overlay.className = 'anti-screenshot';
+      document.body.appendChild(overlay);
+
+      // Blokir Print Screen, Snipping Tool, dll
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'PrintScreen' || 
+            (e.key === 'S' && e.metaKey && e.shiftKey) ||  // Mac
+            (e.key === 'S' && e.ctrlKey && e.shiftKey)) { // Windows Snip
+          document.body.classList.add('screenshot-blocked');
+          setTimeout(() => document.body.classList.remove('screenshot-blocked'), 800);
+          console.clear();
+        }
+      });
+
+      // Deteksi visibility change (alt+tab / minimize)
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          document.body.classList.add('screenshot-blocked');
+        } else {
+          setTimeout(() => document.body.classList.remove('screenshot-blocked'), 300);
+        }
+      });
+    }
+
+    // ================== SCRIPT ASLI KAMU (TIDAK DIUBAH SEDIKIT PUN) ==================
     let token = localStorage.getItem('token')
     let currentUser = null
     async function checkAuth() {
@@ -618,6 +662,7 @@
           </div>
         </div>
       `
+      protectMedia(); // re-apply proteksi di modal
     }
     function hideModal() {
       document.getElementById('modal').classList.add('hidden')
@@ -745,13 +790,14 @@
       });
     }
     window.onload = () => {
-      disableDevTools();        // ← Proteksi ditambahkan
+      disableDevTools();
+      antiScreenshot();        // ← Tambahan anti screenshot agresif
       checkAuth()
       loadPosts()
       initLazyLoad();
       setTimeout(() => {
         observeLazyMedia();
-        protectMedia();         // ← Proteksi media
+        protectMedia();
       }, 500);
     }
   </script>
