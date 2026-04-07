@@ -6,38 +6,530 @@
   <title>Daftar - CINESTREAM</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script>
     tailwind.config = { content: ["*"], theme: { extend: {} } }
   </script>
-</head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
-  <div class="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md">
-    <div class="flex justify-center mb-8">
-      <i class="fa-solid fa-thumbtack text-6xl text-pink-600"></i>
-    </div>
-    <h1 class="text-3xl font-bold text-center mb-8">Daftar di CINESTREAM</h1>
-    
-    <form id="register-form">
-      <input name="email" id="email-input" type="email" placeholder="Masukkan email Anda" 
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-pink-500" required>
-      
-      <button type="submit" 
-              class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
-        Daftar Sekarang
-      </button>
-    </form>
+  <style>
+    :root {
+      --crimson: #e11d48;
+      --crimson-dark: #9f1239;
+      --gold: #f59e0b;
+      --dark: #0a0a0f;
+      --dark-2: #111118;
+      --dark-3: #1a1a24;
+      --dark-4: #24242f;
+      --muted: #6b7280;
+      --light: #f3f4f6;
+    }
 
-    <p class="text-center mt-6 text-gray-500">
-      Sudah punya akun? <a href="/login.html" class="text-pink-600 font-medium">Masuk dengan OTP</a>
-    </p>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Cinematic background */
+    .bg-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-gradient {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(225, 29, 72, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 20%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 100% 100% at 50% 100%, rgba(10, 10, 15, 0.9) 0%, transparent 70%),
+        var(--dark);
+    }
+
+    /* Film strip decoration */
+    .film-strip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 60px;
+      height: 100%;
+      background: var(--dark-2);
+      border-right: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .film-hole {
+      width: 28px;
+      height: 22px;
+      background: var(--dark);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin: 6px 0;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .film-strip-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60px;
+      height: 100%;
+      background: var(--dark-2);
+      border-left: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Scanline overlay */
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 420px;
+      padding: 0 20px;
+      animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-inner {
+      background: var(--dark-3);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 
+        0 0 0 1px rgba(225, 29, 72, 0.1),
+        0 32px 80px rgba(0,0,0,0.6),
+        0 0 120px rgba(225, 29, 72, 0.05);
+    }
+
+    /* Header stripe */
+    .card-header {
+      background: linear-gradient(135deg, var(--crimson) 0%, #be123c 60%, #881337 100%);
+      padding: 32px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 40px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .logo-icon i {
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 3px;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-title {
+      margin-top: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-title h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .header-title p {
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 5px;
+    }
+
+    /* Body */
+    .card-body {
+      padding: 32px 36px 36px;
+    }
+
+    /* Features */
+    .features {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .feature-pill {
+      flex: 1;
+      background: var(--dark-4);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .feature-pill i {
+      font-size: 14px;
+      color: var(--crimson);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .feature-pill span {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    /* Form */
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      transition: color 0.2s;
+      pointer-events: none;
+    }
+
+    .input-wrap:focus-within .input-icon {
+      color: var(--crimson);
+    }
+
+    input[type="email"] {
+      width: 100%;
+      background: var(--dark-4);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      padding: 14px 16px 14px 44px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    input[type="email"]::placeholder {
+      color: rgba(255,255,255,0.2);
+    }
+
+    input[type="email"]:focus {
+      border-color: var(--crimson);
+      background: rgba(225, 29, 72, 0.04);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12);
+    }
+
+    /* CTA Button */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--crimson), #be123c);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(225, 29, 72, 0.35);
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(225, 29, 72, 0.45);
+    }
+
+    .btn-primary:hover::before { opacity: 1; }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 12px rgba(225, 29, 72, 0.3);
+    }
+
+    .btn-primary i {
+      margin-left: 8px;
+      font-size: 13px;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .divider span {
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+      font-weight: 500;
+    }
+
+    /* Footer link */
+    .card-footer {
+      text-align: center;
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .card-footer a {
+      color: var(--crimson);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .card-footer a:hover {
+      color: #fb7185;
+    }
+
+    /* Terms */
+    .terms {
+      text-align: center;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    .terms a {
+      color: rgba(255,255,255,0.35);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .card-header, .card-body { padding-left: 24px; padding-right: 24px; }
+      .film-strip, .film-strip-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Scene -->
+  <div class="bg-scene">
+    <div class="bg-gradient"></div>
+    <!-- Film strips -->
+    <div class="film-strip" id="filmLeft"></div>
+    <div class="film-strip-right" id="filmRight"></div>
+    <div class="scanlines"></div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+    <div class="card-inner">
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="logo-row">
+          <div class="logo-icon">
+            <i class="fa-solid fa-clapperboard"></i>
+          </div>
+          <div>
+            <div class="logo-text">CINESTREAM</div>
+            <div class="logo-sub">Premium Streaming</div>
+          </div>
+        </div>
+        <div class="header-title">
+          <h1>Buat Akun Gratis</h1>
+          <p>Nikmati ribuan film &amp; serial tanpa batas</p>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body">
+
+        <!-- Feature pills -->
+        <div class="features">
+          <div class="feature-pill">
+            <i class="fa-solid fa-film"></i>
+            <span>10K+ Film</span>
+          </div>
+          <div class="feature-pill">
+            <i class="fa-solid fa-tv"></i>
+            <span>4K Ultra HD</span>
+          </div>
+          <div class="feature-pill">
+            <i class="fa-solid fa-download"></i>
+            <span>Download</span>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form id="register-form">
+          <label class="field-label" for="email-input">Alamat Email</label>
+          <div class="input-wrap">
+            <i class="fa-regular fa-envelope input-icon"></i>
+            <input name="email" id="email-input" type="email"
+                   placeholder="contoh@email.com" required>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Daftar Sekarang <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="divider">
+          <div class="divider-line"></div>
+          <span>atau</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <p class="card-footer">
+          Sudah punya akun?
+          <a href="/login.html">Masuk dengan OTP</a>
+        </p>
+
+        <p class="terms">
+          Dengan mendaftar, Anda menyetujui
+          <a href="#">Ketentuan Layanan</a> &amp;
+          <a href="#">Kebijakan Privasi</a> kami.
+        </p>
+
+      </div>
+    </div>
   </div>
 
   <script>
+    // Generate film holes
+    function buildFilmStrip(el) {
+      const count = Math.ceil(window.innerHeight / 36) + 2;
+      for (let i = 0; i < count; i++) {
+        const hole = document.createElement('div');
+        hole.className = 'film-hole';
+        el.appendChild(hole);
+      }
+    }
+    buildFilmStrip(document.getElementById('filmLeft'));
+    buildFilmStrip(document.getElementById('filmRight'));
+
+    // Form submit
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+      btn.disabled = true;
+
       const form = new FormData(e.target);
       const res = await fetch('/api/register', { method: 'POST', body: form });
       const data = await res.json();
+
+      btn.innerHTML = 'Daftar Sekarang <i class="fa-solid fa-arrow-right"></i>';
+      btn.disabled = false;
 
       if (data.success) {
         alert(data.message || "Registrasi berhasil! Silakan login.");
