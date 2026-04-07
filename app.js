@@ -3,7 +3,8 @@
 // ========================
 
 // Ganti dengan URL Cloudflare Worker lo nanti
-const API_BASE = 'https://cinexx-api.YOUR_SUBDOMAIN.workers.dev';
+const API_BASE = '
+stream.internetdnsofficial.workers.dev';
 
 const IMG_BASE = 'https://image.tmdb.org/t/p/';
 
