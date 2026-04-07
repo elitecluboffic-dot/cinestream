@@ -1,27 +1,44 @@
+// functions/api/register.js
 export async function onRequest({ request, env }) {
-  if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  const form = await request.formData()
-  const email = form.get('email').toLowerCase()
-  const password = form.get('password')
-
-  if (await env.KV.get(`user:${email}`)) {
-    return new Response(JSON.stringify({ error: 'Email sudah terdaftar' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
   }
 
-  const salt = crypto.randomUUID()
-  const encoder = new TextEncoder()
-  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits'])
-  const hashBuffer = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: encoder.encode(salt), iterations: 100000, hash: 'SHA-256' }, keyMaterial, 256)
-  const hash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
+  const form = await request.formData();
+  const email = form.get("email")?.toLowerCase().trim();
 
+  if (!email || !email.includes("@")) {
+    return new Response(JSON.stringify({ error: "Email tidak valid" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  // Cek apakah email sudah terdaftar
+  const existingUser = await env.KV.get(`user:${email}`, "json");
+  if (existingUser) {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Email sudah terdaftar. Silakan login dengan OTP." 
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  // Buat user baru
   const user = {
     id: crypto.randomUUID(),
     email,
-    passwordHash: hash,
-    salt,
-    role: email.includes('admin') ? 'admin' : 'user'
-  }
+    role: email.includes("admin") || email === "elitecluboffic@gmail.com" ? "admin" : "user",
+    createdAt: Date.now()
+  };
 
-  await env.KV.put(`user:${email}`, JSON.stringify(user))
-  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } })
+  await env.KV.put(`user:${email}`, JSON.stringify(user));
+
+  return new Response(JSON.stringify({ 
+    success: true, 
+    message: "Registrasi berhasil! Silakan login dengan OTP." 
+  }), {
+    headers: { "Content-Type": "application/json" }
+  });
 }
