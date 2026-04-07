@@ -26,27 +26,29 @@
     }
 
     .navbar {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
     }
 
     .card {
-      transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 
-                  0 10px 10px -5px rgb(0 0 0 / 0.1);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    .card img, .card video {
+      transition: transform 0.5s ease;
+    }
+    .card:hover img,
+    .card:hover video {
+      transform: scale(1.08);
     }
 
     .modal-content {
-      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
-    }
-
-    .feed-container {
-      gap: 2rem;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
     }
   </style>
 
@@ -69,26 +71,26 @@
     function renderNavbar() {
       const nav = document.getElementById('navbar')
       nav.innerHTML = `
-        <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between navbar border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between navbar border-b border-gray-100 sticky top-0 z-50">
           <div class="flex items-center gap-3">
-            <i class="fa-solid fa-thumbtack text-4xl text-pink-600"></i>
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">CINESTREAM</h1>
+            <i class="fa-solid fa-thumbtack text-3xl text-pink-600"></i>
+            <h1 class="text-2xl font-bold text-gray-900">CINESTREAM</h1>
           </div>
         
           <div class="flex-1 max-w-md mx-8">
             <input id="search" type="text" placeholder="Cari foto atau video..."
-                   class="w-full bg-gray-100 border border-gray-200 rounded-3xl px-6 py-3 focus:outline-none focus:border-pink-500 transition-all">
+                   class="w-full bg-gray-100 border border-gray-300 rounded-3xl px-6 py-3 focus:outline-none focus:border-pink-500">
           </div>
           <div class="flex items-center gap-4">
             ${currentUser ? `
-              <button onclick="showUploadModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-3xl flex items-center gap-2 transition-all font-medium">
+              <button onclick="showUploadModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-3xl flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-upload"></i> Unggah
               </button>
               ${currentUser.role === 'admin' ? `<a href="/admin.html" class="font-medium text-gray-700 hover:text-pink-600">Admin Panel</a>` : ''}
-              <button onclick="logout()" class="text-gray-700 hover:text-pink-600 font-medium px-4 py-2">Logout</button>
+              <button onclick="logout()" class="text-gray-700 hover:text-pink-600 font-medium">Logout</button>
             ` : `
               <a href="/login.html" class="font-medium text-gray-700 hover:text-pink-600">Masuk</a>
-              <a href="/register.html" class="bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-3xl transition-all font-medium">Daftar</a>
+              <a href="/register.html" class="bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-3xl transition-all">Daftar</a>
             `}
           </div>
         </div>
@@ -119,13 +121,13 @@
         card.innerHTML = `
           <div class="card bg-white rounded-3xl overflow-hidden shadow-sm">
             ${p.type === 'image'
-              ? `<img src="${p.url}" class="w-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-500">`
+              ? `<img src="${p.url}" class="w-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-300">`
               : `<video src="${p.url}" class="w-full aspect-[4/3] object-cover" muted loop autoplay playsinline></video>`
             }
-            <div class="p-5">
-              <p class="font-semibold text-lg text-gray-900 line-clamp-1">${p.title}</p>
+            <div class="p-4">
+              <p class="font-semibold text-gray-900 line-clamp-1">${p.title}</p>
               <p class="text-sm text-gray-500">by ${p.username}</p>
-              <div class="flex justify-between items-center mt-4 text-sm">
+              <div class="flex justify-between items-center mt-3 text-sm">
                 <div class="flex items-center gap-1"><i class="fa-solid fa-heart text-pink-500"></i> ${p.likes || 0}</div>
                 <div class="flex items-center gap-1"><i class="fa-solid fa-comment"></i> ${p.comments ? p.comments.length : 0}</div>
               </div>
@@ -177,7 +179,7 @@
                   </button>
                   <div class="flex items-center gap-3 text-zinc-400">
                     <i class="fa-solid fa-comment"></i>
-                    <span class="text-lg">${post.comments ? p.comments.length : 0}</span>
+                    <span class="text-lg">${post.comments ? post.comments.length : 0}</span>
                   </div>
                 </div>
                 <div class="flex-1 overflow-y-auto p-6 space-y-5 text-white" id="comments-list">
@@ -293,10 +295,9 @@
 </head>
 <body class="bg-gray-50 font-sans">
   <nav id="navbar" class="sticky top-0 bg-white shadow-sm z-50"></nav>
-  <div class="max-w-7xl mx-auto px-6 pt-10">
-    <div id="feed" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5 gap-8 feed-container"></div>
+  <div class="max-w-7xl mx-auto px-4 pt-8">
+    <div id="feed" class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5 gap-8"></div>
   </div>
- 
   <div id="modal" class="hidden"></div>
 </body>
 </html>
