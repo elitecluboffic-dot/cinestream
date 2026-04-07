@@ -1,112 +1,539 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CineXX – Nonton Film & Series Online</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineStream – Nonton Film & Series Gratis</title>
+<meta name="description" content="Nonton film dan series terbaru secara gratis di CineStream. Streaming HD, subtitle Indonesia, tanpa buffering.">
+<meta name="keywords" content="nonton film gratis, streaming film, film terbaru, series terbaru, subtitle indonesia">
+<meta property="og:title" content="CineStream – Nonton Film & Series Gratis">
+<meta property="og:description" content="Nonton film dan series terbaru secara gratis. Streaming HD.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cinestream.kraxx.my.id">
+<link rel="canonical" href="https://cinestream.kraxx.my.id">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --card: #16161f;
+    --card2: #1e1e2a;
+    --accent: #e50914;
+    --accent2: #ff6b6b;
+    --gold: #f5c518;
+    --text: #f0f0f0;
+    --text2: #a0a0b0;
+    --text3: #606070;
+    --border: #2a2a38;
+    --radius: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.5);
+    /* ── GANTI INI dengan URL Worker kamu ── */
+    --api: "";
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; font-size:15px; min-height:100vh; overflow-x:hidden; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  /* NAV */
+  #navbar {
+    position:fixed; top:0; left:0; right:0; z-index:1000;
+    display:flex; align-items:center; gap:24px;
+    padding:0 32px; height:64px;
+    background:linear-gradient(to bottom,rgba(10,10,15,0.98),transparent);
+    transition:background 0.3s;
+  }
+  #navbar.scrolled { background:rgba(10,10,15,0.98); border-bottom:1px solid var(--border); }
+  .nav-logo { font-family:'Bebas Neue',cursive; font-size:28px; color:var(--accent); letter-spacing:2px; cursor:pointer; text-decoration:none; }
+  .nav-links { display:flex; gap:20px; flex:1; }
+  .nav-links a { color:var(--text2); text-decoration:none; font-size:14px; font-weight:500; transition:color 0.2s; cursor:pointer; }
+  .nav-links a:hover, .nav-links a.active { color:var(--text); }
+  .nav-right { display:flex; align-items:center; gap:12px; margin-left:auto; }
+  .btn-icon { background:none; border:none; color:var(--text2); cursor:pointer; padding:8px; transition:color 0.2s; }
+  .btn-icon:hover { color:var(--text); }
+  .btn-admin { background:var(--accent); color:#fff; border:none; padding:8px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.2s; }
+  .btn-admin:hover { background:#c1070f; }
+
+  /* SEARCH */
+  #search-overlay {
+    display:none; position:fixed; top:64px; left:0; right:0; z-index:999;
+    background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 32px;
+  }
+  #search-overlay.active { display:block; }
+  #search-input {
+    width:100%; padding:12px 20px; background:var(--bg3); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-size:16px; font-family:'Outfit',sans-serif; outline:none; transition:border-color 0.2s;
+  }
+  #search-input:focus { border-color:var(--accent); }
+  #search-results { margin-top:12px; display:flex; flex-wrap:wrap; gap:12px; max-height:300px; overflow-y:auto; }
+
+  /* HERO */
+  #hero { position:relative; height:92vh; min-height:500px; display:flex; align-items:flex-end; padding:0 48px 80px; overflow:hidden; }
+  #hero-bg { position:absolute; inset:0; background-size:cover; background-position:center; transition:background-image 0.8s ease; }
+  #hero-bg::after {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(to top,var(--bg) 0%,rgba(10,10,15,0.6) 40%,rgba(10,10,15,0.2) 100%),
+               linear-gradient(to right,rgba(10,10,15,0.9) 0%,transparent 60%);
+  }
+  .hero-content { position:relative; z-index:2; max-width:520px; }
+  .hero-badge { display:inline-flex; align-items:center; gap:6px; background:var(--accent); color:#fff; padding:4px 12px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:16px; text-transform:uppercase; }
+  .hero-title { font-family:'Bebas Neue',cursive; font-size:clamp(42px,6vw,72px); line-height:1; margin-bottom:16px; text-shadow:0 2px 20px rgba(0,0,0,0.8); }
+  .hero-meta { display:flex; align-items:center; gap:16px; margin-bottom:16px; font-size:13px; color:var(--text2); }
+  .hero-meta .rating { color:var(--gold); font-weight:700; }
+  .hero-desc { font-size:14px; color:var(--text2); line-height:1.7; margin-bottom:28px; max-width:420px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .hero-actions { display:flex; gap:12px; }
+  .btn-play { display:flex; align-items:center; gap:8px; background:#fff; color:#000; border:none; padding:12px 28px; border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; transition:background 0.2s,transform 0.1s; }
+  .btn-play:hover { background:#ddd; transform:scale(1.02); }
+  .btn-more { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.15); color:#fff; border:none; padding:12px 24px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; backdrop-filter:blur(8px); transition:background 0.2s; }
+  .btn-more:hover { background:rgba(255,255,255,0.25); }
+
+  /* SECTIONS */
+  .section { padding:40px 32px; }
+  .section-title { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:1px; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+  .section-title span { color:var(--accent); }
+  .see-all { margin-left:auto; font-size:13px; color:var(--text2); cursor:pointer; font-family:'Outfit',sans-serif; font-weight:500; }
+  .see-all:hover { color:var(--text); }
+
+  /* GRID */
+  .movies-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
+  .movie-card { background:var(--card); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:transform 0.2s,box-shadow 0.2s; position:relative; }
+  .movie-card:hover { transform:translateY(-6px) scale(1.02); box-shadow:var(--shadow); }
+  .movie-card:hover .card-overlay { opacity:1; }
+  .card-thumb { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--bg3); }
+  .card-thumb-placeholder { width:100%; aspect-ratio:2/3; background:var(--bg3); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--text3); font-size:13px; }
+  .card-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; }
+  .card-play-btn { width:48px; height:48px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .card-info { padding:10px 12px; }
+  .card-title { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; }
+  .card-meta { display:flex; justify-content:space-between; align-items:center; }
+  .card-year { font-size:11px; color:var(--text3); }
+  .card-rating { font-size:11px; color:var(--gold); font-weight:700; }
+  .card-badge { position:absolute; top:8px; left:8px; background:var(--accent); color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; }
+  .card-quality { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.7); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:3px; border:1px solid rgba(255,255,255,0.2); }
+  .movies-scroll { display:flex; gap:14px; overflow-x:auto; padding-bottom:8px; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .movies-scroll .movie-card { flex:0 0 160px; }
+
+  /* GENRE TABS */
+  .genre-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .genre-tab { padding:6px 16px; border-radius:20px; font-size:13px; font-weight:500; cursor:pointer; border:1px solid var(--border); color:var(--text2); background:transparent; transition:all 0.2s; }
+  .genre-tab:hover, .genre-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  /* PLAYER MODAL */
+  #player-modal { display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.92); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px; }
+  #player-modal.active { display:flex; }
+  .player-container { background:var(--bg2); border-radius:16px; overflow:hidden; width:100%; max-width:960px; box-shadow:0 24px 80px rgba(0,0,0,0.8); border:1px solid var(--border); }
+  .player-header { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .player-title { font-size:16px; font-weight:700; flex:1; }
+  .player-close { background:var(--bg3); border:none; color:var(--text2); cursor:pointer; width:36px; height:36px; border-radius:50%; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .player-close:hover { background:var(--accent); color:#fff; }
+  .player-wrapper { position:relative; width:100%; aspect-ratio:16/9; background:#000; }
+  .player-wrapper iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+  .player-info { padding:16px 20px; }
+  .player-desc { font-size:13px; color:var(--text2); line-height:1.7; }
+  .player-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .player-tag { padding:4px 12px; border-radius:4px; font-size:12px; background:var(--bg3); color:var(--text2); border:1px solid var(--border); }
+
+  /* STATS */
+  .stats-bar { display:flex; gap:24px; background:var(--bg3); padding:16px 32px; border-bottom:1px solid var(--border); }
+  .stat-item { display:flex; align-items:center; gap:8px; }
+  .stat-val { font-family:'Bebas Neue',cursive; font-size:22px; color:var(--accent); }
+  .stat-label { font-size:12px; color:var(--text3); line-height:1.3; }
+
+  /* SKELETON */
+  .skeleton { background:linear-gradient(90deg,var(--bg3) 25%,var(--card2) 50%,var(--bg3) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--radius); }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  /* EMPTY */
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text3); }
+  .empty-state p { font-size:15px; margin-top:16px; }
+
+  /* FOOTER */
+  footer { background:var(--bg2); border-top:1px solid var(--border); padding:40px 32px 24px; margin-top:40px; }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:32px; margin-bottom:32px; }
+  .footer-brand .nav-logo { display:block; margin-bottom:12px; font-size:24px; }
+  .footer-desc { font-size:13px; color:var(--text3); line-height:1.7; }
+  .footer-col h4 { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text2); margin-bottom:14px; }
+  .footer-col a { display:block; font-size:13px; color:var(--text3); text-decoration:none; margin-bottom:8px; transition:color 0.2s; cursor:pointer; }
+  .footer-col a:hover { color:var(--text); }
+  .footer-bottom { border-top:1px solid var(--border); padding-top:20px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-copy { font-size:12px; color:var(--text3); }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .fade-in { animation:fadeIn 0.5s ease forwards; }
+
+  @media(max-width:768px) {
+    #navbar { padding:0 16px; }
+    #hero { padding:0 20px 60px; }
+    .section { padding:28px 16px; }
+    .movies-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; }
+    .footer-grid { grid-template-columns:1fr 1fr; }
+    .stats-bar { gap:16px; padding:12px 16px; flex-wrap:wrap; }
+  }
+  @media(max-width:480px) {
+    .nav-links { display:none; }
+    .footer-grid { grid-template-columns:1fr; }
+    .footer-bottom { flex-direction:column; gap:12px; }
+  }
+</style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">CINE<span>XX</span></div>
-  <ul class="nav-links">
-    <li><a href="index.html" class="active">Beranda</a></li>
-    <li><a href="movies.html">Film</a></li>
-    <li><a href="series.html">Series</a></li>
-    <li><a href="genre.html">Genre</a></li>
-  </ul>
+<nav id="navbar">
+  <a class="nav-logo" onclick="showPage('home')">CINESTREAM</a>
+  <div class="nav-links">
+    <a onclick="showPage('home')" class="active" id="nav-home">Beranda</a>
+    <a onclick="showPage('movies')" id="nav-movies">Film</a>
+    <a onclick="showPage('series')" id="nav-series">Series</a>
+    <a onclick="showPage('genre')" id="nav-genre">Genre</a>
+  </div>
   <div class="nav-right">
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Cari film, series..." />
-      <button onclick="doSearch()">🔍</button>
-    </div>
+    <button class="btn-icon" onclick="toggleSearch()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="btn-admin" onclick="location.href='/admin'">Admin</button>
   </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero" id="heroSection">
-  <div class="hero-overlay"></div>
-  <div class="hero-content">
-    <div class="hero-badge">🔥 TRENDING #1</div>
-    <h1 class="hero-title" id="heroTitle">Loading...</h1>
-    <p class="hero-desc" id="heroDesc">Loading description...</p>
-    <div class="hero-meta" id="heroMeta"></div>
-    <div class="hero-actions">
-      <button class="btn-watch" id="heroWatchBtn">▶ Tonton Sekarang</button>
-      <button class="btn-info" id="heroInfoBtn">ℹ Info</button>
+<div id="search-overlay">
+  <input id="search-input" type="text" placeholder="Cari film, series..." oninput="doSearch(this.value)" autocomplete="off">
+  <div id="search-results"></div>
+</div>
+
+<main id="app">
+  <div id="hero"><div id="hero-bg"></div><div class="hero-content fade-in" id="hero-content"><div class="skeleton" style="height:14px;width:80px;margin-bottom:16px"></div><div class="skeleton" style="height:60px;width:340px;margin-bottom:16px"></div><div class="skeleton" style="height:14px;width:240px;margin-bottom:28px"></div></div></div>
+  <div class="section"><div class="section-title">🔥 <span>Memuat</span>...</div><div class="movies-scroll">${[...Array(6)].map(()=>`<div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>`).join('')}</div></div>
+</main>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="nav-logo">CINESTREAM</a>
+      <p class="footer-desc">Platform streaming film dan series terlengkap. Nonton ribuan judul dengan kualitas HD secara gratis.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigasi</h4>
+      <a onclick="showPage('home')">Beranda</a>
+      <a onclick="showPage('movies')">Film</a>
+      <a onclick="showPage('series')">Series</a>
+      <a onclick="showPage('genre')">Genre</a>
+    </div>
+    <div class="footer-col">
+      <h4>Genre</h4>
+      <a onclick="filterGenre('Action')">Action</a>
+      <a onclick="filterGenre('Drama')">Drama</a>
+      <a onclick="filterGenre('Comedy')">Comedy</a>
+      <a onclick="filterGenre('Horror')">Horror</a>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <a>Tentang Kami</a>
+      <a>Kebijakan Privasi</a>
+      <a>DMCA</a>
+      <a>Kontak</a>
     </div>
   </div>
-</section>
-
-<!-- TRENDING -->
-<section class="section">
-  <h2 class="section-title">🔥 Trending Minggu Ini</h2>
-  <div class="movie-grid" id="trendingGrid">
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 CineStream. All rights reserved.</span>
   </div>
-</section>
-
-<!-- POPULAR MOVIES -->
-<section class="section">
-  <h2 class="section-title">🎬 Film Populer</h2>
-  <div class="movie-grid" id="popularGrid">
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-  </div>
-</section>
-
-<!-- TOP RATED -->
-<section class="section">
-  <h2 class="section-title">⭐ Rating Tertinggi</h2>
-  <div class="movie-grid" id="topRatedGrid">
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-  </div>
-</section>
-
-<!-- POPULAR SERIES -->
-<section class="section">
-  <h2 class="section-title">📺 Series Populer</h2>
-  <div class="movie-grid" id="seriesGrid">
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-    <div class="skeleton-card"></div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-brand">CINE<span>XX</span></div>
-  <p>Nonton film & series online terlengkap. Data dari TMDB.</p>
-  <div class="footer-links">
-    <a href="#">Tentang</a>
-    <a href="#">Kontak</a>
-    <a href="#">DMCA</a>
-    <a href="#">Privasi</a>
-  </div>
-  <p class="footer-note">© 2026 CineXX. Untuk keperluan edukasi saja.</p>
 </footer>
 
-<script src="app.js"></script>
+<!-- PLAYER MODAL -->
+<div id="player-modal">
+  <div class="player-container">
+    <div class="player-header">
+      <div>
+        <div class="player-title" id="player-title">-</div>
+        <div style="font-size:12px;color:var(--text3)" id="player-meta">-</div>
+      </div>
+      <button class="player-close" onclick="closePlayer()">✕</button>
+    </div>
+    <div class="player-wrapper" id="player-wrapper"></div>
+    <div class="player-info">
+      <p class="player-desc" id="player-desc"></p>
+      <div class="player-tags" id="player-tags"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — ganti dengan URL Worker kamu
+// ══════════════════════════════════════════════
+const API = 'https://stream.internetdnsofficial.workers.dev';
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let allFilms = [];
+let currentPage = 'home';
+let heroInterval = null;
+let heroIndex = 0;
+let activeGenre = 'All';
+
+// ══════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════
+async function fetchFilms(params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`${API}/api/films${qs ? '?' + qs : ''}`);
+  const data = await res.json();
+  return data.films || [];
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('search-overlay').classList.remove('active');
+    closePlayer();
+  }
+});
+
+(async () => {
+  allFilms = await fetchFilms();
+  showPage('home');
+})();
+
+// ══════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════
+function toggleSearch() {
+  const el = document.getElementById('search-overlay');
+  el.classList.toggle('active');
+  if (el.classList.contains('active')) {
+    document.getElementById('search-input').focus();
+    document.getElementById('search-results').innerHTML = '';
+  }
+}
+
+let searchDebounce;
+async function doSearch(q) {
+  const res = document.getElementById('search-results');
+  clearTimeout(searchDebounce);
+  if (!q.trim()) { res.innerHTML = ''; return; }
+  searchDebounce = setTimeout(async () => {
+    const found = await fetchFilms({ q });
+    if (!found.length) { res.innerHTML = '<p style="color:var(--text3);font-size:13px">Tidak ditemukan.</p>'; return; }
+    res.innerHTML = found.slice(0, 12).map(m => `
+      <div onclick="openPlayer('${m.id}');toggleSearch()" style="display:flex;align-items:center;gap:10px;background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:0 0 auto;width:220px;border:1px solid var(--border)">
+        ${m.poster ? `<img src="${m.poster}" style="width:36px;height:50px;border-radius:4px;object-fit:cover">` : `<div style="width:36px;height:50px;background:var(--bg3);border-radius:4px"></div>`}
+        <div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.title}</div><div style="font-size:11px;color:var(--text3)">${m.year} • ${m.type === 'movie' ? 'Film' : 'Series'}</div></div>
+      </div>`).join('');
+  }, 300);
+}
+
+// ══════════════════════════════════════════════
+// PAGES
+// ══════════════════════════════════════════════
+async function showPage(page) {
+  currentPage = page;
+  ['home','movies','series','genre'].forEach(p => {
+    const el = document.getElementById('nav-' + p);
+    if (el) el.classList.toggle('active', p === page);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (heroInterval) clearInterval(heroInterval);
+
+  const app = document.getElementById('app');
+  if (page === 'home') await renderHome(app);
+  else if (page === 'movies') await renderList(app, 'movie', 'Film');
+  else if (page === 'series') await renderList(app, 'series', 'Series');
+  else if (page === 'genre') await renderGenrePage(app);
+}
+
+// ══════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════
+async function renderHome(app) {
+  const db = allFilms.length ? allFilms : await fetchFilms();
+  allFilms = db;
+  const featured = db.filter(m => m.backdrop);
+  const movies = db.filter(m => m.type === 'movie');
+  const series = db.filter(m => m.type === 'series');
+  const topRated = [...db].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10);
+
+  app.innerHTML = `
+    <div id="hero">
+      <div id="hero-bg"></div>
+      <div class="hero-content fade-in" id="hero-content"></div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-val">${db.length}</div><div class="stat-label">Total<br>Konten</div></div>
+      <div class="stat-item"><div class="stat-val">${movies.length}</div><div class="stat-label">Film<br>Tersedia</div></div>
+      <div class="stat-item"><div class="stat-val">${series.length}</div><div class="stat-label">Series<br>Tersedia</div></div>
+      <div class="stat-item"><div class="stat-val">HD</div><div class="stat-label">Kualitas<br>Streaming</div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">🔥 <span>Trending</span> Sekarang <span class="see-all" onclick="showPage('movies')">Lihat Semua →</span></div>
+      ${db.length ? `<div class="movies-scroll">${db.slice(0, 12).map(cardHTML).join('')}</div>` : emptyHTML()}
+    </div>
+    <div class="section" style="background:var(--bg2)">
+      <div class="section-title">⭐ <span>Top</span> Rating</div>
+      ${topRated.length ? `<div class="movies-scroll">${topRated.map(cardHTML).join('')}</div>` : emptyHTML()}
+    </div>
+    ${movies.length ? `
+    <div class="section">
+      <div class="section-title">🎬 <span>Film</span> Terbaru <span class="see-all" onclick="showPage('movies')">Lihat Semua →</span></div>
+      <div class="movies-grid">${movies.slice(0, 8).map(cardHTML).join('')}</div>
+    </div>` : ''}
+    ${series.length ? `
+    <div class="section">
+      <div class="section-title">📺 <span>Series</span> Populer <span class="see-all" onclick="showPage('series')">Lihat Semua →</span></div>
+      <div class="movies-grid">${series.slice(0, 8).map(cardHTML).join('')}</div>
+    </div>` : ''}
+  `;
+
+  const heroList = featured.length ? featured : db;
+  if (heroList.length) {
+    setHero(heroList, 0);
+    heroInterval = setInterval(() => {
+      heroIndex = (heroIndex + 1) % heroList.length;
+      setHero(heroList, heroIndex);
+    }, 6000);
+  }
+}
+
+function setHero(list, idx) {
+  const m = list[idx];
+  const bg = document.getElementById('hero-bg');
+  const content = document.getElementById('hero-content');
+  if (!bg || !content) return;
+  if (m.backdrop) bg.style.backgroundImage = `url('${m.backdrop}')`;
+  else if (m.poster) bg.style.backgroundImage = `url('${m.poster}')`;
+  content.innerHTML = `
+    <div class="hero-badge">🔥 ${m.type === 'movie' ? 'Film' : 'Series'}</div>
+    <div class="hero-title">${m.title}</div>
+    <div class="hero-meta">
+      ${m.rating ? `<span class="rating">★ ${m.rating}</span>` : ''}
+      <span>${m.year || ''}</span>
+      ${m.quality ? `<span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${m.quality}</span>` : ''}
+      ${m.genre ? `<span>${m.genre.split(',')[0]}</span>` : ''}
+    </div>
+    ${m.desc ? `<p class="hero-desc">${m.desc}</p>` : ''}
+    <div class="hero-actions">
+      <button class="btn-play" onclick="openPlayer('${m.id}')">▶ Tonton Sekarang</button>
+      <button class="btn-more" onclick="openPlayer('${m.id}')">ℹ Info</button>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+// LIST PAGE
+// ══════════════════════════════════════════════
+async function renderList(app, type, label) {
+  app.innerHTML = `<div style="padding:90px 32px 32px"><h1 style="font-family:'Bebas Neue',cursive;font-size:36px;margin-bottom:24px">${label} <span style="color:var(--accent)">Terlengkap</span></h1><div class="movies-grid" id="list-grid">${skeletonGrid(12)}</div></div>`;
+  const db = await fetchFilms({ type });
+  document.getElementById('list-grid').innerHTML = db.length ? db.map(cardHTML).join('') : emptyHTML();
+}
+
+// ══════════════════════════════════════════════
+// GENRE PAGE
+// ══════════════════════════════════════════════
+async function renderGenrePage(app) {
+  const db = allFilms.length ? allFilms : await fetchFilms();
+  const genres = ['All', ...new Set(db.flatMap(m => (m.genre || '').split(',').map(g => g.trim())).filter(Boolean))];
+  app.innerHTML = `
+    <div style="padding:90px 32px 32px">
+      <h1 style="font-family:'Bebas Neue',cursive;font-size:36px;margin-bottom:24px">Jelajahi <span style="color:var(--accent)">Genre</span></h1>
+      <div class="genre-tabs" id="genre-tabs">
+        ${genres.map(g => `<button class="genre-tab ${g === activeGenre ? 'active' : ''}" onclick="filterGenre('${g}')">${g}</button>`).join('')}
+      </div>
+      <div class="movies-grid" id="genre-grid">${renderGenreGrid(db, activeGenre)}</div>
+    </div>`;
+}
+
+function filterGenre(g) {
+  activeGenre = g;
+  if (currentPage !== 'genre') { showPage('genre'); return; }
+  document.querySelectorAll('.genre-tab').forEach(t => t.classList.toggle('active', t.textContent === g));
+  const db = allFilms;
+  document.getElementById('genre-grid').innerHTML = renderGenreGrid(db, g);
+}
+
+function renderGenreGrid(db, g) {
+  const filtered = g === 'All' ? db : db.filter(m => (m.genre || '').includes(g));
+  return filtered.length ? filtered.map(cardHTML).join('') : emptyHTML();
+}
+
+// ══════════════════════════════════════════════
+// CARD & HELPERS
+// ══════════════════════════════════════════════
+function cardHTML(m) {
+  return `
+    <div class="movie-card" onclick="openPlayer('${m.id}')">
+      ${m.poster ? `<img class="card-thumb" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+      <div class="card-thumb-placeholder" ${m.poster ? 'style="display:none"' : ''}>
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg>
+        <span>${m.title.slice(0, 12)}</span>
+      </div>
+      ${m.type === 'series' ? '<div class="card-badge">SERIES</div>' : ''}
+      ${m.quality ? `<div class="card-quality">${m.quality}</div>` : ''}
+      <div class="card-overlay"><button class="card-play-btn"><svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg></button></div>
+      <div class="card-info">
+        <div class="card-title">${m.title}</div>
+        <div class="card-meta">
+          <span class="card-year">${m.year || '-'}</span>
+          ${m.rating ? `<span class="card-rating">★ ${m.rating}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function emptyHTML() {
+  return `<div class="empty-state" style="grid-column:1/-1"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg><p>Belum ada konten tersedia.</p></div>`;
+}
+
+function skeletonGrid(n) {
+  return [...Array(n)].map(() => `<div class="skeleton" style="aspect-ratio:2/3;border-radius:10px"></div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// PLAYER
+// ══════════════════════════════════════════════
+async function openPlayer(id) {
+  let m = allFilms.find(x => x.id === id);
+  if (!m) {
+    const res = await fetch(`${API}/api/films/${id}`);
+    m = await res.json();
+  }
+  if (!m || !m.id) return;
+
+  document.getElementById('player-title').textContent = m.title;
+  document.getElementById('player-meta').textContent = [m.year, m.genre, m.quality].filter(Boolean).join(' • ');
+  document.getElementById('player-desc').textContent = m.desc || '';
+  document.getElementById('player-tags').innerHTML = (m.genre || '').split(',').map(g => `<span class="player-tag">${g.trim()}</span>`).join('');
+
+  const wrapper = document.getElementById('player-wrapper');
+  wrapper.innerHTML = '';
+  if (m.stream) {
+    const iframe = document.createElement('iframe');
+    iframe.src = m.stream;
+    iframe.allowFullscreen = true;
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+    iframe.setAttribute('referrerpolicy', 'no-referrer');
+    wrapper.appendChild(iframe);
+  } else {
+    wrapper.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:12px"><p>URL stream belum diatur</p></div>`;
+  }
+
+  document.getElementById('player-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayer() {
+  document.getElementById('player-modal').classList.remove('active');
+  document.getElementById('player-wrapper').innerHTML = '';
+  document.body.style.overflow = '';
+}
+</script>
 </body>
 </html>
