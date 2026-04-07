@@ -4,7 +4,8 @@ export async function onRequest({ request, env }) {
     return new Response("Method not allowed", { status: 405 });
   }
 
-  const { email } = await request.json();
+  const { email, cf_turnstile_token } = await request.json();
+
   if (!email) {
     return new Response(JSON.stringify({ error: "Email diperlukan" }), {
       status: 400,
@@ -12,14 +13,55 @@ export async function onRequest({ request, env }) {
     });
   }
 
+  // === TAMBAHAN: VALIDASI CLOUDFLARE TURNSTILE ===
+  if (!cf_turnstile_token) {
+    return new Response(JSON.stringify({ 
+      error: "Verifikasi Cloudflare diperlukan. Silakan coba lagi." 
+    }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  // Verifikasi Turnstile ke Cloudflare
+  try {
+    const turnstileForm = new FormData();
+    turnstileForm.append('secret', env.CLOUDFLARE_TURNSTILE_SECRET_KEY);  // Secret Key kamu
+    turnstileForm.append('response', cf_turnstile_token);
+    turnstileForm.append('remoteip', request.headers.get('CF-Connecting-IP') || '');
+
+    const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: turnstileForm
+    });
+
+    const turnstileData = await turnstileRes.json();
+
+    if (!turnstileData.success) {
+      return new Response(JSON.stringify({ 
+        error: "Verifikasi Cloudflare gagal. Silakan coba lagi." 
+      }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  } catch (err) {
+    console.error("Turnstile verification error:", err);
+    return new Response(JSON.stringify({ 
+      error: "Terjadi kesalahan verifikasi keamanan." 
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+  // === AKHIR TAMBAHAN TURNSTILE ===
+
   // === TAMBAHAN: CEK COOLDOWN ===
   const cooldownKey = `cooldown:${email}`;
   const cooldown = await env.KV.get(cooldownKey);
-
   if (cooldown) {
     const { expiresAt } = JSON.parse(cooldown);
     const remaining = Math.ceil((expiresAt - Date.now()) / 1000);
-
     if (remaining > 0) {
       return new Response(JSON.stringify({
         error: "Tunggu sebentar sebelum kirim OTP lagi",
@@ -66,7 +108,7 @@ export async function onRequest({ request, env }) {
     if (!res.ok) {
       const errText = await res.text();
       console.error("Resend Error:", res.status, errText);
-     
+    
       let errorMsg = "Gagal mengirim OTP";
       if (res.status === 403) {
         errorMsg = "Domain belum diverifikasi di Resend";
