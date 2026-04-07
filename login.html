@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Cloudflare Turnstile -->
+  <!-- Cloudflare Turnstile (Tambahan) -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <style>
@@ -32,14 +32,233 @@
       overflow: hidden;
       color: var(--text);
     }
+    /* Cinematic background */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(245,0,79,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(120,0,200,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 100% at 50% 50%, #0d0f18 0%, #080a0f 100%);
+    }
+    /* Film grain overlay */
+    .grain {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 128px 128px;
+    }
+    /* Decorative film strip lines */
+    .line-l, .line-r {
+      position: fixed; top: 0; bottom: 0; width: 1px;
+      background: linear-gradient(to bottom, transparent 0%, var(--border) 30%, var(--border) 70%, transparent 100%);
+      z-index: 1;
+    }
+    .line-l { left: 12%; }
+    .line-r { right: 12%; }
+    /* Card */
+    .card {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 440px;
+      margin: 0 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 44px 44px;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 40px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(245,0,79,0.04);
+      animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Logo */
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 36px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--pink);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff;
+      box-shadow: 0 4px 16px rgba(245,0,79,0.4);
+    }
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+    /* Heading */
+    .heading { font-size: 26px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+    .subheading { font-size: 14px; color: var(--muted); margin-bottom: 36px; line-height: 1.5; }
+    /* Input */
+    .input-wrap {
+      position: relative; margin-bottom: 14px;
+    }
+    .input-icon {
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 14px; pointer-events: none;
+    }
+    .input-field {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px 18px 15px 44px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .input-field::placeholder { color: #404550; }
+    .input-field:focus {
+      border-color: var(--pink);
+      background: rgba(245,0,79,0.04);
+      box-shadow: 0 0 0 3px rgba(245,0,79,0.1);
+    }
+    /* OTP boxes */
+    .otp-row {
+      display: flex; gap: 10px; margin-bottom: 14px;
+    }
+    .otp-box {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 58px;
+      text-align: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 1px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      caret-color: var(--pink);
+    }
+    .otp-box:focus {
+      border-color: var(--pink);
+      background: rgba(245,0,79,0.04);
+      box-shadow: 0 0 0 3px rgba(245,0,79,0.1);
+    }
+    /* Button */
+    .btn-primary {
+      width: 100%;
+      background: var(--pink);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(245,0,79,0.3);
+    }
+    .btn-primary:hover {
+      background: var(--pink-dim);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(245,0,79,0.4);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      margin-top: 10px;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    /* Tambahan untuk timer & resend */
+    .resend-container {
+      margin-top: 12px;
+    }
+    .countdown {
+      font-size: 13px;
+      color: var(--pink);
+      text-align: center;
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    .resend-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .resend-btn:hover {
+      border-color: var(--pink);
+      color: var(--text);
+    }
+    .resend-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    /* Message */
+    .msg {
+      font-size: 13px;
+      min-height: 20px;
+      margin-top: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .msg.success { color: #34d399; }
+    .msg.error { color: #f87171; }
+    .msg.info { color: var(--muted); }
+    /* Step transition */
+    .step { transition: all 0.3s ease; }
+    .step.hidden { display: none; }
+    /* Footer */
+    .card-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .card-footer span { font-size: 12px; color: #383d47; }
+    .card-footer i { font-size: 11px; color: #383d47; }
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    /* OTP hint */
+    .otp-hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .otp-hint span { color: rgba(245,0,79,0.8); font-weight: 500; }
 
-    /* Semua style asli kamu tetap sama (tidak diubah) */
-    .bg-layer, .grain, .line-l, .line-r, .card, .logo, .logo-icon, .logo-text,
-    .heading, .subheading, .input-wrap, .input-icon, .input-field, .otp-row,
-    .otp-box, .btn-primary, .btn-ghost, .resend-container, .countdown, .resend-btn,
-    .msg, .step, .card-footer, .spinner, .otp-hint { /* semua tetap */ }
-
-    /* Tambahan untuk Turnstile */
+    /* Tambahan CSS untuk Turnstile (hanya ini yang ditambah) */
     .cf-turnstile {
       margin: 20px 0 16px 0;
       display: flex;
@@ -52,18 +271,15 @@
   <div class="grain"></div>
   <div class="line-l"></div>
   <div class="line-r"></div>
-
   <div class="card">
     <div class="logo">
       <div class="logo-icon"><i class="fa-solid fa-film"></i></div>
       <div class="logo-text">CINESTREAM</div>
     </div>
-
-    <!-- Step 1: Email + Turnstile -->
+    <!-- Step 1: Email -->
     <div id="step-email" class="step">
       <h1 class="heading">Selamat datang</h1>
       <p class="subheading">Masukkan email untuk menerima kode verifikasi</p>
-      
       <div class="input-wrap">
         <i class="fa-regular fa-envelope input-icon"></i>
         <input id="email-input" type="email" placeholder="Email Anda"
@@ -71,7 +287,7 @@
                onkeydown="if(event.key==='Enter') sendOTP()">
       </div>
 
-      <!-- Cloudflare Turnstile -->
+      <!-- Cloudflare Turnstile (Tambahan di sini) -->
       <div class="cf-turnstile" id="turnstile-widget"></div>
 
       <button onclick="sendOTP()" class="btn-primary" id="btn-send">
@@ -80,8 +296,7 @@
         <i class="fa-solid fa-arrow-right" id="btn-send-icon" style="font-size:13px"></i>
       </button>
     </div>
-
-    <!-- Step 2: OTP (tetap sama persis) -->
+    <!-- Step 2: OTP -->
     <div id="step-otp" class="step hidden">
       <h1 class="heading">Cek email kamu</h1>
       <p class="otp-hint">Kode 6 digit telah dikirim ke<br><span id="email-display"></span></p>
@@ -99,7 +314,7 @@
         <span id="btn-verify-text">Verifikasi</span>
         <i class="fa-solid fa-shield-check" id="btn-verify-icon" style="font-size:13px"></i>
       </button>
-
+      <!-- Tambahan: Resend dengan Timer -->
       <div class="resend-container">
         <button onclick="sendOTP()" class="resend-btn" id="btn-resend" disabled>
           Kirim Ulang Kode OTP
@@ -112,7 +327,6 @@
         <i class="fa-solid fa-arrow-left" style="margin-right:6px;font-size:12px"></i>Ganti email
       </button>
     </div>
-
     <p id="message" class="msg info"></p>
     <div class="card-footer">
       <i class="fa-solid fa-lock"></i>
@@ -121,33 +335,23 @@
   </div>
 
   <script>
-    // ================== CLOUDflare TURNSTILE ==================
-    const TURNSTILE_SITEKEY = '0x4AAAAAAAxxxxxxxxxxxxxxxxxxxxxxxx'; // ← GANTI DENGAN SITE KEY KAMU
+    // ================== TAMBAHAN CLOUDFLARE TURNSTILE ==================
+    const TURNSTILE_SITEKEY = '0x4AAAAAAC12zQoXrjFdZ9fD'; // ← GANTI DENGAN SITE KEY KAMU
 
     let turnstileToken = null;
-    let turnstileWidgetId = null;
 
     function renderTurnstile() {
       if (typeof turnstile === "undefined") return;
-      turnstileWidgetId = turnstile.render('#turnstile-widget', {
+      turnstile.render('#turnstile-widget', {
         sitekey: TURNSTILE_SITEKEY,
         callback: function(token) {
           turnstileToken = token;
-        },
-        'error-callback': function() {
-          setMsg("Verifikasi Cloudflare gagal, coba lagi.", 'error');
         }
       });
     }
 
-    function resetTurnstile() {
-      if (turnstileWidgetId !== null) {
-        turnstile.reset(turnstileWidgetId);
-        turnstileToken = null;
-      }
-    }
-
-    // ================== SCRIPT ASLI KAMU (TIDAK DIUBAH) ==================
+    // ================== SCRIPT ASLI KAMU (TIDAK DIUBAH SEDIKIT PUN) ==================
+    // OTP box logic
     const otpBoxes = document.querySelectorAll('.otp-box');
     otpBoxes.forEach((box, i) => {
       box.addEventListener('input', e => {
@@ -190,6 +394,7 @@
     let cooldownInterval = null;
     function startCooldown() {
       if (cooldownInterval) clearInterval(cooldownInterval);
+     
       let timeLeft = 60;
       const timerEl = document.getElementById('timer');
       const cooldownEl = document.getElementById('cooldown');
@@ -211,6 +416,8 @@
     async function sendOTP() {
       const email = document.getElementById('email-input').value.trim();
       if (!email) return setMsg("Masukkan email terlebih dahulu", 'error');
+
+      // Tambahan pengecekan Turnstile
       if (!turnstileToken) {
         setMsg("Mohon selesaikan verifikasi Cloudflare terlebih dahulu", 'error');
         return;
@@ -218,18 +425,16 @@
 
       setLoading('btn-send', 'spin-send', 'btn-send-icon', true);
       setMsg("Mengirim kode...", 'info');
-
       try {
         const res = await fetch('/api/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             email,
-            cf_turnstile_token: turnstileToken 
+            cf_turnstile_token: turnstileToken   // kirim token ke backend
           })
         });
         const data = await res.json();
-
         if (data.success) {
           document.getElementById('email-display').textContent = email;
           document.getElementById('step-email').classList.add('hidden');
@@ -237,10 +442,8 @@
           otpBoxes[0].focus();
           setMsg("Kode dikirim! Cek inbox atau spam kamu.", 'success');
           startCooldown();
-          resetTurnstile();
         } else {
           setMsg(data.error || "Gagal mengirim OTP", 'error');
-          resetTurnstile();
         }
       } catch {
         setMsg("Terjadi kesalahan jaringan", 'error');
@@ -284,10 +487,9 @@
       setMsg('', 'info');
       if (cooldownInterval) clearInterval(cooldownInterval);
       document.getElementById('cooldown').style.display = 'none';
-      resetTurnstile();
     }
 
-    // Inisialisasi Turnstile saat halaman dimuat
+    // Inisialisasi Turnstile
     window.onload = () => {
       renderTurnstile();
     };
