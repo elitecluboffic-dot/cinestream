@@ -8,34 +8,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --pink:       #e11d48;
+      --pink: #e11d48;
       --pink-light: #fb7185;
-      --pink-glow:  rgba(225, 29, 72, 0.18);
-      --rose:       #be123c;
-      --bg:         #07070d;
-      --bg2:        #0f0f1a;
-      --bg3:        #161625;
-      --surface:    rgba(255,255,255,0.04);
-      --surface2:   rgba(255,255,255,0.07);
-      --border:     rgba(255,255,255,0.07);
-      --border2:    rgba(255,255,255,0.12);
-      --text:       #f8fafc;
-      --muted:      #94a3b8;
-      --muted2:     #475569;
-      --radius-sm:  10px;
-      --radius-md:  16px;
-      --radius-lg:  22px;
-      --radius-xl:  32px;
-      --nav-h:      68px;
+      --pink-glow: rgba(225, 29, 72, 0.18);
+      --rose: #be123c;
+      --bg: #07070d;
+      --bg2: #0f0f1a;
+      --bg3: #161625;
+      --surface: rgba(255,255,255,0.04);
+      --surface2: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --muted2: #475569;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+      --nav-h: 68px;
     }
-
     html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
@@ -43,7 +39,6 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
     /* ── Nebula Background ── */
     .hero-video {
       position: fixed; top: 0; left: 0;
@@ -61,7 +56,6 @@
         linear-gradient(180deg, rgba(7,7,13,0.7) 0%, rgba(7,7,13,0.92) 100%);
       z-index: -1;
     }
-
     /* ── Navbar ── */
     .navbar {
       position: sticky; top: 0; z-index: 100;
@@ -119,7 +113,6 @@
       background: var(--surface2);
     }
     .navbar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
-
     /* ── Buttons ── */
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
@@ -142,21 +135,18 @@
       filter: brightness(1.08);
     }
     .btn-primary:active { transform: translateY(0); }
-
     .btn-ghost {
       background: var(--surface);
       color: var(--muted);
       border: 1px solid var(--border);
     }
     .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
-
     .btn-outline {
       background: transparent;
       color: var(--text);
       border: 1px solid var(--border2);
     }
     .btn-outline:hover { background: var(--surface2); }
-
     .btn-link {
       background: none; border: none;
       color: var(--muted); font-size: 13.5px; font-weight: 500;
@@ -164,7 +154,6 @@
       letter-spacing: 0; transition: color 0.2s;
     }
     .btn-link:hover { color: var(--text); }
-
     .badge-admin {
       background: rgba(139,92,246,0.15);
       color: #a78bfa;
@@ -175,22 +164,19 @@
       transition: all 0.2s;
     }
     .badge-admin:hover { background: rgba(139,92,246,0.25); }
-
     /* ── Feed grid ── */
     #feed {
       columns: 1; gap: 20px;
       padding: 32px 0 80px;
     }
-    @media (min-width: 640px)  { #feed { columns: 2; } }
+    @media (min-width: 640px) { #feed { columns: 2; } }
     @media (min-width: 1024px) { #feed { columns: 3; } }
     @media (min-width: 1280px) { #feed { columns: 4; } }
     @media (min-width: 1536px) { #feed { columns: 5; } }
-
     .feed-wrap {
       max-width: 1440px; margin: 0 auto; padding: 0 24px;
       position: relative; z-index: 10;
     }
-
     /* ── Cards ── */
     .card {
       break-inside: avoid; margin-bottom: 20px;
@@ -234,6 +220,17 @@
     .card-stat.likes { color: #fb7185; }
     .card-stat.comments { color: var(--muted); }
 
+    /* === LAZY LOAD CSS === */
+    .lazy-media {
+      width: 100%;
+      transition: opacity 0.4s ease;
+      background: #161625;
+      opacity: 0.85;
+    }
+    .lazy-media.loaded {
+      opacity: 1;
+    }
+
     /* ── Modal ── */
     .modal-backdrop {
       position: fixed; inset: 0;
@@ -263,7 +260,6 @@
       cursor: pointer; transition: all 0.2s;
     }
     .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
-
     .modal-media-pane {
       flex: 3; background: #000;
       display: flex; align-items: center; justify-content: center;
@@ -274,7 +270,6 @@
       max-height: 80vh; width: 100%;
       object-fit: contain; border-radius: var(--radius-md);
     }
-
     .modal-info-pane {
       flex: 2; display: flex; flex-direction: column;
       height: 80vh; max-height: 80vh;
@@ -286,7 +281,6 @@
     }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .modal-author { font-size: 13px; color: var(--muted); }
-
     .modal-actions {
       display: flex; align-items: center; gap: 20px;
       padding: 14px 22px;
@@ -301,7 +295,6 @@
     }
     .modal-action-btn:hover { color: var(--text); }
     .modal-action-btn.liked { color: #fb7185; }
-
     .modal-comments {
       flex: 1; overflow-y: auto; padding: 16px 22px;
       display: flex; flex-direction: column; gap: 16px;
@@ -309,11 +302,9 @@
     .modal-comments::-webkit-scrollbar { width: 4px; }
     .modal-comments::-webkit-scrollbar-track { background: transparent; }
     .modal-comments::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-
     .comment-item { display: flex; flex-direction: column; gap: 3px; }
     .comment-user { font-size: 13px; font-weight: 600; color: #fb7185; }
     .comment-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
-
     .modal-comment-form {
       padding: 14px 18px;
       border-top: 1px solid var(--border);
@@ -338,13 +329,11 @@
       transition: all 0.2s; white-space: nowrap;
     }
     .modal-comment-form .btn-send:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
     .modal-login-hint {
       padding: 14px 22px; text-align: center;
       color: var(--muted2); font-size: 13px;
       border-top: 1px solid var(--border);
     }
-
     /* ── Upload Modal ── */
     #upload-modal {
       position: fixed; inset: 0;
@@ -396,7 +385,6 @@
     .upload-file-icon { font-size: 28px; color: var(--muted2); margin-bottom: 8px; }
     .upload-file-text { font-size: 13.5px; color: var(--muted); }
     .upload-file-text span { color: #fb7185; font-weight: 600; }
-
     .upload-input {
       width: 100%;
       background: var(--surface);
@@ -408,7 +396,6 @@
     }
     .upload-input:focus { border-color: rgba(225,29,72,0.5); }
     .upload-input::placeholder { color: var(--muted2); }
-
     .upload-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
     .btn-upload-submit {
       width: 100%; height: 48px; border-radius: var(--radius-md);
@@ -427,7 +414,6 @@
       cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
     .btn-upload-cancel:hover { background: var(--surface2); color: var(--text); }
-
     /* ── Responsive ── */
     @media (max-width: 900px) {
       .modal-box { flex-direction: column; max-height: 95vh; }
@@ -440,11 +426,9 @@
       .navbar-inner { padding: 0 16px; gap: 12px; }
     }
   </style>
-
   <script>
     let token = localStorage.getItem('token')
     let currentUser = null
-
     async function checkAuth() {
       if (!token) { renderNavbar(); return }
       try {
@@ -453,7 +437,6 @@
       } catch(e) {}
       renderNavbar()
     }
-
     function renderNavbar() {
       const nav = document.getElementById('navbar')
       nav.innerHTML = `
@@ -481,11 +464,9 @@
         </div>
       `
     }
-
     let allPosts = []
     let displayed = 0
     const PAGE_SIZE = 12
-
     async function loadPosts() {
       try {
         const res = await fetch('/api/posts?approved=true')
@@ -507,8 +488,10 @@
         card.innerHTML = `
           <div style="overflow:hidden">
             ${p.type === 'image'
-              ? `<img src="${p.url}" class="card-media">`
-              : `<video src="${p.url}" class="card-media" muted loop autoplay playsinline></video>`
+              ? `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23161625'/%3E%3C/svg%3E" data-src="${p.url}" class="card-media lazy-media">`
+              : `<video data-src="${p.url}" class="card-media lazy-media" muted loop playsinline preload="none">
+                   <source data-src="${p.url}" type="video/mp4">
+                 </video>`
             }
           </div>
           <div class="card-body">
@@ -592,12 +575,10 @@
         </div>
       `
     }
-
     function hideModal() {
       document.getElementById('modal').classList.add('hidden')
       document.getElementById('modal').innerHTML = ''
     }
-
     async function toggleLike() {
       if (!currentUser) return alert('Login dulu')
       const res = await fetch('/api/like', {
@@ -611,7 +592,6 @@
         showPostModal(currentPost)
       }
     }
-
     async function postComment() {
       const input = document.getElementById('comment-input')
       if (!input.value.trim()) return
@@ -627,7 +607,6 @@
         showPostModal(currentPost)
       }
     }
-
     function showUploadModal() {
       const html = `
         <div id="upload-modal">
@@ -680,12 +659,10 @@
         }
       })
     }
-
     function logout() {
       localStorage.removeItem('token')
       location.reload()
     }
-
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         const modal = document.getElementById('modal')
@@ -693,9 +670,45 @@
       }
     })
 
+    /* === LAZY LOAD SCRIPT === */
+    let lazyObserver;
+    function initLazyLoad() {
+      if (!('IntersectionObserver' in window)) return;
+      lazyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const media = entry.target;
+            if (media.dataset.src) {
+              if (media.tagName === 'IMG') {
+                media.src = media.dataset.src;
+              } else if (media.tagName === 'VIDEO') {
+                const source = media.querySelector('source');
+                if (source) source.src = media.dataset.src;
+                media.load();
+              }
+              media.classList.add('loaded');
+              lazyObserver.unobserve(media);
+            }
+          }
+        });
+      }, {
+        rootMargin: '300px 0px',
+        threshold: 0.1
+      });
+    }
+
+    function observeLazyMedia() {
+      document.querySelectorAll('.lazy-media').forEach(media => {
+        lazyObserver.observe(media);
+      });
+    }
+
     window.onload = () => {
       checkAuth()
       loadPosts()
+      initLazyLoad();
+      // Observe setelah posts dirender
+      setTimeout(observeLazyMedia, 500);
     }
   </script>
 </head>
@@ -705,13 +718,10 @@
     <source src="https://assets.mixkit.co/videos/preview/343/343-large.mp4" type="video/mp4">
   </video>
   <div class="overlay"></div>
-
   <nav id="navbar" class="navbar"></nav>
-
   <div class="feed-wrap">
     <div id="feed"></div>
   </div>
-
   <div id="modal" class="hidden"></div>
 </body>
 </html>
