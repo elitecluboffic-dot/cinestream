@@ -15,38 +15,37 @@
     <div class="flex justify-center mb-8">
       <i class="fa-solid fa-thumbtack text-6xl text-pink-600"></i>
     </div>
-    <h1 class="text-3xl font-bold text-center mb-8">Buat Akun CINESTREAM</h1>
+    <h1 class="text-3xl font-bold text-center mb-8">Daftar di CINESTREAM</h1>
     
     <form id="register-form">
-      <input name="email" type="email" placeholder="Email" required 
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-4 focus:outline-none focus:border-pink-500">
-      <input name="password" type="password" placeholder="Password" required 
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-pink-500">
+      <input name="email" id="email-input" type="email" placeholder="Masukkan email Anda" 
+             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-pink-500" required>
+      
       <button type="submit" 
               class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
-        Daftar
+        Daftar Sekarang
       </button>
     </form>
-    
+
     <p class="text-center mt-6 text-gray-500">
-      Sudah punya akun? <a href="/login.html" class="text-pink-600 font-medium">Masuk</a>
+      Sudah punya akun? <a href="/login.html" class="text-pink-600 font-medium">Masuk dengan OTP</a>
     </p>
   </div>
 
   <script>
     document.getElementById('register-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const form = new FormData(e.target)
-      const res = await fetch('/api/register', { method: 'POST', body: form })
-      const data = await res.json()
-      
+      e.preventDefault();
+      const form = new FormData(e.target);
+      const res = await fetch('/api/register', { method: 'POST', body: form });
+      const data = await res.json();
+
       if (data.success) {
-        alert('Registrasi berhasil! Silakan login.')
-        window.location.href = '/login.html'
+        alert(data.message || "Registrasi berhasil! Silakan login.");
+        window.location.href = '/login.html';
       } else {
-        alert(data.error || 'Registrasi gagal')
+        alert(data.error || "Registrasi gagal");
       }
-    })
+    });
   </script>
 </body>
 </html>
