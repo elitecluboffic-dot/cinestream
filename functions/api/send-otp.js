@@ -6,16 +6,18 @@ export async function onRequest({ request, env }) {
 
   const { email } = await request.json();
   if (!email) {
-    return new Response(JSON.stringify({ error: "Email diperlukan" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" }
+    return new Response(JSON.stringify({ error: "Email diperlukan" }), { 
+      status: 400, 
+      headers: { "Content-Type": "application/json" } 
     });
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = Date.now() + 10 * 60 * 1000;
 
-  await env.KV.put(`otp:${email}`, JSON.stringify({ otp, expiresAt }), { expirationTtl: 600 });
+  await env.KV.put(`otp:${email}`, JSON.stringify({ otp, expiresAt }), { 
+    expirationTtl: 600 
+  });
 
   const htmlContent = `
     <h2 style="color:#e11d48;">CINESTREAM</h2>
@@ -30,10 +32,11 @@ export async function onRequest({ request, env }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${env.RESEND_API_KEY}`
+        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+        "User-Agent": "CineStream/1.0"   // ← tambahkan ini (Resend wajib)
       },
       body: JSON.stringify({
-        from: "CINESTREAM <onboarding@resend.dev>",   // kamu bisa ganti domain nanti
+        from: "CINESTREAM <no-reply@cinestream.kraxx.my.id>", // ganti setelah domain terverifikasi
         to: [email],
         subject: `Kode OTP CINESTREAM - ${otp}`,
         html: htmlContent
@@ -41,22 +44,30 @@ export async function onRequest({ request, env }) {
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error("Resend error:", err);
-      throw new Error("Gagal");
+      const errText = await res.text();
+      console.error("Resend Error:", res.status, errText);
+      
+      let errorMsg = "Gagal mengirim OTP";
+      if (res.status === 403) {
+        errorMsg = "Domain belum diverifikasi di Resend";
+      } else if (res.status === 422) {
+        errorMsg = "Format email pengirim tidak valid";
+      }
+
+      throw new Error(errText);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: "Kode OTP telah dikirim ke email Anda. Cek inbox/spam." 
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Kode OTP telah dikirim ke email Anda. Cek inbox/spam."
     }), {
       headers: { "Content-Type": "application/json" }
     });
 
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ 
-      error: "Gagal mengirim OTP. Coba lagi dalam beberapa detik." 
+    console.error("Send OTP Error:", err);
+    return new Response(JSON.stringify({
+      error: "Gagal mengirim OTP. Coba lagi dalam beberapa detik."
     }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
