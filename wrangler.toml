@@ -10,5 +10,5 @@ compatibility_date = "2024-01-01"
 # Set via: wrangler secret put TMDB_API_KEY
 
 [[routes]]
-pattern = "cinexx-api.YOUR_SUBDOMAIN.workers.dev/*"
+pattern = "stream.internetdnsofficial.workers.dev*"
 zone_name = "workers.dev"
