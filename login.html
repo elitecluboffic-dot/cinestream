@@ -15,38 +15,85 @@
     <div class="flex justify-center mb-8">
       <i class="fa-solid fa-thumbtack text-6xl text-pink-600"></i>
     </div>
-    <h1 class="text-3xl font-bold text-center mb-8">Masuk ke CINESTREAM</h1>
-    
-    <form id="login-form">
-      <input name="email" type="email" placeholder="Email" required 
+    <h1 class="text-3xl font-bold text-center mb-2">Masuk ke CINESTREAM</h1>
+    <p class="text-center text-gray-500 mb-8">Masukkan email untuk menerima kode OTP</p>
+
+    <div id="step-email">
+      <input id="email-input" type="email" placeholder="Email Anda" value="elitecluboffic@gmail.com"
              class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-4 focus:outline-none focus:border-pink-500">
-      <input name="password" type="password" placeholder="Password" required 
-             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-pink-500">
-      <button type="submit" 
+      <button onclick="sendOTP()" 
               class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
-        Masuk
+        Kirim Kode OTP
       </button>
-    </form>
-    
-    <p class="text-center mt-6 text-gray-500">
-      Belum punya akun? <a href="/register.html" class="text-pink-600 font-medium">Daftar sekarang</a>
-    </p>
+    </div>
+
+    <div id="step-otp" class="hidden">
+      <input id="otp-input" type="text" maxlength="6" placeholder="Masukkan 6 digit OTP" 
+             class="w-full border border-gray-300 rounded-3xl px-6 py-4 mb-4 text-center text-2xl tracking-widest focus:outline-none focus:border-pink-500">
+      <button onclick="verifyOTP()" 
+              class="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-3xl text-lg font-medium transition-all">
+        Verifikasi OTP
+      </button>
+      <button onclick="backToEmail()" class="mt-4 text-gray-500 w-full">← Kembali</button>
+    </div>
+
+    <p id="message" class="text-center mt-6 text-sm text-gray-500"></p>
   </div>
 
   <script>
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const form = new FormData(e.target)
-      const res = await fetch('/api/login', { method: 'POST', body: form })
-      const data = await res.json()
-      
-      if (data.token) {
-        localStorage.setItem('token', data.token)
-        window.location.href = '/'
+    async function sendOTP() {
+      const email = document.getElementById('email-input').value.trim();
+      const messageEl = document.getElementById('message');
+
+      if (!email) return messageEl.textContent = "Masukkan email terlebih dahulu";
+
+      messageEl.textContent = "Mengirim OTP...";
+
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.getElementById('step-email').classList.add('hidden');
+        document.getElementById('step-otp').classList.remove('hidden');
+        messageEl.textContent = "Kode OTP telah dikirim ke email Anda";
       } else {
-        alert(data.error || 'Login gagal')
+        messageEl.textContent = data.error || "Gagal mengirim OTP";
       }
-    })
+    }
+
+    async function verifyOTP() {
+      const email = document.getElementById('email-input').value.trim();
+      const otp = document.getElementById('otp-input').value.trim();
+      const messageEl = document.getElementById('message');
+
+      if (otp.length !== 6) return messageEl.textContent = "OTP harus 6 digit";
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/';
+      } else {
+        messageEl.textContent = data.error || "OTP salah";
+      }
+    }
+
+    function backToEmail() {
+      document.getElementById('step-email').classList.remove('hidden');
+      document.getElementById('step-otp').classList.add('hidden');
+      document.getElementById('message').textContent = '';
+    }
   </script>
 </body>
 </html>
