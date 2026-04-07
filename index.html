@@ -3,43 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CINESTREAM - PUBLIC FOTO</title>
+  <title>CINESTREAM - Public Foto & Video</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
   <script>
-    tailwind.config = { content: ["*"], theme: { extend: {} } }
+    tailwind.config = {
+      content: ["*"],
+      theme: { extend: {} }
+    }
+  </script>
+
+  <script>
     let token = localStorage.getItem('token')
     let currentUser = null
 
     async function checkAuth() {
-      if (!token) return
-      const res = await fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
-      if (res.ok) currentUser = await res.json()
+      if (!token) {
+        renderNavbar()
+        return
+      }
+      try {
+        const res = await fetch('/api/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (res.ok) currentUser = await res.json()
+      } catch (e) {}
       renderNavbar()
     }
 
     function renderNavbar() {
       const nav = document.getElementById('navbar')
       nav.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between bg-white shadow-sm">
           <div class="flex items-center gap-3">
             <i class="fa-solid fa-thumbtack text-3xl text-pink-600"></i>
-            <h1 class="text-2xl font-bold text-gray-900">CFPin</h1>
+            <h1 class="text-2xl font-bold text-gray-900">CINESTREAM</h1>
           </div>
+          
           <div class="flex-1 max-w-md mx-8">
             <input id="search" type="text" placeholder="Cari foto atau video..." 
                    class="w-full bg-gray-100 border border-gray-300 rounded-3xl px-6 py-3 focus:outline-none focus:border-pink-500">
           </div>
+
           <div class="flex items-center gap-4">
             ${currentUser ? `
-              <button onclick="showUploadModal()" class="bg-pink-600 text-white px-6 py-2 rounded-3xl flex items-center gap-2 hover:bg-pink-700">
+              <button onclick="showUploadModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-3xl flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-upload"></i> Unggah
               </button>
-              ${currentUser.role === 'admin' ? `<a href="/admin.html" class="text-gray-700 hover:text-pink-600 font-medium">Admin Panel</a>` : ''}
-              <button onclick="logout()" class="text-gray-700 hover:text-pink-600">Logout</button>
+              ${currentUser.role === 'admin' ? `<a href="/admin.html" class="font-medium text-gray-700 hover:text-pink-600">Admin Panel</a>` : ''}
+              <button onclick="logout()" class="text-gray-700 hover:text-pink-600 font-medium">Logout</button>
             ` : `
               <a href="/login.html" class="font-medium text-gray-700 hover:text-pink-600">Masuk</a>
-              <a href="/register.html" class="bg-gray-900 text-white px-6 py-2 rounded-3xl">Daftar</a>
+              <a href="/register.html" class="bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-3xl transition-all">Daftar</a>
             `}
           </div>
         </div>
@@ -51,17 +68,22 @@
     const PAGE_SIZE = 12
 
     async function loadPosts() {
-      const res = await fetch('/api/posts?approved=true')
-      allPosts = await res.json()
-      displayed = 0
-      renderMorePosts()
+      try {
+        const res = await fetch('/api/posts?approved=true')
+        allPosts = await res.json()
+        displayed = 0
+        document.getElementById('feed').innerHTML = ''
+        renderMorePosts()
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     function renderMorePosts() {
       const container = document.getElementById('feed')
       const start = displayed
       const end = Math.min(start + PAGE_SIZE, allPosts.length)
-      
+
       for (let i = start; i < end; i++) {
         const p = allPosts[i]
         const card = document.createElement('div')
@@ -76,8 +98,8 @@
               <p class="font-semibold text-gray-900">${p.title}</p>
               <p class="text-sm text-gray-500">by ${p.username}</p>
               <div class="flex justify-between items-center mt-3 text-sm">
-                <div class="flex items-center gap-1"><i class="fa-solid fa-heart text-pink-500"></i> ${p.likes}</div>
-                <div class="flex items-center gap-1"><i class="fa-solid fa-comment"></i> ${p.comments.length}</div>
+                <div class="flex items-center gap-1"><i class="fa-solid fa-heart text-pink-500"></i> ${p.likes || 0}</div>
+                <div class="flex items-center gap-1"><i class="fa-solid fa-comment"></i> ${p.comments ? p.comments.length : 0}</div>
               </div>
             </div>
           </div>
@@ -87,7 +109,6 @@
       }
       displayed = end
 
-      // Infinite scroll sentinel
       if (displayed < allPosts.length) {
         const sentinel = document.createElement('div')
         sentinel.id = 'sentinel'
@@ -103,6 +124,7 @@
     }
 
     let currentPost = null
+
     function showPostModal(post) {
       currentPost = post
       const modal = document.getElementById('modal')
@@ -111,7 +133,7 @@
         <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onclick="if(event.target.id==='modal')hideModal()">
           <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-4xl w-full mx-4 overflow-hidden">
             <div class="flex flex-col md:flex-row">
-              <div class="flex-1">
+              <div class="flex-1 bg-black">
                 ${post.type === 'image' 
                   ? `<img src="${post.url}" class="w-full max-h-[80vh] object-contain">`
                   : `<video src="${post.url}" controls class="w-full max-h-[80vh]"></video>`
@@ -121,19 +143,21 @@
                 <h2 class="text-2xl font-bold">${post.title}</h2>
                 <p class="text-gray-500">by ${post.username}</p>
                 
-                <div class="flex gap-6 my-6">
-                  <button onclick="toggleLike()" class="flex items-center gap-2 text-xl">
-                    <i class="fa-solid fa-heart ${post.likedBy && post.likedBy.includes(currentUser?.id) ? 'text-pink-500' : ''}"></i>
-                    <span id="modal-likes">${post.likes}</span>
+                <div class="flex gap-6 my-6 text-xl">
+                  <button onclick="toggleLike()" class="flex items-center gap-2">
+                    <i class="fa-solid fa-heart ${post.likedBy && post.likedBy.includes(currentUser?.id) ? 'text-pink-500' : 'text-gray-400'}"></i>
+                    <span id="modal-likes">${post.likes || 0}</span>
                   </button>
-                  <div class="flex items-center gap-2 text-xl"><i class="fa-solid fa-comment"></i> ${post.comments.length}</div>
+                  <div class="flex items-center gap-2 text-gray-600">
+                    <i class="fa-solid fa-comment"></i> ${post.comments ? post.comments.length : 0}
+                  </div>
                 </div>
 
-                <div class="max-h-96 overflow-y-auto mb-6" id="comments-list">
-                  ${post.comments.map(c => `
-                    <div class="mb-4">
-                      <strong>${c.username}</strong>
-                      <p class="text-gray-600">${c.text}</p>
+                <div class="max-h-96 overflow-y-auto mb-6 space-y-4" id="comments-list">
+                  ${(post.comments || []).map(c => `
+                    <div>
+                      <strong class="text-sm">${c.username}</strong>
+                      <p class="text-gray-600 text-sm">${c.text}</p>
                     </div>
                   `).join('')}
                 </div>
@@ -141,10 +165,10 @@
                 ${currentUser ? `
                   <div class="flex gap-2">
                     <input id="comment-input" type="text" placeholder="Tulis komentar..." 
-                           class="flex-1 border border-gray-300 rounded-3xl px-5 py-3 focus:outline-none">
+                           class="flex-1 border border-gray-300 rounded-3xl px-5 py-3 focus:outline-none focus:border-pink-500">
                     <button onclick="postComment()" class="bg-pink-600 text-white px-8 rounded-3xl">Kirim</button>
                   </div>
-                ` : `<p class="text-sm text-gray-500">Login untuk komentar</p>`}
+                ` : `<p class="text-sm text-gray-500">Login untuk memberikan komentar</p>`}
               </div>
             </div>
           </div>
@@ -163,13 +187,11 @@
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ postId: currentPost.id })
       })
-      const data = await res.json()
-      currentPost.likes = data.likes
-      if (!currentPost.likedBy) currentPost.likedBy = []
-      const idx = currentPost.likedBy.indexOf(currentUser.id)
-      if (idx > -1) currentPost.likedBy.splice(idx, 1)
-      else currentPost.likedBy.push(currentUser.id)
-      showPostModal(currentPost) // refresh modal
+      if (res.ok) {
+        const data = await res.json()
+        currentPost.likes = data.likes
+        showPostModal(currentPost)
+      }
     }
 
     async function postComment() {
@@ -180,10 +202,12 @@
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ postId: currentPost.id, text: input.value })
       })
-      const data = await res.json()
-      currentPost.comments = data.comments
-      input.value = ''
-      showPostModal(currentPost)
+      if (res.ok) {
+        const data = await res.json()
+        currentPost.comments = data.comments
+        input.value = ''
+        showPostModal(currentPost)
+      }
     }
 
     function showUploadModal() {
@@ -192,11 +216,12 @@
           <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
             <h2 class="text-2xl font-bold mb-6">Unggah Foto / Video</h2>
             <form id="upload-form">
-              <input type="file" id="file-input" accept="image/*,video/*" class="block w-full mb-4">
-              <input id="title-input" type="text" placeholder="Judul" class="w-full border border-gray-300 rounded-3xl px-5 py-4 mb-4" required>
-              <button type="submit" class="w-full bg-pink-600 text-white py-4 rounded-3xl text-lg font-medium">Unggah Sekarang</button>
+              <input type="file" id="file-input" accept="image/*,video/*" class="block w-full mb-4 border border-gray-300 rounded-2xl p-3">
+              <input id="title-input" type="text" placeholder="Judul postingan" 
+                     class="w-full border border-gray-300 rounded-3xl px-5 py-4 mb-6" required>
+              <button type="submit" class="w-full bg-pink-600 text-white py-4 rounded-3xl text-lg font-medium hover:bg-pink-700">Unggah Sekarang</button>
             </form>
-            <button onclick="document.getElementById('upload-modal').remove()" class="mt-4 text-gray-500">Batal</button>
+            <button onclick="document.getElementById('upload-modal').remove()" class="mt-4 text-gray-500 w-full">Batal</button>
           </div>
         </div>
       `
@@ -206,7 +231,7 @@
         e.preventDefault()
         const file = document.getElementById('file-input').files[0]
         const title = document.getElementById('title-input').value
-        if (!file) return alert('Pilih file')
+        if (!file) return alert('Pilih file terlebih dahulu')
 
         const formData = new FormData()
         formData.append('file', file)
@@ -219,11 +244,11 @@
         })
 
         if (res.ok) {
-          alert('Berhasil diunggah! Menunggu approval admin.')
+          alert('Berhasil diunggah! Menunggu persetujuan admin.')
           document.getElementById('upload-modal').remove()
           loadPosts()
         } else {
-          alert('Gagal upload')
+          alert('Gagal mengunggah. Silakan coba lagi.')
         }
       })
     }
