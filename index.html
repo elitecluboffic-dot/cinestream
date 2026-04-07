@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -46,7 +45,7 @@
       user-select: none;
     }
 
-    /* ── Anti Inspect & Download ── */
+    /* ================== TAMBAHAN PROTEKSI ================== */
     img, video {
       -webkit-user-drag: none;
       user-drag: none;
@@ -67,8 +66,9 @@
       -ms-user-select: none;
       user-select: none;
     }
+    /* ================== AKHIR PROTEKSI ================== */
 
-    /* Style asli kamu (tidak diubah) */
+    /* ── Nebula Background ── */
     .hero-video {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
@@ -85,128 +85,384 @@
         linear-gradient(180deg, rgba(7,7,13,0.7) 0%, rgba(7,7,13,0.92) 100%);
       z-index: -1;
     }
-    .navbar { position: sticky; top: 0; z-index: 100; height: var(--nav-h);
-      background: rgba(7,7,13,0.88); backdrop-filter: blur(20px) saturate(1.4);
+    /* Semua style kamu dari sini ke bawah tetap sama persis */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      height: var(--nav-h);
+      background: rgba(7,7,13,0.88);
+      backdrop-filter: blur(20px) saturate(1.4);
       -webkit-backdrop-filter: blur(20px) saturate(1.4);
       border-bottom: 1px solid var(--border);
     }
     .navbar-inner {
-      max-width: 1440px; margin: 0 auto; height: 100%; display: flex; align-items: center;
+      max-width: 1440px; margin: 0 auto;
+      height: 100%; display: flex; align-items: center;
       padding: 0 28px; gap: 24px;
     }
-    .navbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
     .navbar-logo {
-      width: 36px; height: 36px; background: linear-gradient(135deg, #e11d48, #9333ea);
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: #fff; box-shadow: 0 0 20px rgba(225,29,72,0.35);
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #e11d48, #9333ea);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: #fff;
+      box-shadow: 0 0 20px rgba(225,29,72,0.35);
     }
     .navbar-title {
-      font-size: 18px; font-weight: 800; letter-spacing: 0.06em;
+      font-size: 18px; font-weight: 800;
+      letter-spacing: 0.06em;
       background: linear-gradient(90deg, #fff 40%, #fb7185);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .search-wrap { flex: 1; max-width: 480px; position: relative; }
-    .search-wrap i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted2); font-size: 14px; pointer-events: none; }
+    .search-wrap {
+      flex: 1; max-width: 480px; position: relative;
+    }
+    .search-wrap i {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--muted2); font-size: 14px; pointer-events: none;
+    }
     #search {
-      width: 100%; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 100px; padding: 0 20px 0 42px; height: 42px;
-      color: var(--text); font-size: 14px; outline: none;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0 20px 0 42px;
+      height: 42px;
+      color: var(--text);
+      font-size: 14px; font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
     }
-    #search:focus { border-color: rgba(225,29,72,0.5); background: var(--surface2); }
-
+    #search::placeholder { color: var(--muted2); }
+    #search:focus {
+      border-color: rgba(225,29,72,0.5);
+      background: var(--surface2);
+    }
     .navbar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
-
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 0 18px; height: 40px;
-      border-radius: 100px; font-size: 13.5px; font-weight: 600; cursor: pointer;
-      border: none; outline: none; text-decoration: none; white-space: nowrap;
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 18px; height: 40px;
+      border-radius: 100px;
+      font-size: 13.5px; font-weight: 600; font-family: inherit;
+      cursor: pointer; border: none; outline: none;
+      text-decoration: none; white-space: nowrap;
       transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      letter-spacing: 0.01em;
     }
-    .btn-primary { background: linear-gradient(135deg, #e11d48, #be123c); color: #fff;
-      box-shadow: 0 4px 18px rgba(225,29,72,0.30); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(225,29,72,0.45); filter: brightness(1.08); }
-    .btn-ghost { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .btn-primary {
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(225,29,72,0.30);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(225,29,72,0.45);
+      filter: brightness(1.08);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
     .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
-    .btn-link { background: none; border: none; color: var(--muted); padding: 0 8px; height: auto; cursor: pointer; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+    .btn-outline:hover { background: var(--surface2); }
+    .btn-link {
+      background: none; border: none;
+      color: var(--muted); font-size: 13.5px; font-weight: 500;
+      cursor: pointer; padding: 0 8px; height: auto;
+      letter-spacing: 0; transition: color 0.2s;
+    }
     .btn-link:hover { color: var(--text); }
-
-    #feed { columns: 1; gap: 20px; padding: 32px 0 80px; }
+    .badge-admin {
+      background: rgba(139,92,246,0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(139,92,246,0.25);
+      font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .badge-admin:hover { background: rgba(139,92,246,0.25); }
+    #feed {
+      columns: 1; gap: 20px;
+      padding: 32px 0 80px;
+    }
     @media (min-width: 640px) { #feed { columns: 2; } }
     @media (min-width: 1024px) { #feed { columns: 3; } }
     @media (min-width: 1280px) { #feed { columns: 4; } }
     @media (min-width: 1536px) { #feed { columns: 5; } }
-
-    .feed-wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 10; }
-
+    .feed-wrap {
+      max-width: 1440px; margin: 0 auto; padding: 0 24px;
+      position: relative; z-index: 10;
+    }
     .card {
-      break-inside: avoid; margin-bottom: 20px; background: var(--bg3);
-      border: 1px solid var(--border); border-radius: var(--radius-lg);
-      overflow: hidden; cursor: pointer; transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+      break-inside: avoid; margin-bottom: 20px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.35s, border-color 0.35s;
+      will-change: transform;
     }
     .card:hover {
-      transform: translateY(-8px); border-color: rgba(225,29,72,0.30);
-      box-shadow: 0 24px 48px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(225,29,72,0.15);
+      transform: translateY(-8px);
+      border-color: rgba(225,29,72,0.30);
+      box-shadow: 0 24px 48px -8px rgba(0,0,0,0.6),
+                  0 0 0 1px rgba(225,29,72,0.15);
     }
     .card-media {
-      width: 100%; display: block; aspect-ratio: 4/3; object-fit: cover;
+      width: 100%; display: block;
+      aspect-ratio: 4/3; object-fit: cover;
       transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
-      pointer-events: none !important;
     }
     .card:hover .card-media { transform: scale(1.04); }
     .card-body { padding: 14px 16px 16px; }
-    .card-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+    .card-title {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
     .card-author { font-size: 12px; color: var(--muted); }
-    .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
-    .card-stat { display: flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 500; }
+    .card-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .card-stat {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12.5px; font-weight: 500;
+    }
     .card-stat.likes { color: #fb7185; }
-
-    /* Modal styles (disingkat karena terlalu panjang, tapi tetap utuh) */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
-    .modal-box { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-xl);
-      max-width: 1100px; width: 100%; overflow: hidden; box-shadow: 0 60px 120px rgba(0,0,0,0.8);
-      display: flex; max-height: 92vh; }
-    .modal-close { position: absolute; top: 14px; right: 14px; z-index: 10; width: 36px; height: 36px;
-      border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid var(--border2);
-      color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .modal-media-pane { flex: 3; background: #000; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .modal-media-pane img, .modal-media-pane video { max-height: 80vh; width: 100%; object-fit: contain; border-radius: var(--radius-md); pointer-events: none !important; }
-    .modal-info-pane { flex: 2; display: flex; flex-direction: column; height: 80vh; border-left: 1px solid var(--border); }
-    /* ... (sisanya modal style kamu bisa copy dari kode asli kalau mau full) */
-
+    .card-stat.comments { color: var(--muted); }
+    .lazy-media {
+      width: 100%;
+      transition: opacity 0.4s ease;
+      background: #161625;
+      opacity: 0.85;
+    }
+    .lazy-media.loaded {
+      opacity: 1;
+    }
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; padding: 16px;
+    }
+    .modal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-xl);
+      max-width: 1100px; width: 100%;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 60px 120px rgba(0,0,0,0.8);
+      display: flex; flex-direction: row;
+      max-height: 92vh;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 14px; z-index: 10;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border2);
+      color: var(--muted); font-size: 17px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .modal-media-pane {
+      flex: 3; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; min-height: 400px;
+    }
+    .modal-media-pane img,
+    .modal-media-pane video {
+      max-height: 80vh; width: 100%;
+      object-fit: contain; border-radius: var(--radius-md);
+    }
+    .modal-info-pane {
+      flex: 2; display: flex; flex-direction: column;
+      height: 80vh; max-height: 80vh;
+      border-left: 1px solid var(--border);
+    }
+    .modal-header {
+      padding: 22px 22px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .modal-author { font-size: 13px; color: var(--muted); }
+    .modal-actions {
+      display: flex; align-items: center; gap: 20px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-action-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--muted); transition: color 0.2s;
+      padding: 6px 0;
+    }
+    .modal-action-btn:hover { color: var(--text); }
+    .modal-action-btn.liked { color: #fb7185; }
+    .modal-comments {
+      flex: 1; overflow-y: auto; padding: 16px 22px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .modal-comments::-webkit-scrollbar { width: 4px; }
+    .modal-comments::-webkit-scrollbar-track { background: transparent; }
+    .modal-comments::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+    .comment-item { display: flex; flex-direction: column; gap: 3px; }
+    .comment-user { font-size: 13px; font-weight: 600; color: #fb7185; }
+    .comment-text { font-size: 13.5px; color: #cbd5e1; line-height: 1.5; }
+    .modal-comment-form {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center;
+    }
+    .modal-comment-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0 16px; height: 40px;
+      color: var(--text); font-size: 13.5px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .modal-comment-form input::placeholder { color: var(--muted2); }
+    .modal-comment-form input:focus { border-color: rgba(225,29,72,0.5); }
+    .modal-comment-form .btn-send {
+      height: 40px; padding: 0 20px; border-radius: 100px;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff; font-size: 13px; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .modal-comment-form .btn-send:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .modal-login-hint {
+      padding: 14px 22px; text-align: center;
+      color: var(--muted2); font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    #upload-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; padding: 20px;
+    }
+    .upload-box {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+    }
+    .upload-title {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .upload-subtitle {
+      font-size: 13.5px; color: var(--muted); margin-bottom: 28px;
+    }
+    .upload-field { margin-bottom: 16px; }
+    .upload-field label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .upload-file-area {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px dashed var(--border2);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .upload-file-area:hover { border-color: var(--pink-light); background: var(--surface2); }
+    .upload-file-area input[type="file"] {
+      width: 100%; opacity: 0; position: absolute;
+      inset: 0; cursor: pointer;
+    }
+    .upload-file-label {
+      position: relative; display: block;
+      cursor: pointer;
+    }
+    .upload-file-icon { font-size: 28px; color: var(--muted2); margin-bottom: 8px; }
+    .upload-file-text { font-size: 13.5px; color: var(--muted); }
+    .upload-file-text span { color: #fb7185; font-weight: 600; }
+    .upload-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 16px; height: 44px;
+      color: var(--text); font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color 0.2s;
+    }
+    .upload-input:focus { border-color: rgba(225,29,72,0.5); }
+    .upload-input::placeholder { color: var(--muted2); }
+    .upload-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .btn-upload-submit {
+      width: 100%; height: 48px; border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #fff; font-size: 15px; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: all 0.22s;
+      box-shadow: 0 6px 24px rgba(225,29,72,0.35);
+      font-family: inherit;
+    }
+    .btn-upload-submit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .btn-upload-cancel {
+      width: 100%; height: 44px; border-radius: var(--radius-md);
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .btn-upload-cancel:hover { background: var(--surface2); color: var(--text); }
     @media (max-width: 900px) {
       .modal-box { flex-direction: column; max-height: 95vh; }
       .modal-info-pane { flex: none; height: auto; max-height: 50vh; border-left: none; border-top: 1px solid var(--border); }
+      .modal-media-pane { min-height: 260px; }
+      .search-wrap { max-width: 220px; }
+    }
+    @media (max-width: 580px) {
+      .search-wrap { display: none; }
+      .navbar-inner { padding: 0 16px; gap: 12px; }
     }
   </style>
-
   <script>
-    // === ANTI INSPECT & DEVTOOLS ===
+    // === TAMBAHAN PROTEKSI (tidak merubah script asli) ===
     function disableDevTools() {
-      document.addEventListener('keydown', e => {
-        if (e.key === 'F12' || 
-            (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) ||
-            (e.ctrlKey && ['u','s','p'].includes(e.key))) {
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+            (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'p'))) {
           e.preventDefault();
           e.stopImmediatePropagation();
           return false;
         }
       });
 
-      document.addEventListener('contextmenu', e => {
+      document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         return false;
       });
-
-      // Deteksi DevTools (crude method)
-      let devtoolsOpen = false;
-      setInterval(() => {
-        if (window.outerHeight - window.innerHeight > 150 || window.outerWidth - window.innerWidth > 150) {
-          if (!devtoolsOpen) {
-            devtoolsOpen = true;
-            console.clear();
-          }
-        }
-      }, 600);
     }
 
     function protectMedia() {
@@ -216,21 +472,19 @@
       });
     }
 
-    // ================== SCRIPT ASLI KAMU (sudah dilengkapi) ==================
-    let token = localStorage.getItem('token');
-    let currentUser = null;
-
+    // ================== SCRIPT ASLI KAMU (TIDAK DIUBAH) ==================
+    let token = localStorage.getItem('token')
+    let currentUser = null
     async function checkAuth() {
-      if (!token) { renderNavbar(); return; }
+      if (!token) { renderNavbar(); return }
       try {
-        const res = await fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } });
-        if (res.ok) currentUser = await res.json();
+        const res = await fetch('/api/me', { headers: { Authorization: `Bearer ${token}` } })
+        if (res.ok) currentUser = await res.json()
       } catch(e) {}
-      renderNavbar();
+      renderNavbar()
     }
-
     function renderNavbar() {
-      const nav = document.getElementById('navbar');
+      const nav = document.getElementById('navbar')
       nav.innerHTML = `
         <div class="navbar-inner">
           <a class="navbar-brand" href="/">
@@ -254,36 +508,35 @@
             `}
           </div>
         </div>
-      `;
+      `
     }
-
-    let allPosts = [];
-    let displayed = 0;
-    const PAGE_SIZE = 12;
-
+    let allPosts = []
+    let displayed = 0
+    const PAGE_SIZE = 12
     async function loadPosts() {
       try {
-        const res = await fetch('/api/posts?approved=true');
-        allPosts = await res.json();
-        displayed = 0;
-        document.getElementById('feed').innerHTML = '';
-        renderMorePosts();
-      } catch(e) { console.error(e); }
+        const res = await fetch('/api/posts?approved=true')
+        allPosts = await res.json()
+        displayed = 0
+        document.getElementById('feed').innerHTML = ''
+        renderMorePosts()
+      } catch(e) { console.error(e) }
     }
-
     function renderMorePosts() {
-      const container = document.getElementById('feed');
-      const start = displayed;
-      const end = Math.min(start + PAGE_SIZE, allPosts.length);
+      const container = document.getElementById('feed')
+      const start = displayed
+      const end = Math.min(start + PAGE_SIZE, allPosts.length)
       for (let i = start; i < end; i++) {
-        const p = allPosts[i];
-        const card = document.createElement('div');
-        card.className = 'card';
+        const p = allPosts[i]
+        const card = document.createElement('div')
+        card.className = 'card'
         card.innerHTML = `
           <div style="overflow:hidden">
-            ${p.type === 'image' 
+            ${p.type === 'image'
               ? `<img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23161625'/%3E%3C/svg%3E" data-src="${p.url}" class="card-media lazy-media">`
-              : `<video data-src="${p.url}" class="card-media lazy-media" muted loop playsinline preload="none"><source data-src="${p.url}" type="video/mp4"></video>`
+              : `<video data-src="${p.url}" class="card-media lazy-media" muted loop playsinline preload="none">
+                   <source data-src="${p.url}" type="video/mp4">
+                 </video>`
             }
           </div>
           <div class="card-body">
@@ -294,37 +547,36 @@
               <div class="card-stat comments"><i class="fa-solid fa-comment"></i> ${p.comments ? p.comments.length : 0}</div>
             </div>
           </div>
-        `;
-        card.onclick = () => showPostModal(p);
-        container.appendChild(card);
+        `
+        card.onclick = () => showPostModal(p)
+        container.appendChild(card)
       }
-      displayed = end;
+      displayed = end
       if (displayed < allPosts.length) {
-        const sentinel = document.createElement('div');
-        sentinel.id = 'sentinel';
-        container.appendChild(sentinel);
+        const sentinel = document.createElement('div')
+        sentinel.id = 'sentinel'
+        container.appendChild(sentinel)
         const observer = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting) { observer.disconnect(); renderMorePosts(); }
-        });
-        observer.observe(sentinel);
+          if (entries[0].isIntersecting) { observer.disconnect(); renderMorePosts() }
+        })
+        observer.observe(sentinel)
       }
     }
-
-    let currentPost = null;
+    let currentPost = null
     function showPostModal(post) {
-      currentPost = post;
-      const modal = document.getElementById('modal');
-      modal.classList.remove('hidden');
-      const likedBySelf = post.likedBy && currentUser && post.likedBy.includes(currentUser.id);
-
+      currentPost = post
+      const modal = document.getElementById('modal')
+      modal.classList.remove('hidden')
+      const likedBySelf = post.likedBy && currentUser && post.likedBy.includes(currentUser.id)
       modal.innerHTML = `
         <div class="modal-backdrop" id="modal-backdrop" onclick="if(event.target.id==='modal-backdrop')hideModal()">
           <div class="modal-box" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="hideModal()"><i class="fa-solid fa-xmark"></i></button>
             <div class="modal-media-pane">
-              ${post.type === 'image' 
-                ? `<img src="${post.url}" style="pointer-events:none;">` 
-                : `<video src="${post.url}" controls style="pointer-events:none;"></video>`}
+              ${post.type === 'image'
+                ? `<img src="${post.url}">`
+                : `<video src="${post.url}" controls></video>`
+              }
             </div>
             <div class="modal-info-pane">
               <div class="modal-header">
@@ -333,67 +585,135 @@
               </div>
               <div class="modal-actions">
                 <button onclick="toggleLike()" class="modal-action-btn ${likedBySelf ? 'liked' : ''}">
-                  <i class="fa-solid fa-heart"></i> <span id="modal-likes">${post.likes || 0}</span> suka
+                  <i class="fa-solid fa-heart"></i>
+                  <span id="modal-likes">${post.likes || 0}</span> suka
                 </button>
                 <div class="modal-action-btn" style="cursor:default">
-                  <i class="fa-solid fa-comment"></i> <span>${post.comments ? post.comments.length : 0}</span> komentar
+                  <i class="fa-solid fa-comment"></i>
+                  <span>${post.comments ? post.comments.length : 0}</span> komentar
                 </div>
               </div>
               <div class="modal-comments" id="comments-list">
-                ${!post.comments || post.comments.length === 0 
+                ${(post.comments || []).length === 0
                   ? `<p style="color:var(--muted2);font-size:13px;text-align:center;padding:20px 0">Belum ada komentar</p>`
-                  : post.comments.map(c => `
-                    <div class="comment-item">
-                      <span class="comment-user">${c.username}</span>
-                      <span class="comment-text">${c.text}</span>
-                    </div>`).join('')}
+                  : (post.comments || []).map(c => `
+                      <div class="comment-item">
+                        <span class="comment-user">${c.username}</span>
+                        <span class="comment-text">${c.text}</span>
+                      </div>
+                    `).join('')
+                }
               </div>
               ${currentUser ? `
                 <div class="modal-comment-form">
                   <input id="comment-input" type="text" placeholder="Tulis komentar...">
                   <button class="btn-send" onclick="postComment()">Kirim</button>
-                </div>` : `
+                </div>
+              ` : `
                 <div class="modal-login-hint">
                   <a href="/login.html" style="color:#fb7185">Masuk</a> untuk memberikan komentar
-                </div>`}
+                </div>
+              `}
             </div>
           </div>
         </div>
-      `;
-      protectMedia();
+      `
     }
-
     function hideModal() {
-      const modal = document.getElementById('modal');
-      modal.classList.add('hidden');
-      modal.innerHTML = '';
+      document.getElementById('modal').classList.add('hidden')
+      document.getElementById('modal').innerHTML = ''
     }
-
     async function toggleLike() {
-      if (!currentUser) return alert('Login dulu');
-      // Isi dengan kode fetch asli kamu
-      console.log('Like toggled for post:', currentPost.id);
+      if (!currentUser) return alert('Login dulu')
+      const res = await fetch('/api/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ postId: currentPost.id })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        currentPost.likes = data.likes
+        showPostModal(currentPost)
+      }
     }
-
     async function postComment() {
-      const input = document.getElementById('comment-input');
-      if (!input || !input.value.trim()) return;
-      // Isi dengan kode fetch asli kamu
-      console.log('Comment posted:', input.value);
-      input.value = '';
+      const input = document.getElementById('comment-input')
+      if (!input.value.trim()) return
+      const res = await fetch('/api/comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ postId: currentPost.id, text: input.value })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        currentPost.comments = data.comments
+        input.value = ''
+        showPostModal(currentPost)
+      }
     }
-
     function showUploadModal() {
-      alert('Fitur upload akan ditambahkan sesuai kode asli kamu');
-      // Isi dengan kode upload modal asli kamu
+      const html = `
+        <div id="upload-modal">
+          <div class="upload-box">
+            <div class="upload-title">Unggah Konten</div>
+            <div class="upload-subtitle">Foto atau video akan ditinjau sebelum ditampilkan</div>
+            <form id="upload-form">
+              <div class="upload-field">
+                <label>File</label>
+                <div class="upload-file-area">
+                  <label class="upload-file-label">
+                    <input type="file" id="file-input" accept="image/*,video/*" style="position:absolute;opacity:0;inset:0;cursor:pointer">
+                    <div class="upload-file-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="upload-file-text">Seret file ke sini atau <span>pilih file</span></div>
+                  </label>
+                </div>
+              </div>
+              <div class="upload-field">
+                <label>Judul</label>
+                <input id="title-input" class="upload-input" type="text" placeholder="Masukkan judul postingan" required>
+              </div>
+              <div class="upload-actions">
+                <button type="submit" class="btn-upload-submit"><i class="fa-solid fa-arrow-up-from-bracket"></i> Unggah Sekarang</button>
+                <button type="button" class="btn-upload-cancel" onclick="document.getElementById('upload-modal').remove()">Batal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `
+      document.body.insertAdjacentHTML('beforeend', html)
+      document.getElementById('upload-form').addEventListener('submit', async e => {
+        e.preventDefault()
+        const file = document.getElementById('file-input').files[0]
+        const title = document.getElementById('title-input').value
+        if (!file) return alert('Pilih file terlebih dahulu')
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('title', title)
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData
+        })
+        if (res.ok) {
+          alert('Berhasil diunggah! Menunggu persetujuan admin.')
+          document.getElementById('upload-modal').remove()
+          loadPosts()
+        } else {
+          alert('Gagal mengunggah. Silakan coba lagi.')
+        }
+      })
     }
-
     function logout() {
-      localStorage.removeItem('token');
-      location.reload();
+      localStorage.removeItem('token')
+      location.reload()
     }
-
-    /* Lazy Load */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('modal')
+        if (!modal.classList.contains('hidden')) hideModal()
+      }
+    })
+    /* === LAZY LOAD SCRIPT === */
     let lazyObserver;
     function initLazyLoad() {
       if (!('IntersectionObserver' in window)) return;
@@ -402,8 +722,9 @@
           if (entry.isIntersecting) {
             const media = entry.target;
             if (media.dataset.src) {
-              if (media.tagName === 'IMG') media.src = media.dataset.src;
-              else if (media.tagName === 'VIDEO') {
+              if (media.tagName === 'IMG') {
+                media.src = media.dataset.src;
+              } else if (media.tagName === 'VIDEO') {
                 const source = media.querySelector('source');
                 if (source) source.src = media.dataset.src;
                 media.load();
@@ -413,26 +734,30 @@
             }
           }
         });
-      }, { rootMargin: '300px 0px', threshold: 0.1 });
+      }, {
+        rootMargin: '300px 0px',
+        threshold: 0.1
+      });
     }
-
     function observeLazyMedia() {
-      document.querySelectorAll('.lazy-media').forEach(m => lazyObserver.observe(m));
+      document.querySelectorAll('.lazy-media').forEach(media => {
+        lazyObserver.observe(media);
+      });
     }
-
     window.onload = () => {
-      disableDevTools();
-      checkAuth();
-      loadPosts();
+      disableDevTools();        // ← Proteksi ditambahkan
+      checkAuth()
+      loadPosts()
       initLazyLoad();
       setTimeout(() => {
         observeLazyMedia();
-        protectMedia();
-      }, 800);
-    };
+        protectMedia();         // ← Proteksi media
+      }, 500);
+    }
   </script>
 </head>
 <body>
+  <!-- Nebula Background -->
   <video class="hero-video" autoplay muted loop playsinline>
     <source src="https://assets.mixkit.co/videos/preview/343/343-large.mp4" type="video/mp4">
   </video>
