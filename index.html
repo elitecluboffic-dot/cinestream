@@ -206,7 +206,12 @@
 
 <main id="app">
   <div id="hero"><div id="hero-bg"></div><div class="hero-content fade-in" id="hero-content"><div class="skeleton" style="height:14px;width:80px;margin-bottom:16px"></div><div class="skeleton" style="height:60px;width:340px;margin-bottom:16px"></div><div class="skeleton" style="height:14px;width:240px;margin-bottom:28px"></div></div></div>
-  <div class="section"><div class="section-title">🔥 <span>Memuat</span>...</div><div class="movies-scroll">${[...Array(6)].map(()=>`<div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>`).join('')}</div></div>
+  <div class="section">
+  <div class="section-title">🔥 <span>Memuat</span>...</div>
+  <div class="movies-scroll">
+    ${[...Array(6)].map(()=>`<div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>`).join('')}
+  </div>
+</div>
 </main>
 
 <footer>
