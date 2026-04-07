@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nonton – CineXX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" style="text-decoration:none">
+    <div class="nav-brand">CINE<span>XX</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Beranda</a></li>
+    <li><a href="movies.html">Film</a></li>
+    <li><a href="series.html">Series</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Cari film..." />
+      <button onclick="doSearch()">🔍</button>
+    </div>
+  </div>
+</nav>
+
+<div class="watch-container">
+  <!-- VIDEO PLAYER -->
+  <div class="video-wrapper">
+    <iframe id="playerFrame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+  </div>
+
+  <div class="watch-info">
+    <h1 class="watch-title" id="watchTitle">Memuat...</h1>
+    <div class="watch-meta" id="watchMeta"></div>
+
+    <div style="margin-bottom:1rem;">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem;">Pilih Server:</p>
+      <div class="server-list" id="serverList"></div>
+    </div>
+
+    <p id="watchOverview" style="font-size:0.9rem;line-height:1.75;color:#bbb;max-width:860px;"></p>
+  </div>
+
+  <!-- RELATED -->
+  <section class="section">
+    <h2 class="section-title">🎬 Film Terkait</h2>
+    <div class="movie-grid" id="relatedGrid">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">CINE<span>XX</span></div>
+  <p>© 2026 CineXX. Untuk keperluan edukasi.</p>
+</footer>
+
+<script src="app.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const movieId = params.get('id');
+const mediaType = params.get('type') || 'movie';
+
+// Embed servers - pakai vidsrc / embedsu / 2embed
+const servers = [
+  { name: 'Server 1', url: `https://vidsrc.to/embed/${mediaType}/${movieId}` },
+  { name: 'Server 2', url: `https://2embed.cc/embed/${movieId}` },
+  { name: 'Server 3', url: `https://embedsu.com/embed/${mediaType}/${movieId}` },
+  { name: 'Server 4', url: `https://player.videasy.net/${mediaType}/${movieId}` },
+];
+
+let activeServer = 0;
+
+function loadServer(idx) {
+  activeServer = idx;
+  document.getElementById('playerFrame').src = servers[idx].url;
+  document.querySelectorAll('.server-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+  });
+}
+
+function buildServerButtons() {
+  const list = document.getElementById('serverList');
+  list.innerHTML = '';
+  servers.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'server-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = s.name;
+    btn.onclick = () => loadServer(i);
+    list.appendChild(btn);
+  });
+}
+
+async function initWatch() {
+  if (!movieId) {
+    document.getElementById('watchTitle').textContent = 'Film tidak ditemukan.';
+    return;
+  }
+
+  buildServerButtons();
+  loadServer(0);
+
+  // Fetch detail dari worker
+  const data = await apiFetch(`/detail?id=${movieId}&type=${mediaType}`);
+  if (!data) return;
+
+  const title = data.title || data.name || 'Unknown';
+  const rating = formatRating(data.vote_average);
+  const releaseYear = year(data.release_date || data.first_air_date);
+  const runtime = data.runtime ? `${data.runtime} menit` : '';
+
+  document.title = `${title} – CineXX`;
+  document.getElementById('watchTitle').textContent = title;
+  document.getElementById('watchOverview').textContent = data.overview || '';
+  document.getElementById('watchMeta').innerHTML = `
+    <span>⭐ ${rating}</span>
+    <span>${releaseYear}</span>
+    ${runtime ? `<span>${runtime}</span>` : ''}
+    <span style="color:var(--accent);font-weight:600">${mediaType === 'tv' ? 'SERIES' : 'FILM'}</span>
+  `;
+
+  // Load related
+  const related = await apiFetch(`/similar?id=${movieId}&type=${mediaType}`);
+  if (related?.results) {
+    populateGrid('relatedGrid', related.results.slice(0, 8), mediaType);
+  }
+}
+
+initWatch();
+</script>
+</body>
+</html>
