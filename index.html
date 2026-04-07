@@ -29,8 +29,6 @@
     --border: #2a2a38;
     --radius: 10px;
     --shadow: 0 8px 32px rgba(0,0,0,0.5);
-    /* ── GANTI INI dengan URL Worker kamu ── */
-    --api: "";
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior: smooth; }
@@ -205,13 +203,25 @@
 </div>
 
 <main id="app">
-  <div id="hero"><div id="hero-bg"></div><div class="hero-content fade-in" id="hero-content"><div class="skeleton" style="height:14px;width:80px;margin-bottom:16px"></div><div class="skeleton" style="height:60px;width:340px;margin-bottom:16px"></div><div class="skeleton" style="height:14px;width:240px;margin-bottom:28px"></div></div></div>
-  <div class="section">
-  <div class="section-title">🔥 <span>Memuat</span>...</div>
-  <div class="movies-scroll">
-    ${[...Array(6)].map(()=>`<div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>`).join('')}
+  <div id="hero">
+    <div id="hero-bg"></div>
+    <div class="hero-content fade-in" id="hero-content">
+      <div class="skeleton" style="height:14px;width:80px;margin-bottom:16px"></div>
+      <div class="skeleton" style="height:60px;width:340px;margin-bottom:16px"></div>
+      <div class="skeleton" style="height:14px;width:240px;margin-bottom:28px"></div>
+    </div>
   </div>
-</div>
+  <div class="section">
+    <div class="section-title">🔥 <span>Memuat</span>...</div>
+    <div class="movies-scroll">
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+      <div class="movie-card skeleton" style="flex:0 0 160px;aspect-ratio:2/3"></div>
+    </div>
+  </div>
 </main>
 
 <footer>
@@ -267,7 +277,7 @@
 
 <script>
 // ══════════════════════════════════════════════
-// CONFIG — ganti dengan URL Worker kamu
+// CONFIG
 // ══════════════════════════════════════════════
 const API = 'https://stream.internetdnsofficial.workers.dev';
 
@@ -284,10 +294,15 @@ let activeGenre = 'All';
 // API
 // ══════════════════════════════════════════════
 async function fetchFilms(params = {}) {
-  const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${API}/api/films${qs ? '?' + qs : ''}`);
-  const data = await res.json();
-  return data.films || [];
+  try {
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API}/api/films${qs ? '?' + qs : ''}`);
+    const data = await res.json();
+    return data.films || [];
+  } catch (e) {
+    console.error('fetchFilms error:', e);
+    return [];
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -327,13 +342,32 @@ async function doSearch(q) {
   clearTimeout(searchDebounce);
   if (!q.trim()) { res.innerHTML = ''; return; }
   searchDebounce = setTimeout(async () => {
-    const found = await fetchFilms({ q });
-    if (!found.length) { res.innerHTML = '<p style="color:var(--text3);font-size:13px">Tidak ditemukan.</p>'; return; }
-    res.innerHTML = found.slice(0, 12).map(m => `
-      <div onclick="openPlayer('${m.id}');toggleSearch()" style="display:flex;align-items:center;gap:10px;background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:0 0 auto;width:220px;border:1px solid var(--border)">
-        ${m.poster ? `<img src="${m.poster}" style="width:36px;height:50px;border-radius:4px;object-fit:cover">` : `<div style="width:36px;height:50px;background:var(--bg3);border-radius:4px"></div>`}
-        <div style="min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.title}</div><div style="font-size:11px;color:var(--text3)">${m.year} • ${m.type === 'movie' ? 'Film' : 'Series'}</div></div>
-      </div>`).join('');
+    try {
+      const found = await fetchFilms({ q });
+      if (!found.length) {
+        res.innerHTML = '<p style="color:var(--text3);font-size:13px">Tidak ditemukan.</p>';
+        return;
+      }
+      res.innerHTML = '';
+      found.slice(0, 12).forEach(m => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--card);padding:10px;border-radius:8px;cursor:pointer;flex:0 0 auto;width:220px;border:1px solid var(--border)';
+        div.dataset.id = m.id;
+        div.innerHTML = `
+          ${m.poster ? `<img src="${m.poster}" style="width:36px;height:50px;border-radius:4px;object-fit:cover">` : `<div style="width:36px;height:50px;background:var(--bg3);border-radius:4px"></div>`}
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(m.title)}</div>
+            <div style="font-size:11px;color:var(--text3)">${m.year || ''} • ${m.type === 'movie' ? 'Film' : 'Series'}</div>
+          </div>`;
+        div.addEventListener('click', () => {
+          openPlayer(m.id);
+          toggleSearch();
+        });
+        res.appendChild(div);
+      });
+    } catch (e) {
+      console.error('Search error:', e);
+    }
   }, 300);
 }
 
@@ -347,7 +381,7 @@ async function showPage(page) {
     if (el) el.classList.toggle('active', p === page);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (heroInterval) clearInterval(heroInterval);
+  if (heroInterval) { clearInterval(heroInterval); heroInterval = null; }
 
   const app = document.getElementById('app');
   if (page === 'home') await renderHome(app);
@@ -365,7 +399,7 @@ async function renderHome(app) {
   const featured = db.filter(m => m.backdrop);
   const movies = db.filter(m => m.type === 'movie');
   const series = db.filter(m => m.type === 'series');
-  const topRated = [...db].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10);
+  const topRated = [...db].sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0)).slice(0, 10);
 
   app.innerHTML = `
     <div id="hero">
@@ -380,26 +414,33 @@ async function renderHome(app) {
     </div>
     <div class="section">
       <div class="section-title">🔥 <span>Trending</span> Sekarang <span class="see-all" onclick="showPage('movies')">Lihat Semua →</span></div>
-      ${db.length ? `<div class="movies-scroll">${db.slice(0, 12).map(cardHTML).join('')}</div>` : emptyHTML()}
+      ${db.length ? `<div class="movies-scroll" id="scroll-trending"></div>` : emptyHTML()}
     </div>
     <div class="section" style="background:var(--bg2)">
       <div class="section-title">⭐ <span>Top</span> Rating</div>
-      ${topRated.length ? `<div class="movies-scroll">${topRated.map(cardHTML).join('')}</div>` : emptyHTML()}
+      ${topRated.length ? `<div class="movies-scroll" id="scroll-top"></div>` : emptyHTML()}
     </div>
     ${movies.length ? `
     <div class="section">
       <div class="section-title">🎬 <span>Film</span> Terbaru <span class="see-all" onclick="showPage('movies')">Lihat Semua →</span></div>
-      <div class="movies-grid">${movies.slice(0, 8).map(cardHTML).join('')}</div>
+      <div class="movies-grid" id="grid-movies"></div>
     </div>` : ''}
     ${series.length ? `
     <div class="section">
       <div class="section-title">📺 <span>Series</span> Populer <span class="see-all" onclick="showPage('series')">Lihat Semua →</span></div>
-      <div class="movies-grid">${series.slice(0, 8).map(cardHTML).join('')}</div>
+      <div class="movies-grid" id="grid-series"></div>
     </div>` : ''}
   `;
 
+  // Render cards with DOM (safe, no inline onclick with id)
+  renderCardsTo('scroll-trending', db.slice(0, 12));
+  renderCardsTo('scroll-top', topRated);
+  if (movies.length) renderCardsTo('grid-movies', movies.slice(0, 8));
+  if (series.length) renderCardsTo('grid-series', series.slice(0, 8));
+
   const heroList = featured.length ? featured : db;
   if (heroList.length) {
+    heroIndex = 0;
     setHero(heroList, 0);
     heroInterval = setInterval(() => {
       heroIndex = (heroIndex + 1) % heroList.length;
@@ -413,31 +454,50 @@ function setHero(list, idx) {
   const bg = document.getElementById('hero-bg');
   const content = document.getElementById('hero-content');
   if (!bg || !content) return;
+
   if (m.backdrop) bg.style.backgroundImage = `url('${m.backdrop}')`;
   else if (m.poster) bg.style.backgroundImage = `url('${m.poster}')`;
+
   content.innerHTML = `
     <div class="hero-badge">🔥 ${m.type === 'movie' ? 'Film' : 'Series'}</div>
-    <div class="hero-title">${m.title}</div>
+    <div class="hero-title">${escapeHtml(m.title)}</div>
     <div class="hero-meta">
       ${m.rating ? `<span class="rating">★ ${m.rating}</span>` : ''}
       <span>${m.year || ''}</span>
       ${m.quality ? `<span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${m.quality}</span>` : ''}
-      ${m.genre ? `<span>${m.genre.split(',')[0]}</span>` : ''}
+      ${m.genre ? `<span>${escapeHtml(m.genre.split(',')[0])}</span>` : ''}
     </div>
-    ${m.desc ? `<p class="hero-desc">${m.desc}</p>` : ''}
+    ${m.desc ? `<p class="hero-desc">${escapeHtml(m.desc)}</p>` : ''}
     <div class="hero-actions">
-      <button class="btn-play" onclick="openPlayer('${m.id}')">▶ Tonton Sekarang</button>
-      <button class="btn-more" onclick="openPlayer('${m.id}')">ℹ Info</button>
+      <button class="btn-play" id="hero-btn-play">▶ Tonton Sekarang</button>
+      <button class="btn-more" id="hero-btn-info">ℹ Info</button>
     </div>`;
+
+  // Attach events safely
+  const btnPlay = document.getElementById('hero-btn-play');
+  const btnInfo = document.getElementById('hero-btn-info');
+  if (btnPlay) btnPlay.addEventListener('click', () => openPlayer(m.id));
+  if (btnInfo) btnInfo.addEventListener('click', () => openPlayer(m.id));
 }
 
 // ══════════════════════════════════════════════
 // LIST PAGE
 // ══════════════════════════════════════════════
 async function renderList(app, type, label) {
-  app.innerHTML = `<div style="padding:90px 32px 32px"><h1 style="font-family:'Bebas Neue',cursive;font-size:36px;margin-bottom:24px">${label} <span style="color:var(--accent)">Terlengkap</span></h1><div class="movies-grid" id="list-grid">${skeletonGrid(12)}</div></div>`;
+  app.innerHTML = `
+    <div style="padding:90px 32px 32px">
+      <h1 style="font-family:'Bebas Neue',cursive;font-size:36px;margin-bottom:24px">${label} <span style="color:var(--accent)">Terlengkap</span></h1>
+      <div class="movies-grid" id="list-grid">${skeletonGrid(12)}</div>
+    </div>`;
   const db = await fetchFilms({ type });
-  document.getElementById('list-grid').innerHTML = db.length ? db.map(cardHTML).join('') : emptyHTML();
+  const grid = document.getElementById('list-grid');
+  if (!grid) return;
+  if (db.length) {
+    grid.innerHTML = '';
+    renderCardsTo('list-grid', db);
+  } else {
+    grid.innerHTML = emptyHTML();
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -449,73 +509,140 @@ async function renderGenrePage(app) {
   app.innerHTML = `
     <div style="padding:90px 32px 32px">
       <h1 style="font-family:'Bebas Neue',cursive;font-size:36px;margin-bottom:24px">Jelajahi <span style="color:var(--accent)">Genre</span></h1>
-      <div class="genre-tabs" id="genre-tabs">
-        ${genres.map(g => `<button class="genre-tab ${g === activeGenre ? 'active' : ''}" onclick="filterGenre('${g}')">${g}</button>`).join('')}
-      </div>
-      <div class="movies-grid" id="genre-grid">${renderGenreGrid(db, activeGenre)}</div>
+      <div class="genre-tabs" id="genre-tabs"></div>
+      <div class="movies-grid" id="genre-grid"></div>
     </div>`;
+
+  const tabsEl = document.getElementById('genre-tabs');
+  genres.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'genre-tab' + (g === activeGenre ? ' active' : '');
+    btn.textContent = g;
+    btn.addEventListener('click', () => filterGenre(g));
+    tabsEl.appendChild(btn);
+  });
+
+  renderGenreGrid(db, activeGenre);
 }
 
 function filterGenre(g) {
   activeGenre = g;
   if (currentPage !== 'genre') { showPage('genre'); return; }
   document.querySelectorAll('.genre-tab').forEach(t => t.classList.toggle('active', t.textContent === g));
-  const db = allFilms;
-  document.getElementById('genre-grid').innerHTML = renderGenreGrid(db, g);
+  renderGenreGrid(allFilms, g);
 }
 
 function renderGenreGrid(db, g) {
+  const grid = document.getElementById('genre-grid');
+  if (!grid) return;
   const filtered = g === 'All' ? db : db.filter(m => (m.genre || '').includes(g));
-  return filtered.length ? filtered.map(cardHTML).join('') : emptyHTML();
+  if (filtered.length) {
+    grid.innerHTML = '';
+    renderCardsTo('genre-grid', filtered);
+  } else {
+    grid.innerHTML = emptyHTML();
+  }
 }
 
 // ══════════════════════════════════════════════
-// CARD & HELPERS
+// CARDS — DOM-based (NO inline onclick with id)
 // ══════════════════════════════════════════════
-function cardHTML(m) {
-  return `
-    <div class="movie-card" onclick="openPlayer('${m.id}')">
-      ${m.poster ? `<img class="card-thumb" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-      <div class="card-thumb-placeholder" ${m.poster ? 'style="display:none"' : ''}>
-        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg>
-        <span>${m.title.slice(0, 12)}</span>
-      </div>
-      ${m.type === 'series' ? '<div class="card-badge">SERIES</div>' : ''}
-      ${m.quality ? `<div class="card-quality">${m.quality}</div>` : ''}
-      <div class="card-overlay"><button class="card-play-btn"><svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg></button></div>
-      <div class="card-info">
-        <div class="card-title">${m.title}</div>
-        <div class="card-meta">
-          <span class="card-year">${m.year || '-'}</span>
-          ${m.rating ? `<span class="card-rating">★ ${m.rating}</span>` : ''}
-        </div>
+function renderCardsTo(containerId, films) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  films.forEach(m => {
+    const card = createCard(m);
+    container.appendChild(card);
+  });
+}
+
+function createCard(m) {
+  const div = document.createElement('div');
+  div.className = 'movie-card';
+  div.dataset.id = m.id;
+
+  div.innerHTML = `
+    ${m.poster
+      ? `<img class="card-thumb" src="${m.poster}" alt="${escapeHtml(m.title)}" loading="lazy">`
+      : ''}
+    <div class="card-thumb-placeholder" ${m.poster ? 'style="display:none"' : ''}>
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg>
+      <span>${escapeHtml(m.title.slice(0, 12))}</span>
+    </div>
+    ${m.type === 'series' ? '<div class="card-badge">SERIES</div>' : ''}
+    ${m.quality ? `<div class="card-quality">${m.quality}</div>` : ''}
+    <div class="card-overlay">
+      <button class="card-play-btn">
+        <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+      </button>
+    </div>
+    <div class="card-info">
+      <div class="card-title">${escapeHtml(m.title)}</div>
+      <div class="card-meta">
+        <span class="card-year">${m.year || '-'}</span>
+        ${m.rating ? `<span class="card-rating">★ ${m.rating}</span>` : ''}
       </div>
     </div>`;
-}
 
-function emptyHTML() {
-  return `<div class="empty-state" style="grid-column:1/-1"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg><p>Belum ada konten tersedia.</p></div>`;
-}
+  // Fix broken poster
+  if (m.poster) {
+    const img = div.querySelector('.card-thumb');
+    const placeholder = div.querySelector('.card-thumb-placeholder');
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      if (placeholder) placeholder.style.display = 'flex';
+    });
+  }
 
-function skeletonGrid(n) {
-  return [...Array(n)].map(() => `<div class="skeleton" style="aspect-ratio:2/3;border-radius:10px"></div>`).join('');
+  // Click event — safe, no string interpolation
+  div.addEventListener('click', () => openPlayer(m.id));
+
+  return div;
 }
 
 // ══════════════════════════════════════════════
 // PLAYER
 // ══════════════════════════════════════════════
 async function openPlayer(id) {
-  let m = allFilms.find(x => x.id === id);
-  if (!m) {
-    const res = await fetch(`${API}/api/films/${id}`);
-    m = await res.json();
-  }
-  if (!m || !m.id) return;
+  if (!id) { console.error('openPlayer: id kosong'); return; }
 
-  document.getElementById('player-title').textContent = m.title;
+  // Cari dari cache dulu
+  let m = allFilms.find(x => x.id === id);
+
+  // Kalau tidak ada di cache, fetch dari API
+  if (!m) {
+    try {
+      const res = await fetch(`${API}/api/films/${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if (data.error || !data.id) {
+        console.error('Film tidak ditemukan:', data);
+        return;
+      }
+      m = data;
+    } catch (e) {
+      console.error('openPlayer fetch error:', e);
+      return;
+    }
+  }
+
+  if (!m) return;
+
+  document.getElementById('player-title').textContent = m.title || '-';
   document.getElementById('player-meta').textContent = [m.year, m.genre, m.quality].filter(Boolean).join(' • ');
   document.getElementById('player-desc').textContent = m.desc || '';
-  document.getElementById('player-tags').innerHTML = (m.genre || '').split(',').map(g => `<span class="player-tag">${g.trim()}</span>`).join('');
+
+  const tagsEl = document.getElementById('player-tags');
+  tagsEl.innerHTML = '';
+  (m.genre || '').split(',').forEach(g => {
+    const tag = g.trim();
+    if (tag) {
+      const span = document.createElement('span');
+      span.className = 'player-tag';
+      span.textContent = tag;
+      tagsEl.appendChild(span);
+    }
+  });
 
   const wrapper = document.getElementById('player-wrapper');
   wrapper.innerHTML = '';
@@ -538,6 +665,30 @@ function closePlayer() {
   document.getElementById('player-modal').classList.remove('active');
   document.getElementById('player-wrapper').innerHTML = '';
   document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function emptyHTML() {
+  return `<div class="empty-state" style="grid-column:1/-1">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 6 4-6 4V8z"/></svg>
+    <p>Belum ada konten tersedia.</p>
+  </div>`;
+}
+
+function skeletonGrid(n) {
+  return [...Array(n)].map(() => `<div class="skeleton" style="aspect-ratio:2/3;border-radius:10px"></div>`).join('');
 }
 </script>
 </body>
