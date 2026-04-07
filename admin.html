@@ -5,51 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - CINESTREAM</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script>
-    tailwind.config = { content: ["*"] }
-    let token = localStorage.getItem('token')
+    tailwind.config = { content: ["*"], theme: { extend: {} } }
+  </script>
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-10">
+      <h1 class="text-4xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-shield-halved text-pink-600"></i>
+        Admin Panel
+      </h1>
+      <a href="/" class="text-pink-600 hover:text-pink-700 font-medium">← Kembali ke Beranda</a>
+    </div>
 
-    async function loadAdminPosts() {
+    <div id="admin-feed" class="space-y-6"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token')
+    if (!token) {
+      window.location.href = '/login.html'
+    }
+
+    async function loadPendingPosts() {
       const res = await fetch('/api/admin/posts', {
         headers: { Authorization: `Bearer ${token}` }
       })
       const posts = await res.json()
       const container = document.getElementById('admin-feed')
+
+      if (posts.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-500 py-20">Tidak ada postingan yang menunggu approval</p>`
+        return
+      }
+
       container.innerHTML = posts.map(p => `
-        <div class="flex gap-6 bg-white p-6 rounded-3xl shadow-sm mb-6 items-center">
-          ${p.type === 'image' ? `<img src="${p.url}" class="w-32 h-32 object-cover rounded-2xl">` : `<video src="${p.url}" class="w-32 h-32 object-cover rounded-2xl"></video>`}
-          <div class="flex-1">
-            <h3 class="font-bold">${p.title}</h3>
-            <p class="text-sm text-gray-500">by ${p.username}</p>
+        <div class="bg-white rounded-3xl p-6 flex gap-6 items-center shadow-sm">
+          <div class="w-40 h-40 flex-shrink-0 rounded-2xl overflow-hidden">
+            ${p.type === 'image' 
+              ? `<img src="${p.url}" class="w-full h-full object-cover">` 
+              : `<video src="${p.url}" class="w-full h-full object-cover"></video>`
+            }
           </div>
-          <div>
-            <button onclick="approve('${p.id}')" class="bg-green-600 text-white px-8 py-3 rounded-3xl mr-3">Approve</button>
-            <button onclick="reject('${p.id}')" class="bg-red-600 text-white px-8 py-3 rounded-3xl">Tolak</button>
+          <div class="flex-1">
+            <h3 class="font-semibold text-lg">${p.title}</h3>
+            <p class="text-gray-500">Oleh: ${p.username}</p>
+            <p class="text-xs text-gray-400 mt-1">${new Date(p.createdAt).toLocaleString('id-ID')}</p>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="approvePost('${p.id}')" 
+                    class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-3xl transition">Approve</button>
+            <button onclick="rejectPost('${p.id}')" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-3xl transition">Tolak</button>
           </div>
         </div>
       `).join('')
     }
 
-    async function approve(id) {
-      await fetch('/api/admin/approve', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({postId: id}) })
-      loadAdminPosts()
-    }
-    async function reject(id) {
-      await fetch('/api/admin/reject', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({postId: id}) })
-      loadAdminPosts()
+    async function approvePost(id) {
+      await fetch('/api/admin/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ postId: id })
+      })
+      loadPendingPosts()
     }
 
-    window.onload = () => {
-      if (!token) return location.href = '/login.html'
-      loadAdminPosts()
+    async function rejectPost(id) {
+      await fetch('/api/admin/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ postId: id })
+      })
+      loadPendingPosts()
     }
+
+    window.onload = loadPendingPosts
   </script>
-</head>
-<body class="bg-gray-50">
-  <div class="max-w-5xl mx-auto px-6 py-10">
-    <h1 class="text-4xl font-bold mb-10 flex items-center gap-3"><i class="fa-solid fa-shield-halved"></i> Admin Panel - Pending Posts</h1>
-    <div id="admin-feed"></div>
-  </div>
 </body>
 </html>
