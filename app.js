@@ -2,7 +2,7 @@
 // CINEXX – APP.JS (ADMIN ONLY)
 // ========================
 
-const API_BASE = 'https://cinestream.kraxx.my.id/'; // same domain
+const API_BASE = 'stream.internetdnsofficial.workers.dev'; // same domain
 
 // ========================
 // API
