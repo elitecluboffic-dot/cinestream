@@ -438,7 +438,7 @@ let listTypeFilter = 'all';
 
 // ── PROXY HELPER ─────────────────────────────
 function isProxied(url) {
-  return url.startsWith(PROXY_PREFIX);
+  return url.includes('/proxy?url=');
 }
 
 function wrapProxy() {
