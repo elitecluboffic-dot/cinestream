@@ -16,7 +16,6 @@ export async function onRequest({ request, env }) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
     // === 2. ANTI-SPAM: Cek Cooldown ===
     const cooldownKey = `upload-cooldown:${email}`;
     const cooldownData = await env.KV.get(cooldownKey);
@@ -33,7 +32,6 @@ export async function onRequest({ request, env }) {
         });
       }
     }
-
     // === 3. Ambil Form Data ===
     const form = await request.formData();
     const file = form.get('file');
@@ -44,7 +42,6 @@ export async function onRequest({ request, env }) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
     // === Validasi File ===
     if (file.size > 50 * 1024 * 1024) {
       return new Response(JSON.stringify({ error: "Ukuran file maksimal 50MB" }), {
@@ -52,7 +49,6 @@ export async function onRequest({ request, env }) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
     if (!allowedTypes.includes(file.type)) {
       return new Response(JSON.stringify({ error: "Format file tidak didukung. Hanya gambar dan video MP4/WebM" }), {
@@ -60,21 +56,16 @@ export async function onRequest({ request, env }) {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
     // === 4. Upload ke R2 (VERSI PALING STABIL) ===
     const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const fileKey = `posts/${crypto.randomUUID()}-${safeFileName}`;
-
-    const fileBuffer = await file.arrayBuffer();   // ← Ini kuncinya
-
+    const fileBuffer = await file.arrayBuffer(); 
     await env.R2.put(fileKey, fileBuffer, {
       httpMetadata: {
         contentType: file.type || 'application/octet-stream'
       }
     });
-
     const type = file.type.startsWith('image/') ? 'image' : 'video';
-
     // === 5. Simpan ke KV ===
     const post = {
       id: crypto.randomUUID(),
@@ -89,28 +80,24 @@ export async function onRequest({ request, env }) {
       comments: [],
       createdAt: Date.now()
     };
-
     await env.KV.put(`post:${post.id}`, JSON.stringify(post), { expirationTtl: 2592000 });
-
     // === 6. SET COOLDOWN ===
     await env.KV.put(cooldownKey, JSON.stringify({
       expiresAt: Date.now() + 30 * 1000
     }), { expirationTtl: 35 });
-
     return new Response(JSON.stringify({
       success: true,
       message: "Post berhasil diunggah dan menunggu persetujuan admin"
     }), {
       headers: { 'Content-Type': 'application/json' }
     });
-
   } catch (err) {
     console.error("=== UPLOAD ERROR ===");
     console.error(err.name + ":", err.message);
-    
+   
     return new Response(JSON.stringify({
       error: "Terjadi kesalahan saat mengunggah.",
-      detail: err.message   // ← ini yang penting biar kita tau penyebabnya
+      detail: err.message 
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
