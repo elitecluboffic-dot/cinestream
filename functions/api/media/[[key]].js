@@ -1,5 +1,5 @@
 export async function onRequest({ request, env, params }) {
-  const key = params.key;
+  const key = Array.isArray(params.key) ? params.key.join('/') : params.key;
   if (!key) {
     return new Response('File key tidak ditemukan', { status: 400 });
   }
