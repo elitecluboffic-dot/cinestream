@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 – CINESTREAM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #e02020;
+      --red-dim: #8a1010;
+      --bg: #080808;
+      --bg2: #111111;
+      --text: #f0ede8;
+      --muted: #666;
+      --stripe: rgba(255,255,255,0.015);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Film grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.6;
+    }
+
+    /* Scan lines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    /* Top nav bar */
+    nav {
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.12em;
+      color: var(--red);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--red);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { display: block; }
+
+    /* Main content */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Film strip top decoration */
+    .film-strip {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 3rem;
+      animation: drift 8s linear infinite;
+    }
+
+    @keyframes drift {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-60px); }
+    }
+
+    .film-hole {
+      width: 18px;
+      height: 14px;
+      border: 1.5px solid var(--red-dim);
+      border-radius: 3px;
+      opacity: 0.5;
+    }
+
+    /* The 404 number */
+    .error-code {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(8rem, 22vw, 16rem);
+      line-height: 0.85;
+      letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #fff 0%, #555 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      text-align: center;
+    }
+
+    .error-code::after {
+      content: '404';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, var(--red) 0%, var(--red-dim) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      clip-path: polygon(0 60%, 100% 55%, 100% 100%, 0 100%);
+    }
+
+    /* Red line accent */
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: var(--red);
+      margin: 1.5rem auto;
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: 3px;
+      background: var(--red-dim);
+    }
+
+    .divider::before { right: calc(100% + 6px); width: 20px; }
+    .divider::after  { left: calc(100% + 6px);  width: 12px; }
+
+    /* Clapperboard label */
+    .clap-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--red);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+
+    .clap-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      letter-spacing: 0.1em;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 300;
+      text-align: center;
+      max-width: 380px;
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Buttons */
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--red);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 12px 28px;
+      border-radius: 4px;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-primary:hover { background: #f52828; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      padding: 12px 28px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    }
+
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: var(--text); transform: translateY(-1px); }
+
+    /* Bottom film strip */
+    .film-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: var(--bg2);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .film-frame {
+      width: 32px;
+      height: 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Ambient red glow in bg */
+    .glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(224,32,32,0.07) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Entry animation */
+    .animate-in {
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .animate-in:nth-child(2) { animation-delay: 0.1s; }
+    .animate-in:nth-child(3) { animation-delay: 0.2s; }
+    .animate-in:nth-child(4) { animation-delay: 0.3s; }
+    .animate-in:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow"></div>
+
+  <nav>
+    <a class="logo" href="/">
+      <div class="logo-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <polygon points="5,2 14,8 5,14" fill="white"/>
+        </svg>
+      </div>
+      CINESTREAM
+    </a>
+  </nav>
+
+  <main>
+    <div class="film-strip animate-in">
+      <div class="film-hole"></div><div class="film-hole"></div>
+      <div class="film-hole"></div><div class="film-hole"></div>
+      <div class="film-hole"></div><div class="film-hole"></div>
+      <div class="film-hole"></div><div class="film-hole"></div>
+      <div class="film-hole"></div><div class="film-hole"></div>
+    </div>
+
+    <div class="error-code animate-in">404</div>
+
+    <div class="divider animate-in"></div>
+
+    <div class="clap-label animate-in">
+      <span class="clap-dot"></span>
+      Scene Not Found
+    </div>
+
+    <h1 class="animate-in">!!! Halaman Yang Kamu Cari Tidak Ada !!!</h1>
+
+    <p class="animate-in">
+      Konten yang kamu cari sudah dihapus, dipindahkan, atau mungkin tidak pernah ada.
+      Kembali ke beranda untuk menemukan konten lainnya.
+    </p>
+
+    <div class="actions animate-in">
+      <a href="/" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M6 1L1 7l5 6M1 7h12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Kembali ke Beranda
+      </a>
+      <a href="javascript:history.back()" class="btn-ghost">
+        Halaman Sebelumnya
+      </a>
+    </div>
+  </main>
+
+  <div class="film-bottom">
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+    <div class="film-frame"></div><div class="film-frame"></div>
+  </div>
+
+</body>
+</html>
