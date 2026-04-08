@@ -8,12 +8,11 @@ export async function onRequest({ request, env }) {
 
   const { postId } = await request.json();
   const post = JSON.parse(await env.KV.get(`post:${postId}`) || 'null');
-  if (!post) return new Response(JSON.stringify({ error: 'Post tidak ditemukan' }), { status: 404 });
+  if (!post) {
+    return new Response(JSON.stringify({ error: 'Post tidak ditemukan' }), { status: 404 });
+  }
 
-  // Hapus dari R2
   if (post.fileKey) await env.R2.delete(post.fileKey);
-
-  // Hapus dari KV
   await env.KV.delete(`post:${postId}`);
 
   return new Response(JSON.stringify({ success: true }), {
