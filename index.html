@@ -773,9 +773,10 @@
           alert('Berhasil diunggah! Menunggu persetujuan admin.')
           document.getElementById('upload-modal').remove()
           loadPosts()
-        } else {
-          alert('Gagal mengunggah. Silakan coba lagi.')
-        }
+} else {
+  const errData = await res.json().catch(() => ({}))
+  alert('Error: ' + (errData.detail || errData.error || res.status))
+}
       })
     }
     function logout() {
