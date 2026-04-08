@@ -5,15 +5,15 @@ export async function onRequest({ request, env }) {
   const userStr = await env.KV.get(`user:${email}`)
   const user = JSON.parse(userStr)
   if (user.role !== 'admin') return new Response('Forbidden', { status: 403 })
-
   const { keys } = await env.KV.list({ prefix: 'post:' })
   const posts = []
   for (const k of keys) {
     const str = await env.KV.get(k.name)
     if (str) {
       const p = JSON.parse(str)
-      if (p.status === 'pending') posts.push(p)
+      posts.push(p) // UPDATE: hapus filter if (p.status === 'pending')
     }
   }
+  posts.sort((a, b) => b.createdAt - a.createdAt) // UPDATE: urutkan terbaru dulu
   return new Response(JSON.stringify(posts), { headers: { 'Content-Type': 'application/json' } })
 }
