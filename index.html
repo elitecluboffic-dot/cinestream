@@ -825,6 +825,7 @@
       antiScreenshot();
       checkAuth()
       loadPosts()
+      fetch('/api/track', { method: 'POST' }).catch(() => {});
       initLazyLoad();
       setTimeout(() => {
         observeLazyMedia();
