@@ -17,6 +17,7 @@ Disallow: /login.html
 Disallow: /register.html
 Disallow: /functions/
 Disallow: /visits.html
+Disallow: /404.html
 
 # Blokir parameter sensitif
 Disallow: /*?token=
