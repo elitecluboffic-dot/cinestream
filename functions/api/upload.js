@@ -61,12 +61,11 @@ export async function onRequest({ request, env }) {
       });
     }
 
-    // === 4. Upload ke R2 (FULL FIX) ===
+    // === 4. Upload ke R2 (VERSI PALING STABIL) ===
     const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const fileKey = `posts/${crypto.randomUUID()}-${safeFileName}`;   // ← Penting!
+    const fileKey = `posts/${crypto.randomUUID()}-${safeFileName}`;
 
-    // Pakai arrayBuffer = cara paling stabil di Cloudflare
-    const fileBuffer = await file.arrayBuffer();
+    const fileBuffer = await file.arrayBuffer();   // ← Ini kuncinya
 
     await env.R2.put(fileKey, fileBuffer, {
       httpMetadata: {
@@ -91,16 +90,12 @@ export async function onRequest({ request, env }) {
       createdAt: Date.now()
     };
 
-    await env.KV.put(`post:${post.id}`, JSON.stringify(post), {
-      expirationTtl: 2592000 // 30 hari
-    });
+    await env.KV.put(`post:${post.id}`, JSON.stringify(post), { expirationTtl: 2592000 });
 
     // === 6. SET COOLDOWN ===
     await env.KV.put(cooldownKey, JSON.stringify({
       expiresAt: Date.now() + 30 * 1000
-    }), {
-      expirationTtl: 35
-    });
+    }), { expirationTtl: 35 });
 
     return new Response(JSON.stringify({
       success: true,
@@ -110,12 +105,12 @@ export async function onRequest({ request, env }) {
     });
 
   } catch (err) {
-    console.error("=== UPLOAD ERROR DETAIL ===");
-    console.error(err);
+    console.error("=== UPLOAD ERROR ===");
+    console.error(err.name + ":", err.message);
     
     return new Response(JSON.stringify({
-      error: "Terjadi kesalahan saat mengunggah. Silakan coba lagi.",
-      detail: err.message   // ← ini akan membantu debug
+      error: "Terjadi kesalahan saat mengunggah.",
+      detail: err.message   // ← ini yang penting biar kita tau penyebabnya
     }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
