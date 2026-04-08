@@ -132,7 +132,7 @@
     /* ── Stats row ── */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr); /* UPDATE: 3 → 4 */
       gap: 14px;
       margin-bottom: 32px;
     }
@@ -159,6 +159,7 @@
     }
 
     .stat-icon.amber  { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .stat-icon.green  { background: rgba(16,185,129,0.15); color: #34d399; } /* UPDATE: tambah green */
     .stat-icon.sky    { background: rgba(56,189,248,0.15);  color: #38bdf8; }
     .stat-icon.violet { background: rgba(167,139,250,0.15); color: #a78bfa; }
 
@@ -310,6 +311,20 @@
       gap: 5px;
     }
 
+    /* UPDATE: tambah status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+    .status-badge.pending  { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+    .status-badge.approved { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+
     /* actions */
     .post-actions {
       display: flex;
@@ -318,7 +333,7 @@
       flex-shrink: 0;
     }
 
-    .btn-approve, .btn-reject {
+    .btn-approve, .btn-reject, .btn-delete {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -347,12 +362,25 @@
     }
 
     .btn-reject {
+      background: rgba(245,158,11,0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+
+    .btn-reject:hover {
+      background: #f59e0b;
+      color: #000;
+      border-color: #f59e0b;
+    }
+
+    /* UPDATE: tambah btn-delete */
+    .btn-delete {
       background: rgba(225,29,72,0.12);
       color: var(--rose);
       border: 1px solid rgba(225,29,72,0.2);
     }
 
-    .btn-reject:hover {
+    .btn-delete:hover {
       background: var(--crimson);
       color: #fff;
       border-color: var(--crimson);
@@ -380,10 +408,10 @@
 
     /* Responsive */
     @media (max-width: 640px) {
-      .stats-row { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
       .post-card { flex-wrap: wrap; }
       .post-actions { flex-direction: row; width: 100%; }
-      .btn-approve, .btn-reject { flex: 1; justify-content: center; }
+      .btn-approve, .btn-reject, .btn-delete { flex: 1; justify-content: center; }
     }
   </style>
 </head>
@@ -406,13 +434,20 @@
   <!-- Page -->
   <div class="page-wrap">
 
-    <!-- Stats -->
+    <!-- Stats: UPDATE tambah stat approved -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-icon amber"><i class="fa-solid fa-clock"></i></div>
         <div>
           <div class="stat-label">Menunggu</div>
           <div class="stat-value" id="stat-pending">—</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+        <div>
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="stat-approved">—</div>
         </div>
       </div>
       <div class="stat-card">
@@ -431,6 +466,13 @@
       </div>
     </div>
 
+    <!-- UPDATE: Filter tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button id="tab-all"      onclick="setFilter('all',this)"      style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:var(--crimson);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;">Semua</button>
+      <button id="tab-pending"  onclick="setFilter('pending',this)"  style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:var(--dark-3);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;">Pending</button>
+      <button id="tab-approved" onclick="setFilter('approved',this)" style="padding:8px 18px;border-radius:8px;border:1px solid var(--border);background:var(--dark-3);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;">Approved</button>
+    </div>
+
     <!-- Feed -->
     <div class="section-head">
       <div class="section-title">Antrean Persetujuan</div>
@@ -444,19 +486,44 @@
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login.html';
 
+    let allPosts = [];
+    let currentFilter = 'all';
+
     async function loadPendingPosts() {
       const res = await fetch('/api/admin/posts', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const posts = await res.json();
+      allPosts = await res.json();
+
+      // UPDATE: stats sekarang hitung semua status
+      document.getElementById('stat-pending').textContent  = allPosts.filter(p => p.status === 'pending').length;
+      document.getElementById('stat-approved').textContent = allPosts.filter(p => p.status === 'approved').length;
+      document.getElementById('stat-video').textContent    = allPosts.filter(p => p.type === 'video').length;
+      document.getElementById('stat-image').textContent    = allPosts.filter(p => p.type === 'image').length;
+
+      renderFeed();
+    }
+
+    // UPDATE: fungsi filter
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      ['all', 'pending', 'approved'].forEach(f => {
+        const el = document.getElementById('tab-' + f);
+        if (!el) return;
+        el.style.background = f === filter ? 'var(--crimson)' : 'var(--dark-3)';
+        el.style.color      = f === filter ? '#fff'           : 'var(--muted)';
+      });
+      renderFeed();
+    }
+
+    // UPDATE: pisah render dari load
+    function renderFeed() {
       const container = document.getElementById('admin-feed');
+      const filtered = currentFilter === 'all'
+        ? allPosts
+        : allPosts.filter(p => p.status === currentFilter);
 
-      // Update stats
-      document.getElementById('stat-pending').textContent = posts.length;
-      document.getElementById('stat-video').textContent  = posts.filter(p => p.type === 'video').length;
-      document.getElementById('stat-image').textContent  = posts.filter(p => p.type === 'image').length;
-
-      if (posts.length === 0) {
+      if (filtered.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <i class="fa-solid fa-circle-check"></i>
@@ -465,7 +532,7 @@
         return;
       }
 
-      container.innerHTML = posts.map((p, i) => `
+      container.innerHTML = filtered.map((p, i) => `
         <div class="post-card" style="animation-delay:${i * 0.05}s">
           <div class="thumb">
             ${p.type === 'image'
@@ -482,13 +549,24 @@
               <i class="fa-regular fa-clock"></i>
               ${new Date(p.createdAt).toLocaleString('id-ID')}
             </div>
+            <!-- UPDATE: status badge -->
+            <span class="status-badge ${p.status}">
+              <i class="fa-solid ${p.status === 'approved' ? 'fa-check' : 'fa-clock'}"></i>
+              ${p.status.toUpperCase()}
+            </span>
           </div>
           <div class="post-actions">
-            <button class="btn-approve" onclick="approvePost('${p.id}')">
-              <i class="fa-solid fa-check"></i> Approve
-            </button>
-            <button class="btn-reject" onclick="rejectPost('${p.id}')">
-              <i class="fa-solid fa-xmark"></i> Tolak
+            ${p.status !== 'approved' ? `
+              <button class="btn-approve" onclick="approvePost('${p.id}')">
+                <i class="fa-solid fa-check"></i> Approve
+              </button>` : ''}
+            ${p.status === 'pending' ? `
+              <button class="btn-reject" onclick="rejectPost('${p.id}')">
+                <i class="fa-solid fa-xmark"></i> Tolak
+              </button>` : ''}
+            <!-- UPDATE: tombol hapus -->
+            <button class="btn-delete" onclick="deletePost('${p.id}', '${p.title.replace(/'/g, "\\'")}')">
+              <i class="fa-solid fa-trash"></i> Hapus
             </button>
           </div>
         </div>
@@ -511,6 +589,18 @@
         body: JSON.stringify({ postId: id })
       });
       loadPendingPosts();
+    }
+
+    // UPDATE: fungsi delete
+    async function deletePost(id, title) {
+      if (!confirm(`Hapus "${title}"?\n\nFile di R2 juga akan ikut dihapus permanen.`)) return;
+      const res = await fetch('/api/admin/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ postId: id })
+      });
+      if (res.ok) loadPendingPosts();
+      else alert('Gagal menghapus post.');
     }
 
     window.onload = loadPendingPosts;
