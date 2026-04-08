@@ -92,8 +92,8 @@ export async function onRequest({ request, env }) {
 
     // === 6. SET COOLDOWN ===
     await env.KV.put(cooldownKey, JSON.stringify({
-      expiresAt: Date.now() + 30 * 1000
-    }), { expirationTtl: 35 });
+      expiresAt: Date.now() + 60 * 1000
+    }), { expirationTtl: 60 });
 
     return new Response(JSON.stringify({
       success: true,
